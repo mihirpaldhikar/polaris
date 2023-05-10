@@ -1,0 +1,22 @@
+{
+  "name": "@mihirpaldhikar/polaris",
+  "version": "0.0.1",
+  "description": "A rich semantic content editor.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mihirpaldhikar/polaris.git"
+  },
+  "keywords": [
+    "Content Editor"
+  ],
+  "author": "Mihir Paldhikar",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/mihirpaldhikar/polaris/issues"
+  },
+  "homepage": "https://github.com/mihirpaldhikar/polaris#readme"
+}
