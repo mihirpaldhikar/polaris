@@ -2,7 +2,6 @@
   "name": "@mihirpaldhikar/polaris",
   "version": "0.0.1",
   "description": "A rich semantic content editor.",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,7 +21,17 @@
     "url": "https://github.com/mihirpaldhikar/polaris/issues"
   },
   "homepage": "https://github.com/mihirpaldhikar/polaris#readme",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-terser": "^0.4.1",
+    "@rollup/plugin-typescript": "^11.1.0",
     "@typescript-eslint/eslint-plugin": "^5.59.5",
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
@@ -34,6 +43,11 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prettier": "^2.8.8",
+    "rollup": "^3.21.6",
+    "rollup-plugin-dts": "^5.3.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "tslib": "^2.5.0",
     "typescript": "^5.0.4"
   }
 }
