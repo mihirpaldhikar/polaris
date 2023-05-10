@@ -17,6 +17,8 @@ import { type Block } from "../../interfaces";
 import {
   conditionalClassName,
   createNodeFromRole,
+  getBlockNode,
+  getCaretOffset,
   setNodeStyle,
 } from "../../utils";
 
@@ -24,6 +26,7 @@ interface CanvasProps {
   editable: boolean;
   block: Block;
   onChange: (block: Block) => void;
+  onEnter: (splitContent: boolean, caretOffset: number) => void;
 }
 
 /**
@@ -32,6 +35,7 @@ interface CanvasProps {
  * @param editable
  * @param block
  * @param onChange
+ * @param onEnter
  *
  * @returns JSX.Element
  *
@@ -44,6 +48,7 @@ export default function Canvas({
   editable,
   block,
   onChange,
+  onEnter,
 }: CanvasProps): JSX.Element {
   /**
    * @function notifyChange
@@ -54,6 +59,32 @@ export default function Canvas({
   function notifyChange(event: ChangeEvent<HTMLElement>): void {
     block.content = event.target.innerHTML;
     onChange(block);
+  }
+
+  /**
+   * @function keyHandler
+   * @param event
+   *
+   * @description Handles the events specified when keys are pressed.
+   *
+   * @author Mihir Paldhikar
+   */
+
+  function keyHandler(event: KeyboardEvent): void {
+    const blockNode = getBlockNode(block.id);
+
+    if (blockNode == null) return;
+
+    switch (event.key.toLowerCase()) {
+      case "enter": {
+        event.preventDefault();
+
+        const caretOffset = getCaretOffset(blockNode);
+
+        onEnter(caretOffset !== blockNode.innerText.length, caretOffset);
+        break;
+      }
+    }
   }
 
   if (block.type === "text") {
@@ -79,6 +110,7 @@ export default function Canvas({
           : "font-normal text-[17px]"
       ),
       onInput: notifyChange,
+      onKeyDown: keyHandler,
     });
   }
 

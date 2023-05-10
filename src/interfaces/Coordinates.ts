@@ -12,6 +12,9 @@
  * All Rights Reserved.
  */
 
-export type { default as Style } from "./Style";
-export type { default as Block } from "./Block";
-export type { default as Coordinates } from "./Coordinates";
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
+export default Coordinates;

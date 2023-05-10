@@ -12,10 +12,10 @@
  * All Rights Reserved.
  */
 
-import { type JSX, useState } from "react";
+import { createRef, type JSX, useState } from "react";
 import { Canvas } from "../Canvas";
 import { type Block } from "../../interfaces";
-import { generateRefreshKey } from "../../utils";
+import { generateBlockId, generateRefreshKey } from "../../utils";
 
 interface ComposerProps {
   editable: boolean;
@@ -23,6 +23,7 @@ interface ComposerProps {
   block: Block;
   nextBlock: Block | null;
   onChange: (block: Block) => void;
+  onCreate: (currentBlock: Block, newBlock: Block) => void;
 }
 
 /**
@@ -33,6 +34,7 @@ interface ComposerProps {
  * @param block
  * @param nextBlock
  * @param onChange
+ * @param onCreate
  *
  * @description Composer is responsible for communicating with sibling blocks and handling events from the Canvas.
  *
@@ -45,8 +47,39 @@ export default function Composer({
   block,
   nextBlock,
   onChange,
+  onCreate,
 }: ComposerProps): JSX.Element {
   const [refreshKey, setRefreshKey] = useState(generateRefreshKey());
+
+  function enterHandler(splitContent: boolean, caretOffset: number): void {
+    const newBlock: Block = {
+      id: generateBlockId(),
+      reference: createRef<HTMLElement>(),
+      type: "text",
+      role: "paragraph",
+      content: "",
+      style: [],
+    };
+
+    if (splitContent) {
+      const tempNode = document.createElement("div");
+      tempNode.innerHTML = block.content;
+
+      const currentBlockContent: string = tempNode.innerText.substring(
+        0,
+        caretOffset
+      );
+      const newBlockContent: string = tempNode.innerText.substring(caretOffset);
+
+      block.content = currentBlockContent;
+      newBlock.content = newBlockContent;
+      newBlock.role = block.role;
+      newBlock.type = block.type;
+      newBlock.style = block.style;
+    }
+
+    onCreate(block, newBlock);
+  }
 
   return (
     <Canvas
@@ -54,6 +87,7 @@ export default function Composer({
       editable={editable}
       block={block}
       onChange={onChange}
+      onEnter={enterHandler}
     />
   );
 }

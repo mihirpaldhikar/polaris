@@ -76,3 +76,19 @@ export function setNodeStyle(style: Style[]): Record<string, string> {
 export function generateBlockId(): string {
   return generateRandomString(30);
 }
+
+/**
+ *
+ * @param blockId
+ * @returns HTMLElement | null
+ *
+ *@description Returns DOM Node of the provided blockId if block exists else returns null.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function getBlockNode(blockId: string): HTMLElement | null {
+  const blockDOM = document.getElementById(blockId);
+  if (blockDOM === null) return null;
+  return blockDOM;
+}
