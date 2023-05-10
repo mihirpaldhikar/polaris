@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/mihirpaldhikar/polaris/issues"
   },
-  "homepage": "https://github.com/mihirpaldhikar/polaris#readme"
+  "homepage": "https://github.com/mihirpaldhikar/polaris#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
 }
