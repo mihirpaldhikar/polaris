@@ -12,6 +12,6 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
-
-export type { Block } from "./interfaces";
+export type { default as Role } from "./Role";
+export type { default as Type } from "./Type";
+export type { default as Content } from "./Content";

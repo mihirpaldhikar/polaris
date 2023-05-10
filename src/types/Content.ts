@@ -12,6 +12,14 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
+/**
+ * @type Content
+ *
+ * @description Describes the type of data stored in the block.
+ *
+ * @author Mihir Paldhikar
+ */
 
-export type { Block } from "./interfaces";
+type Content = string;
+
+export default Content;

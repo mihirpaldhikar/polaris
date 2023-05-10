@@ -12,6 +12,14 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
+/**
+ * @type Type
+ *
+ * @description Describes the type of the block. A text block will have type of text.
+ *
+ * @author Mihir Paldhikar
+ */
 
-export type { Block } from "./interfaces";
+type Type = "text";
+
+export default Type;

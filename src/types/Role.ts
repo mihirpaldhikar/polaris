@@ -12,6 +12,12 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
+/**
+ * @type Role
+ *
+ * @description Describes the role of the block in the Editor when rendered.
+ * @author Mihir Paldhikar
+ */
+type Role = "title" | "subTitle" | "heading" | "subHeading" | "paragraph";
 
-export type { Block } from "./interfaces";
+export default Role;

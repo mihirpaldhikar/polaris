@@ -12,6 +12,17 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
+/**
+ * @interface Style
+ *
+ * @description Describes about the type of style needs to be applied to the contents of the block when rendered.
+ *
+ * @author Mihir Paldhikar
+ */
 
-export type { Block } from "./interfaces";
+interface Style {
+  name: string;
+  value: string;
+}
+
+export default Style;

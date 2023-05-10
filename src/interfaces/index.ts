@@ -12,6 +12,5 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
-
-export type { Block } from "./interfaces";
+export type { default as Style } from "./Style";
+export type { default as Block } from "./Block";
