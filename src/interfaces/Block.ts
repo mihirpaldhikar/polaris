@@ -30,7 +30,7 @@ interface Block {
   type: Type;
   role: Role;
   content: Content;
-  style: Style;
+  style: Style[];
 }
 
 export default Block;
