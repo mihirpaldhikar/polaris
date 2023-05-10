@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A rich semantic content editor.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
