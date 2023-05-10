@@ -28,6 +28,12 @@ interface ComposerProps {
     newBlock: Block,
     position: "above" | "below"
   ) => void;
+  onDelete: (
+    block: Block,
+    previousBlock: Block,
+    nodeIndex: number,
+    caretOffset: number
+  ) => void;
 }
 
 /**
@@ -39,6 +45,7 @@ interface ComposerProps {
  * @param nextBlock
  * @param onChange
  * @param onCreate
+ * @param onDelete
  *
  * @description Composer is responsible for communicating with sibling blocks and handling events from the Canvas.
  *
@@ -52,6 +59,7 @@ export default function Composer({
   nextBlock,
   onChange,
   onCreate,
+  onDelete,
 }: ComposerProps): JSX.Element {
   const [refreshKey, setRefreshKey] = useState(generateRefreshKey());
 
@@ -85,6 +93,34 @@ export default function Composer({
     onCreate(block, newBlock, "below");
   }
 
+  function deleteHandler(block: Block, joinContent: boolean): void {
+    if (previousBlock != null) {
+      const previousNode = previousBlock.reference?.current as HTMLElement;
+
+      if (joinContent) {
+        previousBlock.id = generateBlockId();
+        previousBlock.content = previousBlock.content.concat(block.content);
+      }
+
+      const childNodes = Array.from(previousNode.childNodes);
+
+      const caretOffset: number =
+        previousNode.lastChild != null
+          ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
+            ? 1
+            : previousNode.lastChild.textContent?.length ??
+              previousNode.innerText.length
+          : previousNode.innerText.length;
+
+      onDelete(
+        block,
+        previousBlock,
+        childNodes.indexOf(previousNode.lastChild ?? previousNode),
+        caretOffset
+      );
+    }
+  }
+
   return (
     <Canvas
       key={refreshKey}
@@ -92,6 +128,7 @@ export default function Composer({
       block={block}
       onChange={onChange}
       onEnter={enterHandler}
+      onDelete={deleteHandler}
     />
   );
 }

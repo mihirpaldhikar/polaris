@@ -99,6 +99,22 @@ export default function Workspace({
     });
   }
 
+  function deletionHandler(
+    block: Block,
+    previousBlock: Block,
+    nodeIndex: number,
+    caretOffset: number
+  ): void {
+    const blockIndex = blocks.indexOf(block);
+    blocks.splice(blockIndex, 1);
+    updateBlocks(blocks);
+    setFocusedNode({
+      nodeId: previousBlock.id,
+      caretOffset,
+      nodeIndex,
+    });
+  }
+
   return (
     <div
       id={`workspace-${document.id}`}
@@ -114,6 +130,7 @@ export default function Workspace({
             nextBlock={index !== blocks.length - 1 ? blocks[index + 1] : null}
             onChange={changeHandler}
             onCreate={createHandler}
+            onDelete={deletionHandler}
           />
         );
       })}

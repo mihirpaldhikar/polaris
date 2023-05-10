@@ -12,8 +12,17 @@
  * All Rights Reserved.
  */
 
-export type { default as Style } from "./Style";
-export type { default as Block } from "./Block";
-export type { default as Coordinates } from "./Coordinates";
-export type { default as Document } from "./Document";
-export type { default as Siblings } from "./Siblings";
+/**
+ * @interface Siblings
+ *
+ * @description Siblings are the nodes above and below the current node.
+ *
+ * @author Mihir Paldhikar
+ */
+
+interface Siblings {
+  previous: HTMLElement | null;
+  next: HTMLElement | null;
+}
+
+export default Siblings;

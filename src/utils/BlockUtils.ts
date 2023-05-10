@@ -13,7 +13,7 @@
  */
 
 import { type Role } from "../types";
-import { type Style } from "../interfaces";
+import { type Siblings, type Style } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 
 /**
@@ -91,4 +91,29 @@ export function getBlockNode(blockId: string): HTMLElement | null {
   const blockDOM = document.getElementById(blockId);
   if (blockDOM === null) return null;
   return blockDOM;
+}
+
+/**
+ * @function getNodeSiblings
+ *
+ * @param blockId
+ *
+ * @description Finds the Siblings of the current Node from the provided BlockId. If no siblings exist either above or below then returns null for that sibling.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function getNodeSiblings(blockId: string): Siblings {
+  const blockDOM = Array.from(
+    document.querySelectorAll(`[data-type="block"]`).values()
+  );
+  const blockDOMIndex = blockDOM.findIndex((block) => block.id === blockId);
+  return {
+    previous:
+      blockDOMIndex !== 0 ? getBlockNode(blockDOM[blockDOMIndex - 1].id) : null,
+    next:
+      blockDOMIndex !== blockDOM.length - 1
+        ? getBlockNode(blockDOM[blockDOMIndex + 1].id)
+        : null,
+  };
 }

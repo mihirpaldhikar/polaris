@@ -19,6 +19,7 @@ import {
   createNodeFromRole,
   getBlockNode,
   getCaretOffset,
+  getNodeSiblings,
   setNodeStyle,
 } from "../../utils";
 
@@ -27,6 +28,7 @@ interface CanvasProps {
   block: Block;
   onChange: (block: Block) => void;
   onEnter: (splitContent: boolean, caretOffset: number) => void;
+  onDelete: (block: Block, joinContent: boolean) => void;
 }
 
 /**
@@ -36,6 +38,7 @@ interface CanvasProps {
  * @param block
  * @param onChange
  * @param onEnter
+ * @param onDelete
  *
  * @returns JSX.Element
  *
@@ -49,6 +52,7 @@ export default function Canvas({
   block,
   onChange,
   onEnter,
+  onDelete,
 }: CanvasProps): JSX.Element {
   /**
    * @function notifyChange
@@ -84,11 +88,39 @@ export default function Canvas({
         onEnter(caretOffset !== blockNode.innerText.length, caretOffset);
         break;
       }
+      case "backspace": {
+        const caretOffset = getCaretOffset(blockNode);
+        const nodeSiblings = getNodeSiblings(block.id);
+        if (
+          caretOffset === 0 &&
+          nodeSiblings.previous != null &&
+          nodeSiblings.previous.getAttribute("data-block-type") === block.type
+        ) {
+          event.preventDefault();
+          onDelete(block, true);
+        }
+        break;
+      }
+      case "delete": {
+        if (event.ctrlKey) {
+          const nodeSiblings = getNodeSiblings(block.id);
+          if (
+            nodeSiblings.previous != null &&
+            nodeSiblings.previous.getAttribute("data-block-type") === block.type
+          ) {
+            event.preventDefault();
+            onDelete(block, false);
+          }
+        }
+        break;
+      }
     }
   }
 
   if (block.type === "text") {
     return createElement(createNodeFromRole(block.role), {
+      "data-type": "block",
+      "data-block-type": block.type,
       id: block.id,
       ref: block.reference,
       role: block.role,
