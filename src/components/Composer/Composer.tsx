@@ -15,7 +15,11 @@
 import { createRef, type JSX, useState } from "react";
 import { Canvas } from "../Canvas";
 import { type Block } from "../../interfaces";
-import { generateBlockId, generateRefreshKey } from "../../utils";
+import {
+  generateBlockId,
+  generateRefreshKey,
+  setCaretOffset,
+} from "../../utils";
 
 interface ComposerProps {
   editable: boolean;
@@ -121,6 +125,57 @@ export default function Composer({
     }
   }
 
+  function navigationHandler(
+    navigate: "up" | "down",
+    caretOffset: number
+  ): void {
+    switch (navigate) {
+      case "up": {
+        if (previousBlock?.reference?.current != null) {
+          const previousNode = previousBlock.reference.current;
+
+          const jumpNode: Node =
+            previousNode.lastChild?.textContent != null
+              ? previousNode.lastChild.nodeType === Node.TEXT_NODE
+                ? (previousNode.lastChild as Node)
+                : (previousNode.lastChild.firstChild as Node)
+              : previousNode;
+
+          const computedCaretOffset: number =
+            caretOffset === -1 ||
+            caretOffset >= (jumpNode.textContent?.length as number)
+              ? (jumpNode.textContent?.length as number)
+              : caretOffset;
+
+          setCaretOffset(jumpNode, computedCaretOffset);
+        }
+        break;
+      }
+      case "down": {
+        if (nextBlock?.reference?.current != null) {
+          const nextNode: HTMLElement = nextBlock.reference.current;
+
+          const jumpNode: Node =
+            nextNode.firstChild?.textContent != null
+              ? nextNode.firstChild.nodeType === Node.TEXT_NODE
+                ? (nextNode.firstChild as Node)
+                : (nextNode.firstChild.firstChild as Node)
+              : nextNode;
+
+          const computedCaretOffset: number =
+            caretOffset === -1
+              ? 0
+              : caretOffset >= (jumpNode.textContent?.length as number)
+              ? (jumpNode.textContent?.length as number)
+              : caretOffset;
+
+          setCaretOffset(jumpNode, computedCaretOffset);
+        }
+        break;
+      }
+    }
+  }
+
   return (
     <Canvas
       key={refreshKey}
@@ -129,6 +184,7 @@ export default function Composer({
       onChange={onChange}
       onEnter={enterHandler}
       onDelete={deleteHandler}
+      onNavigate={navigationHandler}
     />
   );
 }

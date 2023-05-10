@@ -18,6 +18,7 @@ import {
   conditionalClassName,
   createNodeFromRole,
   getBlockNode,
+  getCaretCoordinates,
   getCaretOffset,
   getNodeSiblings,
   setNodeStyle,
@@ -29,6 +30,7 @@ interface CanvasProps {
   onChange: (block: Block) => void;
   onEnter: (splitContent: boolean, caretOffset: number) => void;
   onDelete: (block: Block, joinContent: boolean) => void;
+  onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
 }
 
 /**
@@ -39,7 +41,7 @@ interface CanvasProps {
  * @param onChange
  * @param onEnter
  * @param onDelete
- *
+ * @param onNavigate
  * @returns JSX.Element
  *
  * @description Canvas is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
@@ -53,6 +55,7 @@ export default function Canvas({
   onChange,
   onEnter,
   onDelete,
+  onNavigate,
 }: CanvasProps): JSX.Element {
   /**
    * @function notifyChange
@@ -79,18 +82,17 @@ export default function Canvas({
 
     if (blockNode == null) return;
 
+    const caretOffset = getCaretOffset(blockNode);
+    const nodeSiblings = getNodeSiblings(block.id);
+    const caretCoordinates = getCaretCoordinates();
+
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
-
-        const caretOffset = getCaretOffset(blockNode);
-
         onEnter(caretOffset !== blockNode.innerText.length, caretOffset);
         break;
       }
       case "backspace": {
-        const caretOffset = getCaretOffset(blockNode);
-        const nodeSiblings = getNodeSiblings(block.id);
         if (
           caretOffset === 0 &&
           nodeSiblings.previous != null &&
@@ -103,7 +105,6 @@ export default function Canvas({
       }
       case "delete": {
         if (event.ctrlKey) {
-          const nodeSiblings = getNodeSiblings(block.id);
           if (
             nodeSiblings.previous != null &&
             nodeSiblings.previous.getAttribute("data-block-type") === block.type
@@ -111,6 +112,63 @@ export default function Canvas({
             event.preventDefault();
             onDelete(block, false);
           }
+        }
+        break;
+      }
+      case "arrowleft": {
+        if (
+          caretOffset === 0 &&
+          nodeSiblings.previous !== null &&
+          nodeSiblings.previous.getAttribute("data-block-type") === block.type
+        ) {
+          event.preventDefault();
+          onNavigate("up", -1);
+        }
+
+        break;
+      }
+      case "arrowright": {
+        if (
+          caretOffset === blockNode.innerText.length &&
+          nodeSiblings.next !== null &&
+          nodeSiblings.next.getAttribute("data-block-type") === block.type
+        ) {
+          event.preventDefault();
+          onNavigate("down", -1);
+        }
+        break;
+      }
+
+      case "arrowup": {
+        const computedDistance: number =
+          block.role === "paragraph" || block.role === "subTitle" ? 3 : 2;
+
+        if (
+          nodeSiblings.previous !== null &&
+          nodeSiblings.previous.getAttribute("data-block-type") ===
+            block.type &&
+          Math.floor(
+            caretCoordinates.y -
+              nodeSiblings.previous.getBoundingClientRect().bottom
+          ) <= computedDistance
+        ) {
+          event.preventDefault();
+          onNavigate("up", caretOffset);
+        }
+        break;
+      }
+      case "arrowdown": {
+        const computedDistance: number =
+          block.role === "title" ? 44 : block.role === "subTitle" ? 32 : 28;
+
+        if (
+          nodeSiblings.next !== null &&
+          nodeSiblings.next.getAttribute("data-block-type") === block.type &&
+          caretCoordinates.y - nodeSiblings.next.getBoundingClientRect().top <=
+            computedDistance
+        ) {
+          event.preventDefault();
+          onNavigate("down", caretOffset);
         }
         break;
       }
