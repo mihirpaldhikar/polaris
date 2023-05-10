@@ -13,7 +13,7 @@
  */
 
 import { generateRandomString } from "./SharedUtils";
-import { Coordinates } from "../interfaces";
+import { type Coordinates } from "../interfaces";
 
 /**
  * @function generateRefreshKey
@@ -84,4 +84,58 @@ export function getCaretCoordinates(fromStart: boolean = true): Coordinates {
     }
   }
   return { x, y } satisfies Coordinates;
+}
+
+/**
+ * @function setCaretOffset
+ *
+ * @param node
+ * @param offset
+ *
+ * @description Set caret at provided offset in the provided Node.
+ *
+ * @author Mihir Paldhikar
+ *
+ */
+
+export function setCaretOffset(node: Node, offset: number): void {
+  const selection = window.getSelection();
+  if (selection === null) return;
+
+  const selectedRange = document.createRange();
+  selectedRange.setStart(node, offset);
+  selectedRange.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(selectedRange);
+
+  if (node.parentElement !== null) {
+    node.parentElement.focus();
+
+    if (!nodeInViewPort(node.parentElement)) {
+      node.parentElement.scrollIntoView();
+    }
+  }
+}
+
+/**
+ * @function nodeInViewPort
+ * @param node
+ *
+ * @description Checks if the provided node is in the viewport or not.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function nodeInViewPort(node: HTMLElement): boolean {
+  const rect = node.getBoundingClientRect();
+
+  if (rect !== undefined) {
+    return (
+      rect.bottom > 0 &&
+      rect.right > 0 &&
+      rect.left < (window.innerWidth ?? document.documentElement.clientWidth) &&
+      rect.top < (window.innerHeight ?? document.documentElement.clientHeight)
+    );
+  }
+  return false;
 }

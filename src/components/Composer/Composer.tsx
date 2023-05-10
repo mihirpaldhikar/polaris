@@ -23,7 +23,11 @@ interface ComposerProps {
   block: Block;
   nextBlock: Block | null;
   onChange: (block: Block) => void;
-  onCreate: (currentBlock: Block, newBlock: Block) => void;
+  onCreate: (
+    currentBlock: Block,
+    newBlock: Block,
+    position: "above" | "below"
+  ) => void;
 }
 
 /**
@@ -78,7 +82,7 @@ export default function Composer({
       newBlock.style = block.style;
     }
 
-    onCreate(block, newBlock);
+    onCreate(block, newBlock, "below");
   }
 
   return (

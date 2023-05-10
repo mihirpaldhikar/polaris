@@ -12,6 +12,4 @@
  * All Rights Reserved.
  */
 
-export { Canvas } from "./Canvas";
-export { Composer } from "./Composer";
-export { Workspace } from "./Workspace";
+export { default as Workspace } from "./Workspace";

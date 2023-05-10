@@ -17,3 +17,4 @@ import "./styles/global.css";
 export type { Block } from "./interfaces";
 export { generateBlockId } from "./utils";
 export type { Document } from "./interfaces";
+export { Workspace } from "./components";
