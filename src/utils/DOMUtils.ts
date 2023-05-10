@@ -12,5 +12,16 @@
  * All Rights Reserved.
  */
 
-export { Canvas } from "./Canvas";
-export { Composer } from "./Composer";
+import { generateRandomString } from "./SharedUtils";
+
+/**
+ * @function generateRefreshKey
+ *
+ * @description Generates a unique key which is used to refresh the DOM.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function generateRefreshKey(): string {
+  return generateRandomString(20);
+}

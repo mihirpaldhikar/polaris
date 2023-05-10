@@ -14,3 +14,4 @@
 
 export * from "./BlockUtils";
 export * from "./ConditionalClassName";
+export * from "./DOMUtils";

@@ -12,5 +12,4 @@
  * All Rights Reserved.
  */
 
-export { Canvas } from "./Canvas";
-export { Composer } from "./Composer";
+export { default as Composer } from "./Composer";
