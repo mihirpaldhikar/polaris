@@ -12,7 +12,17 @@
  * All Rights Reserved.
  */
 
-export type { default as Style } from "./Style";
-export type { default as Block } from "./Block";
-export type { default as Coordinates } from "./Coordinates";
-export type { default as Document } from "./Document";
+import type Block from "./Block";
+
+/**
+ * @interface Document
+ *
+ * @description Document is a collection of blocks in the semantic manner. A Document contains all the information required by the Polaris to create rich content editing experience.
+ */
+
+interface Document {
+  id: string;
+  blocks: Block[];
+}
+
+export default Document;
