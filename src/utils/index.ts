@@ -12,7 +12,5 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
-
-export type { Block } from "./interfaces";
-export { generateBlockId } from "./utils";
+export * from "./BlockUtils";
+export * from "./ConditionalClassName";
