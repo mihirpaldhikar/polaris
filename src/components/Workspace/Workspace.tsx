@@ -15,7 +15,13 @@
 import { createRef, type JSX, useEffect, useState } from "react";
 import { Composer } from "../Composer";
 import { type Block, type Document } from "../../interfaces";
-import { getBlockNode, setCaretOffset } from "../../utils";
+import {
+  generateBlockId,
+  getBlockNode,
+  normalizeContent,
+  setCaretOffset,
+} from "../../utils";
+import { type Content } from "../../types";
 
 interface WorkspaceProps {
   editable: boolean;
@@ -115,6 +121,70 @@ export default function Workspace({
     });
   }
 
+  function pasteHandler(
+    block: Block,
+    content: Content | Content[],
+    caretOffset: number
+  ): void {
+    const blockIndex = blocks.indexOf(block);
+    block.content = normalizeContent(block.content);
+    const contentLengthAfterCaretOffset =
+      block.content.substring(caretOffset).length;
+
+    if (block.type === "text" && Array.isArray(content)) {
+      const pasteBlocks: Block[] = content.map((copiedText, index) => {
+        return {
+          id: generateBlockId(),
+          reference: createRef<HTMLElement>(),
+          type: block.type,
+          role: block.role,
+          style: block.style,
+          content:
+            index === 0
+              ? block.content.substring(0, caretOffset).concat(copiedText)
+              : index === content.length - 1
+              ? copiedText.concat(block.content.substring(caretOffset))
+              : copiedText,
+        };
+      });
+      blocks.splice(blockIndex, 1, ...pasteBlocks);
+      updateBlocks(blocks);
+
+      const pasteContentLength = normalizeContent(
+        pasteBlocks[pasteBlocks.length - 1].content
+      ).length;
+
+      const computedCaretOffset: number =
+        pasteContentLength - contentLengthAfterCaretOffset < 0
+          ? contentLengthAfterCaretOffset - pasteContentLength
+          : pasteContentLength - contentLengthAfterCaretOffset;
+
+      setFocusedNode({
+        nodeId: pasteBlocks[pasteBlocks.length - 1].id,
+        caretOffset: computedCaretOffset,
+      });
+    } else if (block.type === "text" && typeof content === "string") {
+      blocks[blockIndex].content = blocks[blockIndex].content
+        .substring(0, caretOffset)
+        .concat(content)
+        .concat(blocks[blockIndex].content.substring(caretOffset));
+
+      updateBlocks(blocks);
+
+      const pasteContentLength = normalizeContent(block.content).length;
+
+      const computedCaretOffset: number =
+        pasteContentLength - contentLengthAfterCaretOffset < 0
+          ? contentLengthAfterCaretOffset - pasteContentLength
+          : pasteContentLength - contentLengthAfterCaretOffset;
+
+      setFocusedNode({
+        nodeId: block.id,
+        caretOffset: computedCaretOffset,
+      });
+    }
+  }
+
   return (
     <div
       id={`workspace-${document.id}`}
@@ -131,6 +201,7 @@ export default function Workspace({
             onChange={changeHandler}
             onCreate={createHandler}
             onDelete={deletionHandler}
+            onPaste={pasteHandler}
           />
         );
       })}

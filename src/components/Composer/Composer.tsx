@@ -20,6 +20,7 @@ import {
   generateRefreshKey,
   setCaretOffset,
 } from "../../utils";
+import { type Content } from "../../types";
 
 interface ComposerProps {
   editable: boolean;
@@ -38,6 +39,11 @@ interface ComposerProps {
     nodeIndex: number,
     caretOffset: number
   ) => void;
+  onPaste: (
+    block: Block,
+    content: Content | Content[],
+    caretOffset: number
+  ) => void;
 }
 
 /**
@@ -50,6 +56,7 @@ interface ComposerProps {
  * @param onChange
  * @param onCreate
  * @param onDelete
+ * @param onPaste
  *
  * @description Composer is responsible for communicating with sibling blocks and handling events from the Canvas.
  *
@@ -64,6 +71,7 @@ export default function Composer({
   onChange,
   onCreate,
   onDelete,
+  onPaste,
 }: ComposerProps): JSX.Element {
   const [refreshKey, setRefreshKey] = useState(generateRefreshKey());
 
@@ -185,6 +193,7 @@ export default function Composer({
       onEnter={enterHandler}
       onDelete={deleteHandler}
       onNavigate={navigationHandler}
+      onPaste={onPaste}
     />
   );
 }

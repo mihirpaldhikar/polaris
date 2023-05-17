@@ -23,6 +23,7 @@ import {
   getNodeSiblings,
   setNodeStyle,
 } from "../../utils";
+import { type Content } from "../../types";
 
 interface CanvasProps {
   editable: boolean;
@@ -31,6 +32,11 @@ interface CanvasProps {
   onEnter: (splitContent: boolean, caretOffset: number) => void;
   onDelete: (block: Block, joinContent: boolean) => void;
   onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
+  onPaste: (
+    block: Block,
+    content: Content | Content[],
+    caretOffset: number
+  ) => void;
 }
 
 /**
@@ -42,6 +48,8 @@ interface CanvasProps {
  * @param onEnter
  * @param onDelete
  * @param onNavigate
+ * @param onPaste
+ *
  * @returns JSX.Element
  *
  * @description Canvas is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
@@ -56,6 +64,7 @@ export default function Canvas({
   onEnter,
   onDelete,
   onNavigate,
+  onPaste,
 }: CanvasProps): JSX.Element {
   /**
    * @function notifyChange
@@ -77,7 +86,7 @@ export default function Canvas({
    * @author Mihir Paldhikar
    */
 
-  function keyHandler(event: KeyboardEvent): void {
+  async function keyHandler(event: KeyboardEvent): Promise<void> {
     const blockNode = getBlockNode(block.id);
 
     if (blockNode == null) return;
@@ -169,6 +178,18 @@ export default function Canvas({
         ) {
           event.preventDefault();
           onNavigate("down", caretOffset);
+        }
+        break;
+      }
+      case "v": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+          const copiedText = await navigator.clipboard.readText();
+          if (copiedText.includes("\n")) {
+            onPaste(block, copiedText.trim().split(/\r?\n/), caretOffset);
+          } else {
+            onPaste(block, copiedText, caretOffset);
+          }
         }
         break;
       }

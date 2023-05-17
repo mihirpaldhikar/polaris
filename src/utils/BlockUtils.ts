@@ -117,3 +117,17 @@ export function getNodeSiblings(blockId: string): Siblings {
         : null,
   };
 }
+
+/**
+ * @function normalizeContent
+ *
+ * @param string
+ *
+ * @description Normalizes the text content by removing HTML specific HEX Codes.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function normalizeContent(string: string): string {
+  return string.replaceAll(/&nbsp;|\u202F|\u00A0/g, " ");
+}
