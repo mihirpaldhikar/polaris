@@ -15,6 +15,7 @@
 import { type Role } from "../types";
 import { type Siblings, type Style } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
+import { BLOCK_NODE, NODE_TYPE } from "../constants";
 
 /**
  * @function createNodeFromRole
@@ -105,7 +106,7 @@ export function getBlockNode(blockId: string): HTMLElement | null {
 
 export function getNodeSiblings(blockId: string): Siblings {
   const blockDOM = Array.from(
-    document.querySelectorAll(`[data-type="block"]`).values()
+    document.querySelectorAll(`[${NODE_TYPE}="${BLOCK_NODE}"]`).values()
   );
   const blockDOMIndex = blockDOM.findIndex((block) => block.id === blockId);
   return {

@@ -13,7 +13,7 @@
  */
 
 import { type ChangeEvent, createElement, Fragment, type JSX } from "react";
-import { type Block } from "../../interfaces";
+import { type Block, type Style } from "../../interfaces";
 import {
   conditionalClassName,
   createNodeFromRole,
@@ -21,9 +21,11 @@ import {
   getCaretCoordinates,
   getCaretOffset,
   getNodeSiblings,
+  manageInlineSpecifiers,
   setNodeStyle,
 } from "../../utils";
 import { type Content } from "../../types";
+import { BLOCK_NODE } from "../../constants";
 
 interface CanvasProps {
   editable: boolean;
@@ -193,12 +195,62 @@ export default function Canvas({
         }
         break;
       }
+      case "b": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+
+          const style: Style[] = [
+            {
+              name: "font-weight",
+              value: "bold",
+            },
+          ];
+
+          manageInlineSpecifiers(blockNode, style);
+          block.content = blockNode.innerHTML;
+          onChange(block);
+        }
+        break;
+      }
+      case "i": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+          const style: Style[] = [
+            {
+              name: "font-style",
+              value: "italic",
+            },
+          ];
+
+          manageInlineSpecifiers(blockNode, style);
+          block.content = blockNode.innerHTML;
+          onChange(block);
+        }
+        break;
+      }
+      case "u": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+
+          const style: Style[] = [
+            {
+              name: "text-decoration",
+              value: "underline",
+            },
+          ];
+
+          manageInlineSpecifiers(blockNode, style);
+          block.content = blockNode.innerHTML;
+          onChange(block);
+        }
+        break;
+      }
     }
   }
 
   if (block.type === "text") {
     return createElement(createNodeFromRole(block.role), {
-      "data-type": "block",
+      "data-type": BLOCK_NODE,
       "data-block-type": block.type,
       id: block.id,
       ref: block.reference,

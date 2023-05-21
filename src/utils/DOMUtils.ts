@@ -13,7 +13,8 @@
  */
 
 import { generateRandomString } from "./SharedUtils";
-import { type Coordinates } from "../interfaces";
+import { type Coordinates, type Style } from "../interfaces";
+import { INLINE_SPECIFIER_NODE, NODE_TYPE } from "../constants";
 
 /**
  * @function generateRefreshKey
@@ -138,4 +139,493 @@ export function nodeInViewPort(node: HTMLElement): boolean {
     );
   }
   return false;
+}
+
+/**
+ *
+ * @function nodeOffset
+ *
+ * @param parentNode
+ * @param targetNode
+ * @param options
+ *
+ * @description Returns the offset of the Target Node from the Parent Node.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function nodeOffset(
+  parentNode: HTMLElement,
+  targetNode: Node,
+  options?: { includeInnerHTML?: boolean }
+): number {
+  let offset: number = 0;
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    if (parentNode.childNodes[i].isEqualNode(targetNode)) {
+      break;
+    }
+    offset =
+      options?.includeInnerHTML !== undefined && options.includeInnerHTML
+        ? parentNode.childNodes[i].nodeType === Node.ELEMENT_NODE
+          ? offset + (parentNode.childNodes[i] as HTMLElement).outerHTML.length
+          : offset + (parentNode.childNodes[i].textContent?.length as number)
+        : offset + (parentNode.childNodes[i].textContent?.length as number);
+  }
+
+  return offset;
+}
+
+/**
+ *
+ * @function splitElement
+ *
+ * @param targetElement
+ * @param offset
+ *
+ * @description Splits the element from the offset.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function splitElement(
+  targetElement: HTMLElement,
+  offset: number
+): string[] {
+  const fragments: string[] = [];
+  const tempElement = targetElement.cloneNode(true) as HTMLElement;
+  const firstHalf = targetElement.innerText.substring(0, offset);
+  const secondHalf = targetElement.innerText.substring(offset);
+  tempElement.innerText = firstHalf;
+  fragments.push(tempElement.outerHTML);
+  tempElement.innerText = secondHalf;
+  fragments.push(tempElement.outerHTML);
+  return fragments;
+}
+
+/**
+ *
+ * @function generateHTMLFragment
+ *
+ * @param startNode
+ * @param startOffset
+ * @param endNode
+ * @param endOffset
+ * @param targetNode
+ *
+ * @description Generates a HTML String from the Target Node.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function generateHTMLFragment(
+  startNode: Node,
+  startOffset: number,
+  endNode: Node,
+  endOffset: number,
+  targetNode: Node
+): string {
+  let fragment: string = "";
+  let foundStartNode: boolean = false;
+  for (let i = 0; i < targetNode.childNodes.length; i++) {
+    if (!targetNode.childNodes[i].isEqualNode(startNode) && !foundStartNode) {
+      continue;
+    } else {
+      foundStartNode = true;
+    }
+    if (
+      targetNode.childNodes[i].isEqualNode(endNode) &&
+      endNode.nodeType === Node.ELEMENT_NODE
+    ) {
+      break;
+    }
+    if (targetNode.childNodes[i].nodeType === Node.ELEMENT_NODE) {
+      fragment = fragment.concat(
+        (targetNode.childNodes[i] as HTMLElement).outerHTML
+      );
+    } else {
+      fragment = fragment.concat(
+        targetNode.childNodes[i].textContent as string
+      );
+    }
+    if (
+      targetNode.childNodes[i].isEqualNode(endNode) &&
+      endNode.nodeType === Node.TEXT_NODE
+    ) {
+      break;
+    }
+  }
+
+  return startNode.nodeType === Node.ELEMENT_NODE &&
+    endNode.nodeType === Node.ELEMENT_NODE
+    ? splitElement(startNode as HTMLElement, startOffset)[1]
+        .concat(fragment.substring((startNode as HTMLElement).outerHTML.length))
+        .concat(splitElement(endNode as HTMLElement, endOffset)[0])
+    : startNode.nodeType === Node.ELEMENT_NODE &&
+      endNode.nodeType === Node.TEXT_NODE
+    ? splitElement(startNode as HTMLElement, startOffset)[1].concat(
+        fragment.substring(
+          (startNode as HTMLElement).outerHTML.length,
+          (startNode as HTMLElement).outerHTML.length + endOffset
+        )
+      )
+    : startNode.nodeType === Node.TEXT_NODE &&
+      endNode.nodeType === Node.ELEMENT_NODE
+    ? fragment
+        .substring(startOffset)
+        .concat(splitElement(endNode as HTMLElement, endOffset)[0])
+    : fragment.substring(startOffset, endOffset);
+}
+
+/**
+ *
+ * @function generateNodesFromHTMLFragment
+ *
+ * @param htmlFragment
+ *
+ * @description generates node from the provided HTML fragment. HTML Fragment is essentially a string of HTML.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
+  const tempNode = document.createElement("div");
+  const nodes: Node[] = [];
+  tempNode.innerHTML = htmlFragment;
+  for (let i = 0; i < tempNode.childNodes.length; i++) {
+    nodes.push(tempNode.childNodes[i]);
+  }
+  return nodes;
+}
+
+/**
+ *
+ * @function generateInlineSpecifierString
+ *
+ * @param htmlFragment
+ * @param style
+ * @param removeStyle
+ *
+ * @description Creates string of HTML with provided styles and metadata.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function generateInlineSpecifierString(
+  htmlFragment: string,
+  style?: Style[],
+  removeStyle?: Style[]
+): string {
+  const nodeFragments = generateNodesFromHTMLFragment(htmlFragment);
+  let inlineSpecifierString = "";
+  for (let i = 0; i < nodeFragments.length; i++) {
+    const tempNode =
+      nodeFragments[i].nodeType === Node.ELEMENT_NODE
+        ? (nodeFragments[i] as HTMLElement)
+        : document.createElement("span");
+
+    tempNode.setAttribute(NODE_TYPE, INLINE_SPECIFIER_NODE);
+    tempNode.innerText = nodeFragments[i].textContent as string;
+
+    if (style !== undefined) {
+      for (let i = 0; i < style.length; i++) {
+        tempNode.style.setProperty(style[i].name, style[i].value);
+      }
+    }
+
+    if (removeStyle !== undefined) {
+      for (let i = 0; i < removeStyle.length; i++) {
+        tempNode.style.removeProperty(removeStyle[i].name);
+      }
+    }
+    inlineSpecifierString = inlineSpecifierString.concat(
+      tempNode.style.cssText.trim().length === 0
+        ? tempNode.innerText
+        : tempNode.outerHTML
+    );
+  }
+  return inlineSpecifierString;
+}
+
+/**
+ * @function generateInlineSpecifiers
+ *
+ * @param targetElement
+ * @param selection
+ * @param style
+ * @param removeStyle
+ *
+ * @description Appends the inline specifiers with styles and metadata.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function generateInlineSpecifiers(
+  targetElement: HTMLElement,
+  selection: Selection | null,
+  style?: Style[],
+  removeStyle?: Style[]
+): void {
+  if (
+    selection === null ||
+    selection.focusNode == null ||
+    selection.anchorNode == null ||
+    selection.toString() === ""
+  ) {
+    return;
+  }
+
+  const range = selection.getRangeAt(0);
+
+  let inlineSpecifiers: string = "";
+
+  let deleteRangeContents: boolean = true;
+
+  if (
+    range.startContainer.isEqualNode(range.endContainer) &&
+    range.startContainer.parentElement != null &&
+    range.endContainer.parentElement != null
+  ) {
+    if (
+      range.startContainer.parentElement.isEqualNode(targetElement) &&
+      range.endContainer.parentElement.isEqualNode(targetElement) &&
+      range.startContainer.parentElement.getAttribute(NODE_TYPE) !==
+        INLINE_SPECIFIER_NODE &&
+      range.endContainer.parentElement.getAttribute(NODE_TYPE) !==
+        INLINE_SPECIFIER_NODE
+    ) {
+      inlineSpecifiers = generateInlineSpecifierString(
+        generateHTMLFragment(
+          range.startContainer,
+          range.startOffset,
+          range.endContainer,
+          range.endOffset,
+          targetElement
+        ),
+        style,
+        removeStyle
+      );
+    }
+    if (
+      range.startContainer.parentElement.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE &&
+      range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE
+    ) {
+      const tempNode = generateNodesFromHTMLFragment(
+        splitElement(range.startContainer.parentElement, range.startOffset)[1]
+      )[0] as HTMLElement;
+
+      tempNode.innerText = selection.toString();
+
+      inlineSpecifiers = splitElement(
+        range.startContainer.parentElement,
+        range.startOffset
+      )[0]
+        .concat(
+          generateInlineSpecifierString(tempNode.outerHTML, style, removeStyle)
+        )
+        .concat(
+          splitElement(range.endContainer.parentElement, range.endOffset)[1]
+        );
+
+      targetElement.removeChild(range.startContainer.parentElement);
+      deleteRangeContents = false;
+    }
+  }
+  if (
+    !range.startContainer.isEqualNode(range.endContainer) &&
+    range.startContainer.parentElement != null &&
+    range.endContainer.parentElement != null
+  ) {
+    /// Start and End Container both are spanned.
+    if (
+      !range.startContainer.parentElement.isEqualNode(targetElement) &&
+      !range.endContainer.parentElement.isEqualNode(targetElement) &&
+      range.startContainer.parentElement.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE &&
+      range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE
+    ) {
+      inlineSpecifiers = generateHTMLFragment(
+        range.startContainer.parentElement,
+        range.startOffset,
+        range.endContainer.parentElement,
+        range.endOffset,
+        targetElement
+      );
+
+      const generatedInlineStyling = generateInlineSpecifierString(
+        inlineSpecifiers,
+        style,
+        removeStyle
+      );
+
+      inlineSpecifiers = splitElement(
+        range.startContainer.parentElement,
+        range.startOffset
+      )[0]
+        .concat(generatedInlineStyling)
+        .concat(
+          splitElement(range.endContainer.parentElement, range.endOffset)[1]
+        );
+
+      range.setStart(range.startContainer.parentElement, 0);
+      range.setEnd(range.endContainer.parentElement, 1);
+    }
+
+    /// Start Container is spanned and End Container is not spanned.
+    if (
+      !range.startContainer.parentElement.isEqualNode(targetElement) &&
+      range.endContainer.parentElement.isEqualNode(targetElement) &&
+      range.startContainer.parentElement.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE &&
+      range.endContainer.parentElement.getAttribute(NODE_TYPE) !==
+        INLINE_SPECIFIER_NODE
+    ) {
+      inlineSpecifiers = generateHTMLFragment(
+        range.startContainer.parentElement,
+        range.startOffset,
+        range.endContainer,
+        range.endOffset,
+        targetElement
+      );
+
+      const generatedInlineStyling = generateInlineSpecifierString(
+        inlineSpecifiers,
+        style,
+        removeStyle
+      );
+
+      inlineSpecifiers = splitElement(
+        range.startContainer.parentElement,
+        range.startOffset
+      )[0].concat(generatedInlineStyling);
+
+      range.setStart(range.startContainer.parentElement, 0);
+      range.setEnd(range.endContainer, range.endOffset);
+    }
+
+    /// Start Container is not spanned and End Container is spanned.
+    if (
+      range.startContainer.parentElement.isEqualNode(targetElement) &&
+      !range.endContainer.parentElement.isEqualNode(targetElement) &&
+      range.startContainer.parentElement.getAttribute(NODE_TYPE) !==
+        INLINE_SPECIFIER_NODE &&
+      range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE
+    ) {
+      inlineSpecifiers = generateHTMLFragment(
+        range.startContainer,
+        range.startOffset,
+        range.endContainer.parentElement,
+        range.endOffset,
+        targetElement
+      );
+
+      const generatedInlineStyling = generateInlineSpecifierString(
+        inlineSpecifiers,
+        style,
+        removeStyle
+      );
+
+      inlineSpecifiers = generatedInlineStyling.concat(
+        splitElement(range.endContainer.parentElement, range.endOffset)[1]
+      );
+
+      range.setStart(range.startContainer, range.startOffset);
+      range.setEnd(range.endContainer.parentElement, 1);
+    }
+
+    if (
+      range.startContainer.parentElement.isEqualNode(targetElement) &&
+      range.endContainer.parentElement.isEqualNode(targetElement) &&
+      range.startContainer.nodeType === Node.TEXT_NODE &&
+      range.endContainer.nodeType === Node.TEXT_NODE
+    ) {
+      inlineSpecifiers = generateInlineSpecifierString(
+        targetElement.innerHTML.substring(
+          nodeOffset(targetElement, range.startContainer, {
+            includeInnerHTML: true,
+          }) + range.startOffset,
+          nodeOffset(targetElement, range.endContainer, {
+            includeInnerHTML: true,
+          }) + range.endOffset
+        ),
+        style,
+        removeStyle
+      );
+    }
+  }
+  const placeholderNode = document.createElement("span");
+  selection.removeAllRanges();
+  selection.addRange(range);
+  if (deleteRangeContents) {
+    range.deleteContents();
+  }
+  range.insertNode(placeholderNode);
+  placeholderNode.insertAdjacentHTML("afterend", inlineSpecifiers);
+  targetElement.removeChild(placeholderNode);
+  selection.removeAllRanges();
+  const spanNodes = targetElement.getElementsByTagName("span");
+  for (let i = 0; i < spanNodes.length; i++) {
+    if (spanNodes[i].innerText.trim().length === 0) {
+      spanNodes[i].parentNode?.removeChild(spanNodes[i]);
+    }
+  }
+}
+
+/**
+ * @function hasInlineSpecifierStyle
+ * @param style
+ *
+ * @description Checks of the selected text has inline specifier styles.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export default function hasInlineSpecifierStyle(style: Style[]): boolean {
+  const selection = window.getSelection();
+  if (selection === null) return false;
+  const range = selection.getRangeAt(0);
+  const startContainerParent = range.startContainer.parentElement;
+  const endContainerParent = range.endContainer.parentElement;
+
+  let styleGroup: string = "";
+
+  for (let i = 0; i < style.length; i++) {
+    styleGroup = styleGroup.concat(`${style[i].name}:${style[i].value};`);
+  }
+
+  return (
+    startContainerParent != null &&
+    endContainerParent != null &&
+    startContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
+    endContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
+    startContainerParent.style.cssText
+      .replaceAll(" ", "")
+      .includes(styleGroup) &&
+    endContainerParent.style.cssText.replaceAll(" ", "").includes(styleGroup)
+  );
+}
+
+/**
+ * function manageInlineSpecifiers
+ *
+ * @param targetNode
+ * @param style
+ *
+ * @description Manages the Inline Specifiers.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function manageInlineSpecifiers(
+  targetNode: HTMLElement,
+  style: Style[]
+): void {
+  if (hasInlineSpecifierStyle(style)) {
+    generateInlineSpecifiers(targetNode, window.getSelection(), [], style);
+  } else {
+    generateInlineSpecifiers(targetNode, window.getSelection(), style);
+  }
 }
