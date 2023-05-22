@@ -14,7 +14,12 @@
 
 import { generateRandomString } from "./SharedUtils";
 import { type Coordinates, type Style } from "../interfaces";
-import { INLINE_SPECIFIER_NODE, NODE_TYPE } from "../constants";
+import {
+  INLINE_SPECIFIER_NODE,
+  LINK_ATTRIBUTE,
+  NODE_TYPE,
+  REMOVE_LINK,
+} from "../constants";
 
 /**
  * @function generateRefreshKey
@@ -304,6 +309,7 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
  * @param htmlFragment
  * @param style
  * @param removeStyle
+ * @param link
  *
  * @description Creates string of HTML with provided styles and metadata.
  *
@@ -313,7 +319,8 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
 export function generateInlineSpecifierString(
   htmlFragment: string,
   style?: Style[],
-  removeStyle?: Style[]
+  removeStyle?: Style[],
+  link?: string
 ): string {
   const nodeFragments = generateNodesFromHTMLFragment(htmlFragment);
   let inlineSpecifierString = "";
@@ -337,8 +344,17 @@ export function generateInlineSpecifierString(
         tempNode.style.removeProperty(removeStyle[i].name);
       }
     }
+
+    if (link !== undefined && link !== REMOVE_LINK) {
+      tempNode.setAttribute(LINK_ATTRIBUTE, link);
+    } else if (link === undefined || link === REMOVE_LINK) {
+      tempNode.removeAttribute(LINK_ATTRIBUTE);
+    }
+
     inlineSpecifierString = inlineSpecifierString.concat(
-      tempNode.style.cssText.trim().length === 0
+      (tempNode.getAttribute("style") == null ||
+        tempNode.getAttribute("style") === "") &&
+        (link === undefined || link === REMOVE_LINK)
         ? tempNode.innerText
         : tempNode.outerHTML
     );
@@ -353,6 +369,7 @@ export function generateInlineSpecifierString(
  * @param selection
  * @param style
  * @param removeStyle
+ * @param link
  *
  * @description Appends the inline specifiers with styles and metadata.
  *
@@ -363,7 +380,8 @@ export function generateInlineSpecifiers(
   targetElement: HTMLElement,
   selection: Selection | null,
   style?: Style[],
-  removeStyle?: Style[]
+  removeStyle?: Style[],
+  link?: string
 ): void {
   if (
     selection === null ||
@@ -402,7 +420,8 @@ export function generateInlineSpecifiers(
           targetElement
         ),
         style,
-        removeStyle
+        removeStyle,
+        link
       );
     }
     if (
@@ -422,7 +441,12 @@ export function generateInlineSpecifiers(
         range.startOffset
       )[0]
         .concat(
-          generateInlineSpecifierString(tempNode.outerHTML, style, removeStyle)
+          generateInlineSpecifierString(
+            tempNode.outerHTML,
+            style,
+            removeStyle,
+            link
+          )
         )
         .concat(
           splitElement(range.endContainer.parentElement, range.endOffset)[1]
@@ -457,7 +481,8 @@ export function generateInlineSpecifiers(
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        removeStyle
+        removeStyle,
+        link
       );
 
       inlineSpecifiers = splitElement(
@@ -493,7 +518,8 @@ export function generateInlineSpecifiers(
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        removeStyle
+        removeStyle,
+        link
       );
 
       inlineSpecifiers = splitElement(
@@ -525,7 +551,8 @@ export function generateInlineSpecifiers(
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        removeStyle
+        removeStyle,
+        link
       );
 
       inlineSpecifiers = generatedInlineStyling.concat(
@@ -552,7 +579,8 @@ export function generateInlineSpecifiers(
           }) + range.endOffset
         ),
         style,
-        removeStyle
+        removeStyle,
+        link
       );
     }
   }
@@ -566,10 +594,12 @@ export function generateInlineSpecifiers(
   placeholderNode.insertAdjacentHTML("afterend", inlineSpecifiers);
   targetElement.removeChild(placeholderNode);
   selection.removeAllRanges();
-  const spanNodes = targetElement.getElementsByTagName("span");
+  const spanNodes = targetElement.querySelectorAll(
+    `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`
+  );
   for (let i = 0; i < spanNodes.length; i++) {
-    if (spanNodes[i].innerText.trim().length === 0) {
-      spanNodes[i].parentNode?.removeChild(spanNodes[i]);
+    if (spanNodes[i].textContent?.length === 0) {
+      spanNodes[i].remove();
     }
   }
 }
@@ -583,7 +613,7 @@ export function generateInlineSpecifiers(
  * @author Mihir Paldhikar
  */
 
-export default function hasInlineSpecifierStyle(style: Style[]): boolean {
+export function hasInlineSpecifierStyle(style: Style[]): boolean {
   const selection = window.getSelection();
   if (selection === null) return false;
   const range = selection.getRangeAt(0);
@@ -609,10 +639,42 @@ export default function hasInlineSpecifierStyle(style: Style[]): boolean {
 }
 
 /**
+ * @function inlineSpecifierLink
+ *
+ * @description Returns link of the inline specifier has a link embedded.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function inlineSpecifierLink(): string | undefined {
+  const selection = window.getSelection();
+  if (selection === null) return undefined;
+  const range = selection.getRangeAt(0);
+  const startContainerParent = range.startContainer.parentElement;
+  const endContainerParent = range.endContainer.parentElement;
+
+  if (
+    startContainerParent != null &&
+    endContainerParent != null &&
+    startContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
+    endContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
+    startContainerParent.getAttribute(LINK_ATTRIBUTE) != null &&
+    endContainerParent.getAttribute(LINK_ATTRIBUTE) != null &&
+    startContainerParent.getAttribute(LINK_ATTRIBUTE) ===
+      endContainerParent.getAttribute(LINK_ATTRIBUTE)
+  ) {
+    return startContainerParent.getAttribute(LINK_ATTRIBUTE) as string;
+  }
+
+  return undefined;
+}
+
+/**
  * function manageInlineSpecifiers
  *
  * @param targetNode
  * @param style
+ * @param link
  *
  * @description Manages the Inline Specifiers.
  *
@@ -621,11 +683,24 @@ export default function hasInlineSpecifierStyle(style: Style[]): boolean {
 
 export function manageInlineSpecifiers(
   targetNode: HTMLElement,
-  style: Style[]
+  style: Style[],
+  link?: string
 ): void {
   if (hasInlineSpecifierStyle(style)) {
-    generateInlineSpecifiers(targetNode, window.getSelection(), [], style);
+    generateInlineSpecifiers(
+      targetNode,
+      window.getSelection(),
+      [],
+      style,
+      link ?? inlineSpecifierLink()
+    );
   } else {
-    generateInlineSpecifiers(targetNode, window.getSelection(), style);
+    generateInlineSpecifiers(
+      targetNode,
+      window.getSelection(),
+      style,
+      [],
+      link ?? inlineSpecifierLink()
+    );
   }
 }

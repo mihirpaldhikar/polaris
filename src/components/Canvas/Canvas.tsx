@@ -25,7 +25,12 @@ import {
   setNodeStyle,
 } from "../../utils";
 import { type Content } from "../../types";
-import { BLOCK_NODE } from "../../constants";
+import {
+  BLOCK_NODE,
+  INLINE_SPECIFIER_NODE,
+  LINK_ATTRIBUTE,
+  NODE_TYPE,
+} from "../../constants";
 
 interface CanvasProps {
   editable: boolean;
@@ -248,6 +253,30 @@ export default function Canvas({
     }
   }
 
+  function clickHandler(event: MouseEvent): void {
+    if (event.ctrlKey) {
+      const nodeAtMouseCoordinates = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      );
+
+      if (nodeAtMouseCoordinates == null) return;
+
+      if (
+        nodeAtMouseCoordinates.getAttribute(NODE_TYPE) ===
+          INLINE_SPECIFIER_NODE &&
+        nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) != null
+      ) {
+        setTimeout(() => {
+          window.open(
+            nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) as string,
+            "_blank"
+          );
+        }, 10);
+      }
+    }
+  }
+
   if (block.type === "text") {
     return createElement(createNodeFromRole(block.role), {
       "data-type": BLOCK_NODE,
@@ -274,6 +303,7 @@ export default function Canvas({
       ),
       onInput: notifyChange,
       onKeyDown: keyHandler,
+      onClick: clickHandler,
     });
   }
 
