@@ -16,9 +16,16 @@ import { createRef, type JSX, useState } from "react";
 import { Canvas } from "../Canvas";
 import { type Block } from "../../interfaces";
 import {
+  areInlineSpecifierEqual,
   generateBlockId,
   generateRefreshKey,
+  getBlockNode,
+  getNodeAt,
+  isInlineSpecifierNode,
+  joinElements,
+  nodeOffset,
   setCaretOffset,
+  splitElement,
 } from "../../utils";
 import { type Content } from "../../types";
 
@@ -36,7 +43,7 @@ interface ComposerProps {
   onDelete: (
     block: Block,
     previousBlock: Block,
-    nodeIndex: number,
+    childNodeIndex: number,
     caretOffset: number
   ) => void;
   onPaste: (
@@ -76,6 +83,17 @@ export default function Composer({
   const [refreshKey, setRefreshKey] = useState(generateRefreshKey());
 
   function enterHandler(splitContent: boolean, caretOffset: number): void {
+    const blockNode = getBlockNode(block.id) as HTMLElement;
+    const nodeAtCaretOffset = getNodeAt(blockNode, caretOffset);
+    const caretNodeOffset = nodeOffset(blockNode, nodeAtCaretOffset);
+    const caretNodeOffsetWithInnerHTML = nodeOffset(
+      blockNode,
+      nodeAtCaretOffset,
+      {
+        includeInnerHTML: true,
+      }
+    );
+
     const newBlock: Block = {
       id: generateBlockId(),
       reference: createRef<HTMLElement>(),
@@ -85,15 +103,52 @@ export default function Composer({
       style: [],
     };
 
-    if (splitContent) {
-      const tempNode = document.createElement("div");
-      tempNode.innerHTML = block.content;
+    let currentBlockContent: string = "";
+    let newBlockContent: string = "";
 
-      const currentBlockContent: string = tempNode.innerText.substring(
-        0,
-        caretOffset
-      );
-      const newBlockContent: string = tempNode.innerText.substring(caretOffset);
+    if (splitContent) {
+      if (
+        blockNode.innerHTML.substring(0, caretOffset) ===
+        blockNode.innerText.substring(0, caretOffset)
+      ) {
+        currentBlockContent = blockNode.innerHTML.substring(0, caretOffset);
+        newBlockContent = blockNode.innerHTML.substring(caretOffset);
+      } else {
+        const htmlFragment = blockNode.innerHTML.substring(
+          0,
+          caretNodeOffsetWithInnerHTML
+        );
+
+        if (isInlineSpecifierNode(nodeAtCaretOffset)) {
+          const caretNodeFragments = splitElement(
+            nodeAtCaretOffset as HTMLElement,
+            caretOffset - caretNodeOffset
+          );
+          currentBlockContent = htmlFragment.concat(caretNodeFragments[0]);
+          newBlockContent = caretNodeFragments[1].concat(
+            blockNode.innerHTML.substring(
+              htmlFragment.length +
+                (nodeAtCaretOffset as HTMLElement).outerHTML.length
+            )
+          );
+        } else {
+          currentBlockContent = htmlFragment.concat(
+            (nodeAtCaretOffset.textContent as string).substring(
+              0,
+              caretOffset - caretNodeOffset
+            )
+          );
+
+          newBlockContent = (nodeAtCaretOffset.textContent as string)
+            .substring(caretOffset - caretNodeOffset)
+            .concat(
+              blockNode.innerHTML.substring(
+                htmlFragment.length +
+                  (nodeAtCaretOffset.textContent as string).length
+              )
+            );
+        }
+      }
 
       block.content = currentBlockContent;
       newBlock.content = newBlockContent;
@@ -106,31 +161,60 @@ export default function Composer({
   }
 
   function deleteHandler(block: Block, joinContent: boolean): void {
-    if (previousBlock != null) {
-      const previousNode = previousBlock.reference?.current as HTMLElement;
+    if (previousBlock === null) return;
+    const currentNode = getBlockNode(block.id) as HTMLElement;
+    const previousNode = previousBlock.reference?.current as HTMLElement;
 
-      if (joinContent) {
-        previousBlock.id = generateBlockId();
+    if (joinContent) {
+      previousBlock.id = generateBlockId();
+
+      if (
+        isInlineSpecifierNode(previousNode.lastChild as Node) &&
+        isInlineSpecifierNode(currentNode.firstChild as Node) &&
+        areInlineSpecifierEqual(
+          previousNode.lastChild as HTMLElement,
+          currentNode.firstChild as HTMLElement
+        )
+      ) {
+        previousBlock.content = previousNode.innerHTML
+          .substring(
+            0,
+            nodeOffset(previousNode, previousNode.lastChild as Node, {
+              includeInnerHTML: true,
+            })
+          )
+          .concat(
+            joinElements(
+              previousNode.lastChild as HTMLElement,
+              currentNode.firstChild as HTMLElement
+            )
+          )
+          .concat(
+            currentNode.innerHTML.substring(
+              (currentNode.firstChild as HTMLElement).outerHTML.length
+            )
+          );
+      } else {
         previousBlock.content = previousBlock.content.concat(block.content);
       }
-
-      const childNodes = Array.from(previousNode.childNodes);
-
-      const caretOffset: number =
-        previousNode.lastChild != null
-          ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
-            ? 1
-            : previousNode.lastChild.textContent?.length ??
-              previousNode.innerText.length
-          : previousNode.innerText.length;
-
-      onDelete(
-        block,
-        previousBlock,
-        childNodes.indexOf(previousNode.lastChild ?? previousNode),
-        caretOffset
-      );
     }
+
+    const computedCaretOffset =
+      previousNode.lastChild != null
+        ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
+          ? (previousNode.lastChild.textContent as string).length
+          : previousNode.lastChild.textContent?.length ??
+            previousNode.innerText.length
+        : previousNode.innerText.length;
+
+    const childNodes: ChildNode[] = Array.from(previousNode.childNodes);
+
+    onDelete(
+      block,
+      previousBlock,
+      childNodes.indexOf(previousNode.lastChild as ChildNode),
+      computedCaretOffset
+    );
   }
 
   function navigationHandler(

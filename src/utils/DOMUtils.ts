@@ -209,6 +209,27 @@ export function splitElement(
 
 /**
  *
+ * @function splitElement
+ *
+ * @param parentElement
+ * @param targetElement
+ *
+ * @description Splits the element from the offset.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function joinElements(
+  parentElement: HTMLElement,
+  targetElement: HTMLElement
+): string {
+  const tempElement = parentElement.cloneNode(true) as HTMLElement;
+  tempElement.innerHTML = tempElement.innerHTML.concat(targetElement.innerHTML);
+  return tempElement.outerHTML;
+}
+
+/**
+ *
  * @function generateHTMLFragment
  *
  * @param startNode
@@ -594,14 +615,7 @@ export function generateInlineSpecifiers(
   placeholderNode.insertAdjacentHTML("afterend", inlineSpecifiers);
   targetElement.removeChild(placeholderNode);
   selection.removeAllRanges();
-  const spanNodes = targetElement.querySelectorAll(
-    `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`
-  );
-  for (let i = 0; i < spanNodes.length; i++) {
-    if (spanNodes[i].textContent?.length === 0) {
-      spanNodes[i].remove();
-    }
-  }
+  removeEmptyInlineSpecifiers(targetElement);
 }
 
 /**
@@ -646,7 +660,13 @@ export function hasInlineSpecifierStyle(style: Style[]): boolean {
  * @author Mihir Paldhikar
  */
 
-export function inlineSpecifierLink(): string | undefined {
+export function inlineSpecifierLink(
+  specifier?: HTMLElement
+): string | undefined {
+  if (specifier !== undefined) {
+    return specifier.getAttribute(LINK_ATTRIBUTE) as string;
+  }
+
   const selection = window.getSelection();
   if (selection === null) return undefined;
   const range = selection.getRangeAt(0);
@@ -703,4 +723,49 @@ export function manageInlineSpecifiers(
       link ?? inlineSpecifierLink()
     );
   }
+}
+
+export function getNodeAt(parentNode: Node, offset: number): Node {
+  let length: number = 0;
+  let node: Node = parentNode;
+  for (let i = 0; i < parentNode.childNodes.length; i++) {
+    length = length + (parentNode.childNodes[i].textContent?.length as number);
+    if (offset - length <= 0) {
+      node = parentNode.childNodes[i];
+      break;
+    }
+  }
+  return node;
+}
+
+export function isInlineSpecifierNode(node: Node): boolean {
+  return (
+    node.nodeType === Node.ELEMENT_NODE &&
+    (node as HTMLElement).getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE
+  );
+}
+
+export function inlineSpecifierStyle(specifier: HTMLElement): string {
+  return specifier.style.cssText;
+}
+
+export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
+  const inlineSpecifierNodes = parentElement.querySelectorAll(
+    `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`
+  );
+  for (let i = 0; i < inlineSpecifierNodes.length; i++) {
+    if (inlineSpecifierNodes[i].textContent?.length === 0) {
+      inlineSpecifierNodes[i].remove();
+    }
+  }
+}
+
+export function areInlineSpecifierEqual(
+  first: HTMLElement,
+  second: HTMLElement
+): boolean {
+  return (
+    inlineSpecifierStyle(first) === inlineSpecifierStyle(second) &&
+    inlineSpecifierLink(first) === inlineSpecifierLink(second)
+  );
 }

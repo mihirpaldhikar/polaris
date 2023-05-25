@@ -19,6 +19,7 @@ import {
   generateBlockId,
   getBlockNode,
   normalizeContent,
+  removeEmptyInlineSpecifiers,
   setCaretOffset,
 } from "../../utils";
 import { type Content } from "../../types";
@@ -65,7 +66,7 @@ export default function Workspace({
       const node = getBlockNode(nodeId);
 
       if (node != null) {
-        const jumpNode: Node =
+        const computedNode: Node =
           nodeIndex !== undefined &&
           node.childNodes[nodeIndex] !== undefined &&
           fromStart === undefined
@@ -74,7 +75,13 @@ export default function Workspace({
             ? node.firstChild ?? node
             : node.lastChild ?? node;
 
+        const jumpNode =
+          computedNode.nodeType === Node.ELEMENT_NODE
+            ? (computedNode.firstChild as Node) ?? node
+            : computedNode;
+
         setCaretOffset(jumpNode, caretOffset);
+        removeEmptyInlineSpecifiers(node);
       }
     }
   }, [focusedNode]);
