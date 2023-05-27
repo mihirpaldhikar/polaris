@@ -56,24 +56,19 @@ export default function Workspace({
   const [focusedNode, setFocusedNode] = useState<{
     nodeId: string;
     caretOffset: number;
-    fromStart?: boolean;
     nodeIndex?: number;
   } | null>(null);
 
   useEffect(() => {
     if (focusedNode != null) {
-      const { nodeId, nodeIndex, caretOffset, fromStart } = focusedNode;
+      const { nodeId, nodeIndex, caretOffset } = focusedNode;
       const node = getBlockNode(nodeId);
 
       if (node != null) {
         const computedNode: Node =
-          nodeIndex !== undefined &&
-          node.childNodes[nodeIndex] !== undefined &&
-          fromStart === undefined
+          nodeIndex !== undefined && node.childNodes[nodeIndex] !== undefined
             ? node.childNodes[nodeIndex]
-            : fromStart !== undefined && fromStart
-            ? node.firstChild ?? node
-            : node.lastChild ?? node;
+            : node;
 
         const jumpNode =
           computedNode.nodeType === Node.ELEMENT_NODE
@@ -108,7 +103,7 @@ export default function Workspace({
     setFocusedNode({
       nodeId: newBlock.id,
       caretOffset: 0,
-      fromStart: true,
+      nodeIndex: 0,
     });
   }
 

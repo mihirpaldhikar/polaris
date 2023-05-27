@@ -169,8 +169,10 @@ export default function Composer({
       previousBlock.id = generateBlockId();
 
       if (
-        isInlineSpecifierNode(previousNode.lastChild as Node) &&
-        isInlineSpecifierNode(currentNode.firstChild as Node) &&
+        previousNode.lastChild != null &&
+        currentNode.firstChild != null &&
+        isInlineSpecifierNode(previousNode.lastChild) &&
+        isInlineSpecifierNode(currentNode.firstChild) &&
         areInlineSpecifierEqual(
           previousNode.lastChild as HTMLElement,
           currentNode.firstChild as HTMLElement
@@ -212,7 +214,9 @@ export default function Composer({
     onDelete(
       block,
       previousBlock,
-      childNodes.indexOf(previousNode.lastChild as ChildNode),
+      previousNode.lastChild == null
+        ? -1
+        : childNodes.indexOf(previousNode.lastChild),
       computedCaretOffset
     );
   }
