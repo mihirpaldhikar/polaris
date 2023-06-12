@@ -12,7 +12,7 @@
  * All Rights Reserved.
  */
 
-import { createRef, type JSX, useEffect, useState } from "react";
+import { createRef, type JSX, useCallback, useEffect, useState } from "react";
 import { Composer } from "../Composer";
 import { type Block, type Document } from "../../interfaces";
 import {
@@ -27,6 +27,8 @@ import { type Content } from "../../types";
 interface WorkspaceProps {
   editable: boolean;
   document: Document;
+  onSave?: (document: Document) => void;
+  autoSaveTimeout?: number;
 }
 
 /**
@@ -34,6 +36,8 @@ interface WorkspaceProps {
  *
  * @param editable
  * @param document
+ * @param autoSaveTime
+ * @param onSave
  *
  * @description A Workspace is essentially as Editor which manages all the blocks of the document. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
  *
@@ -43,6 +47,8 @@ interface WorkspaceProps {
 export default function Workspace({
   editable,
   document,
+  autoSaveTimeout,
+  onSave,
 }: WorkspaceProps): JSX.Element {
   const [blocks, updateBlocks] = useState<Block[]>(
     document.blocks.map((block) => {
@@ -58,6 +64,55 @@ export default function Workspace({
     caretOffset: number;
     nodeIndex?: number;
   } | null>(null);
+
+  const keyboardManager = useCallback(
+    (event: KeyboardEvent): void => {
+      switch (event.key.toLowerCase()) {
+        case "s": {
+          if (event.ctrlKey) {
+            event.preventDefault();
+            if (onSave !== undefined) {
+              const blockRef = blocks.map((block) => {
+                return {
+                  ...block,
+                  reference: undefined,
+                };
+              });
+              const documentRef = document;
+              documentRef.blocks = blockRef;
+              onSave(documentRef);
+            }
+          }
+
+          break;
+        }
+      }
+    },
+    [blocks, document, onSave]
+  );
+
+  useEffect(() => {
+    if (editable && autoSaveTimeout !== undefined && onSave !== undefined) {
+      setInterval(() => {
+        const blockRef = blocks.map((block) => {
+          return {
+            ...block,
+            reference: undefined,
+          };
+        });
+        const documentRef = document;
+        documentRef.blocks = blockRef;
+        onSave(documentRef);
+      }, autoSaveTimeout);
+    }
+  }, [autoSaveTimeout, blocks, document, editable, onSave]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", keyboardManager);
+    return () => {
+      window.removeEventListener("keydown", keyboardManager);
+    };
+  }, [keyboardManager]);
 
   useEffect(() => {
     if (focusedNode != null) {
