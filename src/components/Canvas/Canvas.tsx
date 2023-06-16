@@ -21,7 +21,7 @@ import {
   getCaretCoordinates,
   getCaretOffset,
   getNodeSiblings,
-  manageInlineSpecifiers,
+  inlineSpecifierManager,
   setNodeStyle,
 } from "../../utils";
 import { type Content } from "../../types";
@@ -211,7 +211,8 @@ export default function Canvas({
             },
           ];
 
-          manageInlineSpecifiers(blockNode, style);
+          inlineSpecifierManager(blockNode, style);
+
           block.content = blockNode.innerHTML;
           onChange(block);
         }
@@ -227,7 +228,7 @@ export default function Canvas({
             },
           ];
 
-          manageInlineSpecifiers(blockNode, style);
+          inlineSpecifierManager(blockNode, style);
           block.content = blockNode.innerHTML;
           onChange(block);
         }
@@ -244,7 +245,7 @@ export default function Canvas({
             },
           ];
 
-          manageInlineSpecifiers(blockNode, style);
+          inlineSpecifierManager(blockNode, style);
           block.content = blockNode.innerHTML;
           onChange(block);
         }

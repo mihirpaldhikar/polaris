@@ -329,7 +329,6 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
  *
  * @param htmlFragment
  * @param style
- * @param removeStyle
  * @param link
  *
  * @description Creates string of HTML with provided styles and metadata.
@@ -339,8 +338,7 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
 
 export function generateInlineSpecifierString(
   htmlFragment: string,
-  style?: Style[],
-  removeStyle?: Style[],
+  style: Style[],
   link?: string
 ): string {
   const nodeFragments = generateNodesFromHTMLFragment(htmlFragment);
@@ -354,15 +352,11 @@ export function generateInlineSpecifierString(
     tempNode.setAttribute(NODE_TYPE, INLINE_SPECIFIER_NODE);
     tempNode.innerText = nodeFragments[i].textContent as string;
 
-    if (style !== undefined) {
-      for (let i = 0; i < style.length; i++) {
+    for (let i = 0; i < style.length; i++) {
+      if (style[i].enabled ?? false) {
         tempNode.style.setProperty(style[i].name, style[i].value);
-      }
-    }
-
-    if (removeStyle !== undefined) {
-      for (let i = 0; i < removeStyle.length; i++) {
-        tempNode.style.removeProperty(removeStyle[i].name);
+      } else {
+        tempNode.style.removeProperty(style[i].name);
       }
     }
 
@@ -389,7 +383,6 @@ export function generateInlineSpecifierString(
  * @param targetElement
  * @param selection
  * @param style
- * @param removeStyle
  * @param link
  *
  * @description Appends the inline specifiers with styles and metadata.
@@ -400,8 +393,7 @@ export function generateInlineSpecifierString(
 export function generateInlineSpecifiers(
   targetElement: HTMLElement,
   selection: Selection | null,
-  style?: Style[],
-  removeStyle?: Style[],
+  style: Style[],
   link?: string
 ): void {
   if (
@@ -441,7 +433,6 @@ export function generateInlineSpecifiers(
           targetElement
         ),
         style,
-        removeStyle,
         link
       );
     }
@@ -461,14 +452,7 @@ export function generateInlineSpecifiers(
         range.startContainer.parentElement,
         range.startOffset
       )[0]
-        .concat(
-          generateInlineSpecifierString(
-            tempNode.outerHTML,
-            style,
-            removeStyle,
-            link
-          )
-        )
+        .concat(generateInlineSpecifierString(tempNode.outerHTML, style, link))
         .concat(
           splitElement(range.endContainer.parentElement, range.endOffset)[1]
         );
@@ -502,7 +486,6 @@ export function generateInlineSpecifiers(
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        removeStyle,
         link
       );
 
@@ -539,7 +522,6 @@ export function generateInlineSpecifiers(
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        removeStyle,
         link
       );
 
@@ -572,7 +554,6 @@ export function generateInlineSpecifiers(
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        removeStyle,
         link
       );
 
@@ -600,7 +581,6 @@ export function generateInlineSpecifiers(
           }) + range.endOffset
         ),
         style,
-        removeStyle,
         link
       );
     }
@@ -619,37 +599,31 @@ export function generateInlineSpecifiers(
 }
 
 /**
- * @function hasInlineSpecifierStyle
+ * @function elementContainsStyle
+ * @param element
  * @param style
  *
- * @description Checks of the selected text has inline specifier styles.
+ * @description Checks of the element has inline specifier styles.
  *
  * @author Mihir Paldhikar
  */
 
-export function hasInlineSpecifierStyle(style: Style[]): boolean {
-  const selection = window.getSelection();
-  if (selection === null) return false;
-  const range = selection.getRangeAt(0);
-  const startContainerParent = range.startContainer.parentElement;
-  const endContainerParent = range.endContainer.parentElement;
-
-  let styleGroup: string = "";
-
-  for (let i = 0; i < style.length; i++) {
-    styleGroup = styleGroup.concat(`${style[i].name}:${style[i].value};`);
+export function elementContainsStyle(
+  element: HTMLElement,
+  style: Style[]
+): boolean {
+  if (!isInlineSpecifierNode(element)) {
+    return false;
   }
+  const startNodeStyleArray = cssTextToStyle(element.style.cssText).map((s) => {
+    return `${s.name}:${s.value}`;
+  });
 
-  return (
-    startContainerParent != null &&
-    endContainerParent != null &&
-    startContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
-    endContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
-    startContainerParent.style.cssText
-      .replaceAll(" ", "")
-      .includes(styleGroup) &&
-    endContainerParent.style.cssText.replaceAll(" ", "").includes(styleGroup)
-  );
+  const sty = style.map((s) => {
+    return `${s.name}:${s.value}`;
+  });
+
+  return sty.every((k) => startNodeStyleArray.includes(k));
 }
 
 /**
@@ -663,66 +637,28 @@ export function hasInlineSpecifierStyle(style: Style[]): boolean {
 export function inlineSpecifierLink(
   specifier?: HTMLElement
 ): string | undefined {
-  if (specifier !== undefined) {
-    return specifier.getAttribute(LINK_ATTRIBUTE) as string;
+  if (specifier !== undefined && isInlineSpecifierNode(specifier)) {
+    return specifier.getAttribute(LINK_ATTRIBUTE) ?? undefined;
   }
-
   const selection = window.getSelection();
-  if (selection === null) return undefined;
+  if (selection == null || selection.toString() === "") return undefined;
+
   const range = selection.getRangeAt(0);
-  const startContainerParent = range.startContainer.parentElement;
-  const endContainerParent = range.endContainer.parentElement;
+  const startContainer = range.startContainer.parentElement as HTMLElement;
+  const endContainer = range.endContainer.parentElement as HTMLElement;
 
   if (
-    startContainerParent != null &&
-    endContainerParent != null &&
-    startContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
-    endContainerParent.getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE &&
-    startContainerParent.getAttribute(LINK_ATTRIBUTE) != null &&
-    endContainerParent.getAttribute(LINK_ATTRIBUTE) != null &&
-    startContainerParent.getAttribute(LINK_ATTRIBUTE) ===
-      endContainerParent.getAttribute(LINK_ATTRIBUTE)
+    !isInlineSpecifierNode(startContainer) ||
+    !isInlineSpecifierNode(endContainer) ||
+    startContainer.getAttribute(LINK_ATTRIBUTE) == null ||
+    endContainer.getAttribute(LINK_ATTRIBUTE) == null ||
+    startContainer.getAttribute(LINK_ATTRIBUTE) !==
+      endContainer.getAttribute(LINK_ATTRIBUTE)
   ) {
-    return startContainerParent.getAttribute(LINK_ATTRIBUTE) as string;
+    return undefined;
   }
 
-  return undefined;
-}
-
-/**
- * function manageInlineSpecifiers
- *
- * @param targetNode
- * @param style
- * @param link
- *
- * @description Manages the Inline Specifiers.
- *
- * @author Mihir Paldhikar
- */
-
-export function manageInlineSpecifiers(
-  targetNode: HTMLElement,
-  style: Style[],
-  link?: string
-): void {
-  if (hasInlineSpecifierStyle(style)) {
-    generateInlineSpecifiers(
-      targetNode,
-      window.getSelection(),
-      [],
-      style,
-      link ?? inlineSpecifierLink()
-    );
-  } else {
-    generateInlineSpecifiers(
-      targetNode,
-      window.getSelection(),
-      style,
-      [],
-      link ?? inlineSpecifierLink()
-    );
-  }
+  return startContainer.getAttribute(LINK_ATTRIBUTE) as string;
 }
 
 export function getNodeAt(parentNode: Node, offset: number): Node {
@@ -745,10 +681,6 @@ export function isInlineSpecifierNode(node: Node): boolean {
   );
 }
 
-export function inlineSpecifierStyle(specifier: HTMLElement): string {
-  return specifier.style.cssText;
-}
-
 export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
   const inlineSpecifierNodes = parentElement.querySelectorAll(
     `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`
@@ -765,7 +697,93 @@ export function areInlineSpecifierEqual(
   second: HTMLElement
 ): boolean {
   return (
-    inlineSpecifierStyle(first) === inlineSpecifierStyle(second) &&
+    first.style.cssText === second.style.cssText &&
     inlineSpecifierLink(first) === inlineSpecifierLink(second)
   );
+}
+
+export function cssTextToStyle(cssText: string): Style[] {
+  const cssArray = cssText.split(";");
+  cssArray.pop();
+  return cssArray.map((cssStyle) => {
+    return {
+      name: cssStyle.split(":")[0].trim(),
+      value: cssStyle.split(":")[1].trim(),
+      enabled: true,
+    } satisfies Style;
+  });
+}
+
+export function inlineSpecifierManager(
+  targetElement: HTMLElement,
+  style: Style[],
+  link?: string
+): void {
+  const selection = window.getSelection();
+
+  if (selection == null || selection.toString() === "") return;
+
+  const range = selection.getRangeAt(0);
+
+  const startContainerParent = range.startContainer.parentElement;
+  const endContainerParent = range.endContainer.parentElement;
+
+  if (startContainerParent == null || endContainerParent == null) return;
+
+  if (
+    elementContainsStyle(startContainerParent, style) &&
+    elementContainsStyle(endContainerParent, style)
+  ) {
+    style = style.map((sty) => {
+      return {
+        ...sty,
+        enabled: false,
+      };
+    });
+  } else {
+    style = style.map((sty) => {
+      return {
+        ...sty,
+        enabled: true,
+      };
+    });
+  }
+
+  if (
+    inlineSpecifierLink(startContainerParent) ===
+    inlineSpecifierLink(endContainerParent)
+  ) {
+    if (
+      link === undefined &&
+      inlineSpecifierLink(startContainerParent) !== undefined
+    ) {
+      link = inlineSpecifierLink(startContainerParent);
+    } else if (
+      link === undefined &&
+      inlineSpecifierLink(startContainerParent) === undefined
+    ) {
+      link = undefined;
+    } else if (
+      link !== undefined &&
+      link === REMOVE_LINK &&
+      (inlineSpecifierLink(startContainerParent) === undefined ||
+        inlineSpecifierLink(startContainerParent) !== undefined)
+    ) {
+      link = undefined;
+    }
+  }
+
+  if (link !== undefined) {
+    style.push(
+      ...[
+        {
+          name: "text-decoration",
+          value: "underline",
+          enabled: true,
+        },
+      ]
+    );
+  }
+
+  generateInlineSpecifiers(targetElement, selection, style, link);
 }
