@@ -51,6 +51,7 @@ interface ComposerProps {
     content: Content | Content[],
     caretOffset: number
   ) => void;
+  onSelect: (block: Block) => void;
 }
 
 /**
@@ -65,6 +66,7 @@ interface ComposerProps {
  * @param onDelete
  * @param onPaste
  *
+ * @param onSelect
  * @description Composer is responsible for communicating with sibling blocks and handling events from the Canvas.
  *
  * @author Mihir Paldhikar
@@ -79,6 +81,7 @@ export default function Composer({
   onCreate,
   onDelete,
   onPaste,
+  onSelect,
 }: ComposerProps): JSX.Element {
   const [refreshKey, setRefreshKey] = useState(generateRefreshKey());
 
@@ -282,6 +285,7 @@ export default function Composer({
       onDelete={deleteHandler}
       onNavigate={navigationHandler}
       onPaste={onPaste}
+      onSelect={onSelect}
     />
   );
 }

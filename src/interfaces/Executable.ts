@@ -12,10 +12,11 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
+import type Style from "./Style";
 
-export type { Block } from "./interfaces";
-export { generateBlockId } from "./utils";
-export { generateMenuId } from "./utils";
-export type { Document } from "./interfaces";
-export { Workspace } from "./components";
+interface Executable {
+  type: "styleManager" | "linkManager";
+  args: Style[] | string;
+}
+
+export default Executable;

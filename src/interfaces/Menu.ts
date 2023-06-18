@@ -12,10 +12,15 @@
  * All Rights Reserved.
  */
 
-import "./styles/global.css";
+import { type JSX } from "react";
+import { type Executable } from "./index";
 
-export type { Block } from "./interfaces";
-export { generateBlockId } from "./utils";
-export { generateMenuId } from "./utils";
-export type { Document } from "./interfaces";
-export { Workspace } from "./components";
+interface Menu {
+  id: string;
+  name: string;
+  icon?: JSX.Element;
+  active?: boolean;
+  execute: Executable;
+}
+
+export default Menu;

@@ -44,6 +44,7 @@ interface CanvasProps {
     content: Content | Content[],
     caretOffset: number
   ) => void;
+  onSelect: (block: Block) => void;
 }
 
 /**
@@ -57,6 +58,7 @@ interface CanvasProps {
  * @param onNavigate
  * @param onPaste
  *
+ * @param onSelect
  * @returns JSX.Element
  *
  * @description Canvas is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
@@ -72,6 +74,7 @@ export default function Canvas({
   onDelete,
   onNavigate,
   onPaste,
+  onSelect,
 }: CanvasProps): JSX.Element {
   /**
    * @function notifyChange
@@ -305,6 +308,9 @@ export default function Canvas({
       onInput: notifyChange,
       onKeyDown: keyHandler,
       onClick: clickHandler,
+      onSelect: () => {
+        onSelect(block);
+      },
     });
   }
 

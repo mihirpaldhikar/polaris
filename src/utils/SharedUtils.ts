@@ -37,3 +37,7 @@ export function generateRandomString(length: number): string {
   }
   return randomString;
 }
+
+export function generateMenuId(): string {
+  return generateRandomString(10);
+}
