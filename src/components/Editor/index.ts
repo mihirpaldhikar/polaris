@@ -12,4 +12,4 @@
  * All Rights Reserved.
  */
 
-export { default as Workspace } from "./Workspace";
+export { default as Editor } from "./Editor";

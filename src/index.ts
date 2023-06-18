@@ -18,4 +18,4 @@ export type { Block } from "./interfaces";
 export { generateBlockId } from "./utils";
 export { generateMenuId } from "./utils";
 export type { Document } from "./interfaces";
-export { Workspace } from "./components";
+export { Editor } from "./components";

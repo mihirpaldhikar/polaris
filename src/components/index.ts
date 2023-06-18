@@ -14,4 +14,4 @@
 
 export { Canvas } from "./Canvas";
 export { Composer } from "./Composer";
-export { Workspace } from "./Workspace";
+export { Editor } from "./Editor";

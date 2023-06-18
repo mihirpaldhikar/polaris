@@ -53,7 +53,7 @@ interface WorkspaceProps {
 }
 
 /**
- * @function Workspace
+ * @function Editor
  *
  * @param editable
  * @param document
@@ -66,7 +66,7 @@ interface WorkspaceProps {
  * @author Mihir Paldhikar
  */
 
-export default function Workspace({
+export default function Editor({
   editable,
   document,
   autoSaveTimeout,
