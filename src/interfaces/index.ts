@@ -19,3 +19,4 @@ export type { default as Blob } from "./Blob";
 export type { default as Siblings } from "./Siblings";
 export type { default as Menu } from "./Menu";
 export type { default as Executable } from "./Executable";
+export type { default as InputArgs } from "./InputArgs";

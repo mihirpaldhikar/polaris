@@ -13,10 +13,11 @@
  */
 
 import type Style from "./Style";
+import type InputArgs from "./InputArgs";
 
 interface Executable {
-  type: "styleManager" | "linkManager";
-  args: Style[] | string;
+  type: "styleManager" | "linkManager" | "userInput";
+  args: Style[] | string | InputArgs;
 }
 
 export default Executable;

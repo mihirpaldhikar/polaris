@@ -13,13 +13,22 @@
  */
 
 import { type JSX } from "react";
-import { type Coordinates, type Executable, type Menu } from "../../interfaces";
+import {
+  type Coordinates,
+  type Executable,
+  type InputArgs,
+  type Menu,
+  type Style,
+} from "../../interfaces";
 import { conditionalClassName } from "../../utils";
+import { createRoot } from "react-dom/client";
+import { InputDialog } from "../InputDialog";
 
 const ACTION_BUTTON_WIDTH: number = 28;
 const ACTION_MENU_PADDING: number = 42;
 
 interface SelectionMenuProps {
+  blobId: string;
   coordinates: Coordinates;
   menus: Menu[];
   onMenuSelected: (executable: Executable) => void;
@@ -27,6 +36,7 @@ interface SelectionMenuProps {
 }
 
 export default function SelectionMenu({
+  blobId,
   coordinates,
   menus,
   onMenuSelected,
@@ -66,7 +76,62 @@ export default function SelectionMenu({
             key={menu.id}
             title={menu.name}
             onClick={() => {
-              onMenuSelected(menu.execute);
+              if (menu.execute.type !== "userInput") {
+                onMenuSelected(menu.execute);
+              } else {
+                const editorNode = window.document.getElementById(
+                  `editor-${blobId}`
+                );
+                const dialogNode = document.getElementById(`dialog-${blobId}`);
+                if (dialogNode == null || editorNode == null) return;
+
+                const dialogRoot = createRoot(dialogNode);
+
+                dialogRoot.render(
+                  <InputDialog
+                    coordinates={coordinates}
+                    inputArgs={menu.execute.args as InputArgs}
+                    onClose={() => {
+                      dialogRoot.unmount();
+                    }}
+                    onConfirm={(data, remove) => {
+                      const inputArgs = menu.execute.args as InputArgs;
+                      switch (inputArgs.executionTypeAfterInput) {
+                        case "linkManager": {
+                          onMenuSelected({
+                            type: "linkManager",
+                            args: data,
+                          });
+                          break;
+                        }
+                        case "styleManager": {
+                          const style: Style[] = [
+                            {
+                              name: (inputArgs.initialPayload as Style).name,
+                              value: `${data}${inputArgs.unit ?? ""}`,
+                              enabled: !(remove === true),
+                            },
+                          ];
+                          onMenuSelected({
+                            type: "styleManager",
+                            args: style,
+                          });
+                          break;
+                        }
+                      }
+                    }}
+                  />
+                );
+                editorNode.addEventListener(
+                  "mousedown",
+                  () => {
+                    dialogRoot.unmount();
+                  },
+                  {
+                    once: true,
+                  }
+                );
+              }
               onClose();
             }}
           >

@@ -34,6 +34,7 @@ import {
   generateMenuId,
   getBlockNode,
   getCaretCoordinates,
+  inlineSpecifierLink,
   inlineSpecifierManager,
   normalizeContent,
   removeEmptyInlineSpecifiers,
@@ -42,7 +43,14 @@ import {
 import { type Content } from "../../types";
 import { createRoot } from "react-dom/client";
 import { SelectionMenu } from "../SelectionMenu";
-import { BoldIcon, ItalicIcon, UnderlineIcon } from "../../icons";
+import {
+  BoldIcon,
+  ItalicIcon,
+  LinkIcon,
+  TextSizeIcon,
+  UnderlineIcon,
+} from "../../icons";
+import { REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
 interface WorkspaceProps {
   editable: boolean;
@@ -270,15 +278,13 @@ export default function Editor({
 
     const blockNode = getBlockNode(block.id);
     const popupNode = window.document.getElementById(`popup-${blob.id}`);
-    const workspaceNode = window.document.getElementById(
-      `workspace-${blob.id}`
-    );
+    const editorNode = window.document.getElementById(`editor-${blob.id}`);
 
     if (
       selection == null ||
       blockNode == null ||
       popupNode == null ||
-      workspaceNode == null ||
+      editorNode == null ||
       selection.toString() === ""
     ) {
       return;
@@ -345,6 +351,43 @@ export default function Editor({
           ],
         },
       },
+      {
+        id: generateMenuId(),
+        name: "Link",
+        icon: <LinkIcon />,
+        execute: {
+          type: "userInput",
+          args: {
+            hint: "link..",
+            type: "text",
+            executionTypeAfterInput: "linkManager",
+            initialPayload: inlineSpecifierLink() ?? "",
+            payloadIfRemovedClicked: REMOVE_LINK,
+            validStringRegExp:
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)/,
+          },
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Text Size",
+        icon: <TextSizeIcon />,
+        execute: {
+          type: "userInput",
+          args: {
+            hint: "size..",
+            type: "number",
+            unit: "px",
+            executionTypeAfterInput: "styleManager",
+            initialPayload: {
+              name: "font-size",
+              value: "",
+            },
+            payloadIfRemovedClicked: REMOVE_STYLE,
+            validStringRegExp: /^[0-9]*$/,
+          },
+        },
+      },
     ];
 
     if (selectionMenu !== undefined && selectionMenu.length !== 0) {
@@ -364,6 +407,7 @@ export default function Editor({
 
     popupRoot.render(
       <SelectionMenu
+        blobId={blob.id}
         coordinates={selectionMenuCoordinates}
         menus={defaultSelectionMenu}
         onClose={() => {
@@ -377,13 +421,20 @@ export default function Editor({
               inlineSpecifierManager(blockNode, executable.args as Style[]);
               block.content = blockNode.innerHTML;
               changeHandler(block);
+              break;
+            }
+            case "linkManager": {
+              inlineSpecifierManager(blockNode, [], executable.args as string);
+              block.content = blockNode.innerHTML;
+              changeHandler(block);
+              break;
             }
           }
         }}
       />
     );
 
-    workspaceNode.addEventListener(
+    editorNode.addEventListener(
       "keydown",
       () => {
         selection.removeAllRanges();
@@ -393,7 +444,7 @@ export default function Editor({
         once: true,
       }
     );
-    workspaceNode.addEventListener(
+    editorNode.addEventListener(
       "mousedown",
       () => {
         selection.removeAllRanges();
@@ -410,7 +461,7 @@ export default function Editor({
       <div id={`popup-${blob.id}`}></div>
       <div id={`dialog-${blob.id}`}></div>
       <div
-        id={`workspace-${blob.id}`}
+        id={`editor-${blob.id}`}
         className={"min-h-screen w-full px-2 pb-60"}
       >
         {contents.map((block, index) => {

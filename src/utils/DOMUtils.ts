@@ -737,14 +737,14 @@ export function inlineSpecifierManager(
     style = style.map((sty) => {
       return {
         ...sty,
-        enabled: false,
+        enabled: sty.enabled ?? false,
       };
     });
   } else {
     style = style.map((sty) => {
       return {
         ...sty,
-        enabled: true,
+        enabled: sty.enabled ?? true,
       };
     });
   }
@@ -773,17 +773,15 @@ export function inlineSpecifierManager(
     }
   }
 
-  if (link !== undefined) {
-    style.push(
-      ...[
-        {
-          name: "text-decoration",
-          value: "underline",
-          enabled: true,
-        },
-      ]
-    );
-  }
+  style.push(
+    ...[
+      {
+        name: "text-decoration",
+        value: "underline",
+        enabled: link !== undefined,
+      },
+    ]
+  );
 
   generateInlineSpecifiers(targetElement, selection, style, link);
 }

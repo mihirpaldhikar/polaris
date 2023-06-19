@@ -12,10 +12,16 @@
  * All Rights Reserved.
  */
 
-export const NODE_TYPE = "data-type";
-export const BLOCK_NODE = "block";
-export const INLINE_SPECIFIER_NODE = "inline-specifier";
-export const LINK_ATTRIBUTE = "data-link";
+import type Style from "./Style";
 
-export const REMOVE_LINK = "polaris://remove-link";
-export const REMOVE_STYLE = "polaris://remove-style";
+interface InputArgs {
+  hint: string;
+  type: "text" | "number" | "email";
+  executionTypeAfterInput: "styleManager" | "linkManager";
+  validStringRegExp: RegExp;
+  initialPayload: string | Style;
+  unit?: string;
+  payloadIfRemovedClicked?: string;
+}
+
+export default InputArgs;
