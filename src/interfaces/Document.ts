@@ -22,7 +22,7 @@ import type Block from "./Block";
 
 interface Document {
   id: string;
-  blocks: Block[];
+  contents: Block[];
 }
 
 export default Document;

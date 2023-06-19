@@ -73,8 +73,8 @@ export default function Editor({
   selectionMenu,
   onSave,
 }: WorkspaceProps): JSX.Element {
-  const [blocks, updateBlocks] = useState<Block[]>(
-    document.blocks.map((block) => {
+  const [contents, updateContents] = useState<Block[]>(
+    document.contents.map((block) => {
       return {
         ...block,
         reference: createRef<HTMLElement>(),
@@ -95,14 +95,14 @@ export default function Editor({
           if (event.ctrlKey) {
             event.preventDefault();
             if (onSave !== undefined) {
-              const blockRef = blocks.map((block) => {
+              const blockRef = contents.map((block) => {
                 return {
                   ...block,
                   reference: undefined,
                 };
               });
               const documentRef = document;
-              documentRef.blocks = blockRef;
+              documentRef.contents = blockRef;
               onSave(documentRef);
             }
           }
@@ -111,24 +111,24 @@ export default function Editor({
         }
       }
     },
-    [blocks, document, onSave]
+    [contents, document, onSave]
   );
 
   useEffect(() => {
     if (editable && autoSaveTimeout !== undefined && onSave !== undefined) {
       setInterval(() => {
-        const blockRef = blocks.map((block) => {
+        const blockRef = contents.map((block) => {
           return {
             ...block,
             reference: undefined,
           };
         });
         const documentRef = document;
-        documentRef.blocks = blockRef;
+        documentRef.contents = blockRef;
         onSave(documentRef);
       }, autoSaveTimeout);
     }
-  }, [autoSaveTimeout, blocks, document, editable, onSave]);
+  }, [autoSaveTimeout, contents, document, editable, onSave]);
 
   useEffect(() => {
     window.addEventListener("keydown", keyboardManager);
@@ -160,9 +160,9 @@ export default function Editor({
   }, [focusedNode]);
 
   function changeHandler(block: Block): void {
-    const blockIndex: number = blocks.indexOf(block);
-    blocks[blockIndex] = block;
-    updateBlocks(blocks);
+    const blockIndex: number = contents.indexOf(block);
+    contents[blockIndex] = block;
+    updateContents(contents);
   }
 
   function createHandler(
@@ -170,14 +170,14 @@ export default function Editor({
     newBlock: Block,
     position: "above" | "below"
   ): void {
-    const blockIndex = blocks.indexOf(block);
-    blocks[blockIndex] = block;
-    blocks.splice(
+    const blockIndex = contents.indexOf(block);
+    contents[blockIndex] = block;
+    contents.splice(
       position === "below" ? blockIndex + 1 : blockIndex,
       0,
       newBlock
     );
-    updateBlocks(blocks);
+    updateContents(contents);
     setFocusedNode({
       nodeId: newBlock.id,
       caretOffset: 0,
@@ -191,9 +191,9 @@ export default function Editor({
     nodeIndex: number,
     caretOffset: number
   ): void {
-    const blockIndex = blocks.indexOf(block);
-    blocks.splice(blockIndex, 1);
-    updateBlocks(blocks);
+    const blockIndex = contents.indexOf(block);
+    contents.splice(blockIndex, 1);
+    updateContents(contents);
     setFocusedNode({
       nodeId: previousBlock.id,
       caretOffset,
@@ -206,7 +206,7 @@ export default function Editor({
     content: Content | Content[],
     caretOffset: number
   ): void {
-    const blockIndex = blocks.indexOf(block);
+    const blockIndex = contents.indexOf(block);
     block.content = normalizeContent(block.content);
     const contentLengthAfterCaretOffset =
       block.content.substring(caretOffset).length;
@@ -227,8 +227,8 @@ export default function Editor({
               : copiedText,
         };
       });
-      blocks.splice(blockIndex, 1, ...pasteBlocks);
-      updateBlocks(blocks);
+      contents.splice(blockIndex, 1, ...pasteBlocks);
+      updateContents(contents);
 
       const pasteContentLength = normalizeContent(
         pasteBlocks[pasteBlocks.length - 1].content
@@ -244,12 +244,12 @@ export default function Editor({
         caretOffset: computedCaretOffset,
       });
     } else if (block.type === "text" && typeof content === "string") {
-      blocks[blockIndex].content = blocks[blockIndex].content
+      contents[blockIndex].content = contents[blockIndex].content
         .substring(0, caretOffset)
         .concat(content)
-        .concat(blocks[blockIndex].content.substring(caretOffset));
+        .concat(contents[blockIndex].content.substring(caretOffset));
 
-      updateBlocks(blocks);
+      updateContents(contents);
 
       const pasteContentLength = normalizeContent(block.content).length;
 
@@ -413,14 +413,16 @@ export default function Editor({
         id={`workspace-${document.id}`}
         className={"min-h-screen w-full px-2 pb-60"}
       >
-        {blocks.map((block, index) => {
+        {contents.map((block, index) => {
           return (
             <Composer
               key={block.id}
               editable={editable}
-              previousBlock={index !== 0 ? blocks[index - 1] : null}
+              previousBlock={index !== 0 ? contents[index - 1] : null}
               block={block}
-              nextBlock={index !== blocks.length - 1 ? blocks[index + 1] : null}
+              nextBlock={
+                index !== contents.length - 1 ? contents[index + 1] : null
+              }
               onChange={changeHandler}
               onCreate={createHandler}
               onDelete={deletionHandler}
