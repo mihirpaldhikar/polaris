@@ -136,6 +136,7 @@ export default function Canvas({
       }
       case "arrowleft": {
         if (
+          (!event.ctrlKey || !event.shiftKey) &&
           caretOffset === 0 &&
           nodeSiblings.previous !== null &&
           nodeSiblings.previous.getAttribute("data-block-type") === block.type
@@ -148,6 +149,7 @@ export default function Canvas({
       }
       case "arrowright": {
         if (
+          (!event.ctrlKey || !event.shiftKey) &&
           caretOffset === blockNode.innerText.length &&
           nodeSiblings.next !== null &&
           nodeSiblings.next.getAttribute("data-block-type") === block.type
@@ -308,7 +310,7 @@ export default function Canvas({
       onInput: notifyChange,
       onKeyDown: keyHandler,
       onClick: clickHandler,
-      onSelect: () => {
+      onMouseUp: () => {
         onSelect(block);
       },
     });
