@@ -22,9 +22,9 @@ import {
 } from "react";
 import { Composer } from "../Composer";
 import {
+  type Blob,
   type Block,
   type Coordinates,
-  type Document,
   type Menu,
   type Style,
 } from "../../interfaces";
@@ -46,8 +46,8 @@ import { BoldIcon, ItalicIcon, UnderlineIcon } from "../../icons";
 
 interface WorkspaceProps {
   editable: boolean;
-  document: Document;
-  onSave?: (document: Document) => void;
+  blob: Blob;
+  onSave?: (blob: Blob) => void;
   autoSaveTimeout?: number;
   selectionMenu?: Menu[];
 }
@@ -56,25 +56,25 @@ interface WorkspaceProps {
  * @function Editor
  *
  * @param editable
- * @param document
+ * @param blob
  * @param autoSaveTime
  * @param selectionMenu
  * @param onSave
  *
- * @description A Workspace is essentially as Editor which manages all the blocks of the document. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
+ * @description A Workspace is essentially as Editor which manages all the contents of the blob. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
  *
  * @author Mihir Paldhikar
  */
 
 export default function Editor({
   editable,
-  document,
+  blob,
   autoSaveTimeout,
   selectionMenu,
   onSave,
 }: WorkspaceProps): JSX.Element {
   const [contents, updateContents] = useState<Block[]>(
-    document.contents.map((block) => {
+    blob.contents.map((block) => {
       return {
         ...block,
         reference: createRef<HTMLElement>(),
@@ -101,9 +101,9 @@ export default function Editor({
                   reference: undefined,
                 };
               });
-              const documentRef = document;
-              documentRef.contents = blockRef;
-              onSave(documentRef);
+              const blobRef = blob;
+              blobRef.contents = blockRef;
+              onSave(blobRef);
             }
           }
 
@@ -111,7 +111,7 @@ export default function Editor({
         }
       }
     },
-    [contents, document, onSave]
+    [contents, blob, onSave]
   );
 
   useEffect(() => {
@@ -123,12 +123,12 @@ export default function Editor({
             reference: undefined,
           };
         });
-        const documentRef = document;
-        documentRef.contents = blockRef;
-        onSave(documentRef);
+        const blobRef = blob;
+        blobRef.contents = blockRef;
+        onSave(blobRef);
       }, autoSaveTimeout);
     }
-  }, [autoSaveTimeout, contents, document, editable, onSave]);
+  }, [autoSaveTimeout, contents, blob, editable, onSave]);
 
   useEffect(() => {
     window.addEventListener("keydown", keyboardManager);
@@ -269,9 +269,9 @@ export default function Editor({
     const selection = window.getSelection();
 
     const blockNode = getBlockNode(block.id);
-    const popupNode = window.document.getElementById(`popup-${document.id}`);
+    const popupNode = window.document.getElementById(`popup-${blob.id}`);
     const workspaceNode = window.document.getElementById(
-      `workspace-${document.id}`
+      `workspace-${blob.id}`
     );
 
     if (
@@ -407,10 +407,10 @@ export default function Editor({
 
   return (
     <Fragment>
-      <div id={`popup-${document.id}`}></div>
-      <div id={`dialog-${document.id}`}></div>
+      <div id={`popup-${blob.id}`}></div>
+      <div id={`dialog-${blob.id}`}></div>
       <div
-        id={`workspace-${document.id}`}
+        id={`workspace-${blob.id}`}
         className={"min-h-screen w-full px-2 pb-60"}
       >
         {contents.map((block, index) => {

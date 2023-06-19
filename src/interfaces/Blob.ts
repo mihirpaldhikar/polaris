@@ -15,14 +15,14 @@
 import type Block from "./Block";
 
 /**
- * @interface Document
+ * @interface Blob
  *
- * @description Document is a collection of blocks in the semantic manner. A Document contains all the information required by the Polaris to create rich content editing experience.
+ * @description Blob is a collection of blocks in the semantic manner. A Blob contains all the information required by the Polaris to create rich content editing experience.
  */
 
-interface Document {
+interface Blob {
   id: string;
   contents: Block[];
 }
 
-export default Document;
+export default Blob;
