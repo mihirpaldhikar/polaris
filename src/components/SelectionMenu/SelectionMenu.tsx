@@ -54,7 +54,7 @@ export default function SelectionMenu({
   const yAxis =
     coordinates.y <= 30
       ? coordinates.y + ACTION_MENU_HEIGHT - 10
-      : coordinates.y - 55;
+      : coordinates.y - 45;
 
   return (
     <div
@@ -63,14 +63,14 @@ export default function SelectionMenu({
         left: xAxis,
       }}
       className={
-        "fixed z-10 flex flex-row items-center rounded-lg border border-black/10 bg-white p-1 shadow-md"
+        "fixed z-10 flex flex-row items-center rounded-xl border border-black/10 bg-white py-1 shadow-md"
       }
     >
       {menus.map((menu) => {
         return (
           <div
             className={conditionalClassName(
-              "m-1 cursor-pointer rounded-md hover:bg-gray-200",
+              "mx-[6px] cursor-pointer rounded-lg p-1 hover:bg-gray-200",
               menu.active ?? false ? "bg-blue-200 fill-blue-800" : null
             )}
             key={menu.id}
