@@ -23,6 +23,8 @@ import {
 import { conditionalClassName } from "../../utils";
 import { createRoot } from "react-dom/client";
 import { InputDialog } from "../InputDialog";
+import { ColorPickerDialog } from "../ColorPickerDialog";
+import { REMOVE_COLOR } from "../../constants";
 
 const ACTION_BUTTON_WIDTH: number = 28;
 const ACTION_MENU_PADDING: number = 42;
@@ -79,6 +81,7 @@ export default function SelectionMenu({
               if (menu.execute.type !== "userInput") {
                 onMenuSelected(menu.execute);
               } else {
+                const inputArgs = menu.execute.args as InputArgs;
                 const editorNode = window.document.getElementById(
                   `editor-${blobId}`
                 );
@@ -87,42 +90,68 @@ export default function SelectionMenu({
 
                 const dialogRoot = createRoot(dialogNode);
 
-                dialogRoot.render(
-                  <InputDialog
-                    coordinates={coordinates}
-                    active={menu.active ?? false}
-                    inputArgs={menu.execute.args as InputArgs}
-                    onClose={() => {
-                      dialogRoot.unmount();
-                    }}
-                    onConfirm={(data, remove) => {
-                      const inputArgs = menu.execute.args as InputArgs;
-                      switch (inputArgs.executionTypeAfterInput) {
-                        case "linkManager": {
-                          onMenuSelected({
-                            type: "linkManager",
-                            args: data,
-                          });
-                          break;
+                if (inputArgs.type === "color") {
+                  dialogRoot.render(
+                    <ColorPickerDialog
+                      active={menu.active ?? false}
+                      coordinates={coordinates}
+                      inputArgs={inputArgs}
+                      onColorSelected={(colorHexCode) => {
+                        const style: Style[] = [
+                          {
+                            name: (inputArgs.initialPayload as Style).name,
+                            value: colorHexCode,
+                            enabled: colorHexCode !== REMOVE_COLOR,
+                          },
+                        ];
+                        onMenuSelected({
+                          type: "styleManager",
+                          args: style,
+                        });
+                      }}
+                      onClose={() => {
+                        dialogRoot.unmount();
+                      }}
+                    />
+                  );
+                } else {
+                  dialogRoot.render(
+                    <InputDialog
+                      coordinates={coordinates}
+                      active={menu.active ?? false}
+                      inputArgs={menu.execute.args as InputArgs}
+                      onClose={() => {
+                        dialogRoot.unmount();
+                      }}
+                      onConfirm={(data, remove) => {
+                        switch (inputArgs.executionTypeAfterInput) {
+                          case "linkManager": {
+                            onMenuSelected({
+                              type: "linkManager",
+                              args: data,
+                            });
+                            break;
+                          }
+                          case "styleManager": {
+                            const style: Style[] = [
+                              {
+                                name: (inputArgs.initialPayload as Style).name,
+                                value: `${data}${inputArgs.unit ?? ""}`,
+                                enabled: !(remove === true),
+                              },
+                            ];
+                            onMenuSelected({
+                              type: "styleManager",
+                              args: style,
+                            });
+                            break;
+                          }
                         }
-                        case "styleManager": {
-                          const style: Style[] = [
-                            {
-                              name: (inputArgs.initialPayload as Style).name,
-                              value: `${data}${inputArgs.unit ?? ""}`,
-                              enabled: !(remove === true),
-                            },
-                          ];
-                          onMenuSelected({
-                            type: "styleManager",
-                            args: style,
-                          });
-                          break;
-                        }
-                      }
-                    }}
-                  />
-                );
+                      }}
+                    />
+                  );
+                }
+
                 editorNode.addEventListener(
                   "mousedown",
                   () => {

@@ -17,3 +17,5 @@ export { default as ItalicIcon } from "./ItalicIcon";
 export { default as UnderlineIcon } from "./UnderlineIcon";
 export { default as LinkIcon } from "./LinkIcon";
 export { default as TextSizeIcon } from "./TextSizeIcon";
+export { default as TextColorIcon } from "./TextColorIcon";
+export { default as TextBackgroundColorIcon } from "./TextBackgroundColorIcon";

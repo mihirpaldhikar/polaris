@@ -16,7 +16,7 @@ import type Style from "./Style";
 
 interface InputArgs {
   hint: string;
-  type: "text" | "number" | "email";
+  type: "text" | "number" | "email" | "color";
   executionTypeAfterInput: "styleManager" | "linkManager";
   validStringRegExp: RegExp;
   initialPayload: string | Style;

@@ -38,6 +38,7 @@ import {
   inlineSpecifierManager,
   normalizeContent,
   removeEmptyInlineSpecifiers,
+  rgbStringToHex,
   setCaretOffset,
 } from "../../utils";
 import { type Content } from "../../types";
@@ -47,10 +48,17 @@ import {
   BoldIcon,
   ItalicIcon,
   LinkIcon,
+  TextBackgroundColorIcon,
+  TextColorIcon,
   TextSizeIcon,
   UnderlineIcon,
 } from "../../icons";
-import { LINK_ATTRIBUTE, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
+import {
+  LINK_ATTRIBUTE,
+  REMOVE_COLOR,
+  REMOVE_LINK,
+  REMOVE_STYLE,
+} from "../../constants";
 
 interface WorkspaceProps {
   editable: boolean;
@@ -388,6 +396,44 @@ export default function Editor({
           },
         },
       },
+      {
+        id: generateMenuId(),
+        name: "Text Color",
+        icon: <TextColorIcon />,
+        execute: {
+          type: "userInput",
+          args: {
+            hint: "HEX Code",
+            type: "color",
+            executionTypeAfterInput: "styleManager",
+            initialPayload: {
+              name: "color",
+              value: "",
+            },
+            payloadIfRemovedClicked: REMOVE_COLOR,
+            validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+          },
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Text Background Color",
+        icon: <TextBackgroundColorIcon />,
+        execute: {
+          type: "userInput",
+          args: {
+            hint: "HEX Code",
+            type: "color",
+            executionTypeAfterInput: "styleManager",
+            initialPayload: {
+              name: "background-color",
+              value: "",
+            },
+            payloadIfRemovedClicked: REMOVE_COLOR,
+            validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+          },
+        },
+      },
     ];
 
     if (selectionMenu !== undefined && selectionMenu.length !== 0) {
@@ -416,9 +462,15 @@ export default function Editor({
           elementContainsStyle(endNodeParent, inputArgs.initialPayload)
         ) {
           inputArgs.initialPayload.value =
-            startNodeParent.style.getPropertyValue(
-              inputArgs.initialPayload.name
-            );
+            inputArgs.type === "color"
+              ? rgbStringToHex(
+                  startNodeParent.style.getPropertyValue(
+                    inputArgs.initialPayload.name
+                  )
+                )
+              : startNodeParent.style.getPropertyValue(
+                  inputArgs.initialPayload.name
+                );
           menu.active = true;
         }
 

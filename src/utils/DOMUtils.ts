@@ -792,3 +792,28 @@ export function inlineSpecifierManager(
 
   generateInlineSpecifiers(targetElement, selection, style, link);
 }
+
+export function RGBToHex(r: number, g: number, b: number): string {
+  let red = r.toString(16);
+  let green = g.toString(16);
+  let blue = b.toString(16);
+
+  if (red.length === 1) red = "0" + red;
+  if (green.length === 1) green = "0" + green;
+  if (blue.length === 1) blue = "0" + blue;
+
+  return "#" + red + green + blue;
+}
+
+export function rgbStringToHex(rgb: string): string {
+  const rgbArr = rgb
+    .replaceAll("rgb", "")
+    .replaceAll("(", "")
+    .replaceAll(")", "")
+    .split(",");
+  return RGBToHex(
+    parseInt(rgbArr[0]),
+    parseInt(rgbArr[1]),
+    parseInt(rgbArr[2])
+  );
+}

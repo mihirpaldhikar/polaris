@@ -66,14 +66,14 @@ export default function InputDialog({
         left: coordinates.x,
       }}
       className={
-        "fixed flex w-72 flex-col space-y-5 rounded-lg border border-gray-50 bg-white px-2 py-3 shadow-md"
+        "fixed flex w-72 flex-col space-y-5 rounded-lg border border-black/10 bg-white px-2 py-3 shadow-md"
       }
     >
       <input
         type={inputArgs.type}
         placeholder={inputArgs.hint}
         className={
-          "w-full rounded-md p-1 outline outline-gray-300 ring-0 focus:outline-blue-600"
+          "w-full rounded-md border-2 px-2 py-1 outline-none focus:border-blue-600"
         }
         value={data}
         onChange={(event) => {
