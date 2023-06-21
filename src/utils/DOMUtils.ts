@@ -610,11 +610,16 @@ export function generateInlineSpecifiers(
 
 export function elementContainsStyle(
   element: HTMLElement,
-  style: Style[]
+  style: Style[] | Style
 ): boolean {
   if (!isInlineSpecifierNode(element)) {
     return false;
   }
+
+  if (!Array.isArray(style)) {
+    return element.style.getPropertyValue(style.name) !== "";
+  }
+
   const startNodeStyleArray = cssTextToStyle(element.style.cssText).map((s) => {
     return `${s.name}:${s.value}`;
   });

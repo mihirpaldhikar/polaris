@@ -25,6 +25,7 @@ import {
   type Blob,
   type Block,
   type Coordinates,
+  type InputArgs,
   type Menu,
   type Style,
 } from "../../interfaces";
@@ -34,7 +35,6 @@ import {
   generateMenuId,
   getBlockNode,
   getCaretCoordinates,
-  inlineSpecifierLink,
   inlineSpecifierManager,
   normalizeContent,
   removeEmptyInlineSpecifiers,
@@ -50,7 +50,7 @@ import {
   TextSizeIcon,
   UnderlineIcon,
 } from "../../icons";
-import { REMOVE_LINK, REMOVE_STYLE } from "../../constants";
+import { LINK_ATTRIBUTE, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
 interface WorkspaceProps {
   editable: boolean;
@@ -358,13 +358,13 @@ export default function Editor({
         execute: {
           type: "userInput",
           args: {
-            hint: "link..",
+            hint: "Add Link..",
             type: "text",
             executionTypeAfterInput: "linkManager",
-            initialPayload: inlineSpecifierLink() ?? "",
+            initialPayload: "",
             payloadIfRemovedClicked: REMOVE_LINK,
             validStringRegExp:
-              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)/,
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&/=]*)/,
           },
         },
       },
@@ -375,7 +375,7 @@ export default function Editor({
         execute: {
           type: "userInput",
           args: {
-            hint: "size..",
+            hint: "Text Size..",
             type: "number",
             unit: "px",
             executionTypeAfterInput: "styleManager",
@@ -395,11 +395,41 @@ export default function Editor({
     }
 
     for (const menu of defaultSelectionMenu) {
-      if (menu.execute.type === "styleManager") {
+      if (
+        menu.execute.type === "styleManager" &&
+        Array.isArray(menu.execute.args)
+      ) {
         if (
-          elementContainsStyle(startNodeParent, menu.execute.args as Style[]) &&
-          elementContainsStyle(endNodeParent, menu.execute.args as Style[])
+          elementContainsStyle(startNodeParent, menu.execute.args) &&
+          elementContainsStyle(endNodeParent, menu.execute.args)
         ) {
+          menu.active = true;
+        }
+      }
+
+      if (menu.execute.type === "userInput") {
+        const inputArgs = menu.execute.args as InputArgs;
+        if (
+          typeof inputArgs.initialPayload === "object" &&
+          inputArgs.executionTypeAfterInput === "styleManager" &&
+          elementContainsStyle(startNodeParent, inputArgs.initialPayload) &&
+          elementContainsStyle(endNodeParent, inputArgs.initialPayload)
+        ) {
+          inputArgs.initialPayload.value =
+            startNodeParent.style.getPropertyValue(
+              inputArgs.initialPayload.name
+            );
+          menu.active = true;
+        }
+
+        if (
+          typeof inputArgs.initialPayload === "string" &&
+          inputArgs.executionTypeAfterInput === "linkManager" &&
+          startNodeParent.getAttribute(LINK_ATTRIBUTE) !== null &&
+          endNodeParent.getAttribute(LINK_ATTRIBUTE) !== null
+        ) {
+          inputArgs.initialPayload =
+            startNodeParent.getAttribute(LINK_ATTRIBUTE) ?? "";
           menu.active = true;
         }
       }
