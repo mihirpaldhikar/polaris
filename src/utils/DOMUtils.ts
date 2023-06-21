@@ -778,15 +778,17 @@ export function inlineSpecifierManager(
     }
   }
 
-  style.push(
-    ...[
-      {
-        name: "text-decoration",
-        value: "underline",
-        enabled: link !== undefined,
-      },
-    ]
-  );
+  if (link !== undefined) {
+    style.push(
+      ...[
+        {
+          name: "text-decoration",
+          value: "underline",
+          enabled: true,
+        },
+      ]
+    );
+  }
 
   generateInlineSpecifiers(targetElement, selection, style, link);
 }
