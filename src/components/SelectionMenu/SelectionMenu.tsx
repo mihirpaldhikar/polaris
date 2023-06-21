@@ -90,6 +90,7 @@ export default function SelectionMenu({
                 dialogRoot.render(
                   <InputDialog
                     coordinates={coordinates}
+                    active={menu.active ?? false}
                     inputArgs={menu.execute.args as InputArgs}
                     onClose={() => {
                       dialogRoot.unmount();

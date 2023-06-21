@@ -17,6 +17,7 @@ import { type Coordinates, type InputArgs } from "../../interfaces";
 
 interface InputDialogProps {
   coordinates: Coordinates;
+  active: boolean;
   inputArgs: InputArgs;
   onConfirm: (data: string, remove?: boolean) => void;
   onClose: () => void;
@@ -24,6 +25,7 @@ interface InputDialogProps {
 
 export default function InputDialog({
   coordinates,
+  active,
   inputArgs,
   onConfirm,
   onClose,
@@ -82,35 +84,48 @@ export default function InputDialog({
           );
         }}
       />
-      <div
-        className={
-          "flex w-full flex-row items-center justify-between space-x-2"
-        }
-      >
-        <button
-          disabled={disabled}
+      <div>
+        <div
           className={
-            "w-full rounded-md bg-blue-600 p-1 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
+            "flex w-full flex-row items-center justify-between space-x-2"
           }
-          onClick={() => {
-            onConfirm(data);
-            onClose();
-          }}
         >
-          Confirm
-        </button>
-        <button
-          className={
-            "w-full rounded-md bg-gray-300 p-1 text-black hover:bg-gray-400"
-          }
-          onClick={() => {
-            onConfirm(inputArgs.payloadIfRemovedClicked ?? "", true);
-            onClose();
-          }}
-        >
-          Cancel
-        </button>
+          <button
+            disabled={disabled}
+            className={
+              "w-full rounded-md bg-blue-600 p-1 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
+            }
+            onClick={() => {
+              onConfirm(data);
+              onClose();
+            }}
+          >
+            Confirm
+          </button>
+          <button
+            className={
+              "w-full rounded-md bg-gray-300 p-1 text-black hover:bg-gray-400"
+            }
+            onClick={() => {
+              onClose();
+            }}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
+      <button
+        hidden={!active}
+        className={
+          "w-full rounded-md bg-red-600 p-1 text-white hover:bg-red-700"
+        }
+        onClick={() => {
+          onConfirm(inputArgs.payloadIfRemovedClicked ?? "", true);
+          onClose();
+        }}
+      >
+        Remove
+      </button>
     </div>
   );
 }
