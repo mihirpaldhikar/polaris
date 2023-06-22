@@ -70,102 +70,110 @@ export default function SelectionMenu({
     >
       {menus.map((menu) => {
         return (
-          <div
-            className={conditionalClassName(
-              "mx-[6px] cursor-pointer rounded-lg p-1 hover:bg-gray-200",
-              menu.active ?? false ? "bg-blue-200 fill-blue-800" : null
-            )}
-            key={menu.id}
-            title={menu.name}
-            onClick={() => {
-              if (menu.execute.type !== "userInput") {
-                onMenuSelected(menu.execute);
-              } else {
-                const inputArgs = menu.execute.args as InputArgs;
-                const editorNode = window.document.getElementById(
-                  `editor-${blobId}`
-                );
-                const dialogNode = document.getElementById(`dialog-${blobId}`);
-                if (dialogNode == null || editorNode == null) return;
-
-                const dialogRoot = createRoot(dialogNode);
-
-                if (inputArgs.type === "color") {
-                  dialogRoot.render(
-                    <ColorPickerDialog
-                      active={menu.active ?? false}
-                      coordinates={coordinates}
-                      inputArgs={inputArgs}
-                      onColorSelected={(colorHexCode) => {
-                        const style: Style[] = [
-                          {
-                            name: (inputArgs.initialPayload as Style).name,
-                            value: colorHexCode,
-                            enabled: colorHexCode !== REMOVE_COLOR,
-                          },
-                        ];
-                        onMenuSelected({
-                          type: "styleManager",
-                          args: style,
-                        });
-                      }}
-                      onClose={() => {
-                        dialogRoot.unmount();
-                      }}
-                    />
-                  );
+          <div key={menu.id} className={"flex flex-row items-center"}>
+            <span
+              className={"mx-1 h-[23px] w-[1.5px] bg-gray-300 "}
+              hidden={!(menu.separator ?? false)}
+            />
+            <div
+              className={conditionalClassName(
+                "mx-[6px] cursor-pointer rounded-lg p-1 hover:bg-gray-200",
+                menu.active ?? false ? "bg-blue-200 fill-blue-800" : null
+              )}
+              title={menu.name}
+              onClick={() => {
+                if (menu.execute.type !== "userInput") {
+                  onMenuSelected(menu.execute);
                 } else {
-                  dialogRoot.render(
-                    <InputDialog
-                      coordinates={coordinates}
-                      active={menu.active ?? false}
-                      inputArgs={menu.execute.args as InputArgs}
-                      onClose={() => {
-                        dialogRoot.unmount();
-                      }}
-                      onConfirm={(data, remove) => {
-                        switch (inputArgs.executionTypeAfterInput) {
-                          case "linkManager": {
-                            onMenuSelected({
-                              type: "linkManager",
-                              args: data,
-                            });
-                            break;
+                  const inputArgs = menu.execute.args as InputArgs;
+                  const editorNode = window.document.getElementById(
+                    `editor-${blobId}`
+                  );
+                  const dialogNode = document.getElementById(
+                    `dialog-${blobId}`
+                  );
+                  if (dialogNode == null || editorNode == null) return;
+
+                  const dialogRoot = createRoot(dialogNode);
+
+                  if (inputArgs.type === "color") {
+                    dialogRoot.render(
+                      <ColorPickerDialog
+                        active={menu.active ?? false}
+                        coordinates={coordinates}
+                        inputArgs={inputArgs}
+                        onColorSelected={(colorHexCode) => {
+                          const style: Style[] = [
+                            {
+                              name: (inputArgs.initialPayload as Style).name,
+                              value: colorHexCode,
+                              enabled: colorHexCode !== REMOVE_COLOR,
+                            },
+                          ];
+                          onMenuSelected({
+                            type: "styleManager",
+                            args: style,
+                          });
+                        }}
+                        onClose={() => {
+                          dialogRoot.unmount();
+                        }}
+                      />
+                    );
+                  } else {
+                    dialogRoot.render(
+                      <InputDialog
+                        coordinates={coordinates}
+                        active={menu.active ?? false}
+                        inputArgs={menu.execute.args as InputArgs}
+                        onClose={() => {
+                          dialogRoot.unmount();
+                        }}
+                        onConfirm={(data, remove) => {
+                          switch (inputArgs.executionTypeAfterInput) {
+                            case "linkManager": {
+                              onMenuSelected({
+                                type: "linkManager",
+                                args: data,
+                              });
+                              break;
+                            }
+                            case "styleManager": {
+                              const style: Style[] = [
+                                {
+                                  name: (inputArgs.initialPayload as Style)
+                                    .name,
+                                  value: `${data}${inputArgs.unit ?? ""}`,
+                                  enabled: !(remove === true),
+                                },
+                              ];
+                              onMenuSelected({
+                                type: "styleManager",
+                                args: style,
+                              });
+                              break;
+                            }
                           }
-                          case "styleManager": {
-                            const style: Style[] = [
-                              {
-                                name: (inputArgs.initialPayload as Style).name,
-                                value: `${data}${inputArgs.unit ?? ""}`,
-                                enabled: !(remove === true),
-                              },
-                            ];
-                            onMenuSelected({
-                              type: "styleManager",
-                              args: style,
-                            });
-                            break;
-                          }
-                        }
-                      }}
-                    />
+                        }}
+                      />
+                    );
+                  }
+
+                  editorNode.addEventListener(
+                    "mousedown",
+                    () => {
+                      dialogRoot.unmount();
+                    },
+                    {
+                      once: true,
+                    }
                   );
                 }
-
-                editorNode.addEventListener(
-                  "mousedown",
-                  () => {
-                    dialogRoot.unmount();
-                  },
-                  {
-                    once: true,
-                  }
-                );
-              }
-              onClose();
-            }}
-          >
-            {menu.icon}
+                onClose();
+              }}
+            >
+              {menu.icon}
+            </div>
           </div>
         );
       })}

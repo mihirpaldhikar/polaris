@@ -16,6 +16,7 @@ import { type JSX } from "react";
 import { type Executable } from "./index";
 
 interface Menu {
+  separator?: boolean;
   id: string;
   name: string;
   icon?: JSX.Element;

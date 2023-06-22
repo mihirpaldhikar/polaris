@@ -363,6 +363,7 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Link",
+        separator: true,
         icon: <LinkIcon />,
         execute: {
           type: "userInput",
@@ -380,6 +381,7 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Text Size",
+        separator: true,
         icon: <TextSizeIcon />,
         execute: {
           type: "userInput",
