@@ -61,7 +61,7 @@ import {
 } from "../../constants";
 
 interface WorkspaceProps {
-  editable: boolean;
+  editable?: boolean;
   blob: Blob;
   onSave?: (blob: Blob) => void;
   autoSaveTimeout?: number;
@@ -83,7 +83,7 @@ interface WorkspaceProps {
  */
 
 export default function Editor({
-  editable,
+  editable = true,
   blob,
   autoSaveTimeout,
   selectionMenu,
