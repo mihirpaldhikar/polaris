@@ -17,5 +17,6 @@ import "./styles/global.css";
 export type { Block } from "./interfaces";
 export { generateBlockId } from "./utils";
 export { generateMenuId } from "./utils";
+export { parseBlobToHTML } from "./utils";
 export type { Blob } from "./interfaces";
 export { Editor } from "./components";
