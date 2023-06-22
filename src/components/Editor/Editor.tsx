@@ -289,6 +289,7 @@ export default function Editor({
     const editorNode = window.document.getElementById(`editor-${blob.id}`);
 
     if (
+      !editable ||
       selection == null ||
       blockNode == null ||
       popupNode == null ||
