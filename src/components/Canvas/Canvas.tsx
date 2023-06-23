@@ -12,7 +12,14 @@
  * All Rights Reserved.
  */
 
-import { type ChangeEvent, createElement, Fragment, type JSX } from "react";
+import {
+  type ChangeEvent,
+  createElement,
+  Fragment,
+  type JSX,
+  useEffect,
+  useRef,
+} from "react";
 import { type Block, type Style } from "../../interfaces";
 import {
   conditionalClassName,
@@ -20,8 +27,11 @@ import {
   getBlockNode,
   getCaretCoordinates,
   getCaretOffset,
+  getNodeAt,
+  getNodeIndex,
   getNodeSiblings,
   inlineSpecifierManager,
+  nodeOffset,
   setNodeStyle,
 } from "../../utils";
 import { type Content } from "../../types";
@@ -45,6 +55,12 @@ interface CanvasProps {
     caretOffset: number
   ) => void;
   onSelect: (block: Block) => void;
+  onActionKeyPressed: (
+    nodeIndex: number,
+    block: Block,
+    previousContent: Content,
+    caretOffset: number
+  ) => void;
 }
 
 /**
@@ -59,6 +75,7 @@ interface CanvasProps {
  * @param onPaste
  *
  * @param onSelect
+ * @param onCommandKeyPressed
  * @returns JSX.Element
  *
  * @description Canvas is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
@@ -75,7 +92,29 @@ export default function Canvas({
   onNavigate,
   onPaste,
   onSelect,
+  onActionKeyPressed,
 }: CanvasProps): JSX.Element {
+  const action = useRef(false);
+
+  useEffect(() => {
+    window.addEventListener("actionMenuOpened", () => {
+      action.current = true;
+    });
+
+    window.addEventListener("actionMenuClosed", () => {
+      action.current = false;
+    });
+    return () => {
+      window.removeEventListener("actionMenuOpened", () => {
+        action.current = false;
+      });
+
+      window.removeEventListener("actionMenuClosed", () => {
+        action.current = false;
+      });
+    };
+  }, []);
+
   /**
    * @function notifyChange
    * @param event
@@ -108,6 +147,9 @@ export default function Canvas({
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
+        if (action.current) {
+          break;
+        }
         onEnter(caretOffset !== blockNode.innerText.length, caretOffset);
         break;
       }
@@ -161,6 +203,10 @@ export default function Canvas({
       }
 
       case "arrowup": {
+        if (action.current) {
+          event.preventDefault();
+          break;
+        }
         const computedDistance: number =
           block.role === "paragraph" || block.role === "subTitle" ? 3 : 2;
 
@@ -179,6 +225,10 @@ export default function Canvas({
         break;
       }
       case "arrowdown": {
+        if (action.current) {
+          event.preventDefault();
+          break;
+        }
         const computedDistance: number =
           block.role === "title" ? 44 : block.role === "subTitle" ? 32 : 28;
 
@@ -254,6 +304,15 @@ export default function Canvas({
           block.content = blockNode.innerHTML;
           onChange(block);
         }
+        break;
+      }
+      case "/": {
+        onActionKeyPressed(
+          getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
+          block,
+          block.content,
+          caretOffset - nodeOffset(blockNode, getNodeAt(blockNode, caretOffset))
+        );
         break;
       }
     }

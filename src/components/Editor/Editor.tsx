@@ -36,21 +36,30 @@ import {
   getBlockNode,
   getCaretCoordinates,
   inlineSpecifierManager,
+  nodeInViewPort,
   normalizeContent,
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
   setCaretOffset,
 } from "../../utils";
-import { type Content } from "../../types";
-import { createRoot } from "react-dom/client";
+import { type Content, type Role } from "../../types";
+import { createRoot, type Root } from "react-dom/client";
 import { SelectionMenu } from "../SelectionMenu";
 import {
+  AlignCenterIcon,
+  AlignEndIcon,
+  AlignStartIcon,
   BoldIcon,
+  HeadingIcon,
   ItalicIcon,
   LinkIcon,
+  ParagraphIcon,
+  SubHeadingIcon,
+  SubTitleIcon,
   TextBackgroundColorIcon,
   TextColorIcon,
   TextSizeIcon,
+  TitleIcon,
   UnderlineIcon,
 } from "../../icons";
 import {
@@ -59,6 +68,8 @@ import {
   REMOVE_LINK,
   REMOVE_STYLE,
 } from "../../constants";
+import { ActionMenu } from "../ActionMenu";
+import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -103,6 +114,17 @@ export default function Editor({
     caretOffset: number;
     nodeIndex?: number;
   } | null>(null);
+
+  const [popupRoot, setPopupRoot] = useState<Root>();
+
+  useEffect(() => {
+    setPopupRoot(
+      createRoot(document.getElementById(`popup-${blob.id}`) as HTMLElement)
+    );
+    return () => {
+      setPopupRoot(undefined);
+    };
+  }, [blob.id]);
 
   const keyboardManager = useCallback(
     (event: KeyboardEvent): void => {
@@ -169,7 +191,9 @@ export default function Editor({
             ? (computedNode.firstChild as Node) ?? node
             : computedNode;
 
-        setCaretOffset(jumpNode, caretOffset);
+        setTimeout(() => {
+          setCaretOffset(jumpNode, caretOffset);
+        }, 0.001);
         removeEmptyInlineSpecifiers(node);
       }
     }
@@ -285,14 +309,12 @@ export default function Editor({
     const selection = window.getSelection();
 
     const blockNode = getBlockNode(block.id);
-    const popupNode = window.document.getElementById(`popup-${blob.id}`);
     const editorNode = window.document.getElementById(`editor-${blob.id}`);
 
     if (
       !editable ||
       selection == null ||
       blockNode == null ||
-      popupNode == null ||
       editorNode == null ||
       selection.toString() === ""
     ) {
@@ -311,11 +333,13 @@ export default function Editor({
     const startNodeParent = range.startContainer.parentElement;
     const endNodeParent = range.endContainer.parentElement;
 
-    if (startNodeParent == null || endNodeParent == null) {
+    if (
+      startNodeParent == null ||
+      endNodeParent == null ||
+      popupRoot === undefined
+    ) {
       return;
     }
-
-    const popupRoot = createRoot(popupNode);
 
     const defaultSelectionMenu: Menu[] = [
       {
@@ -496,7 +520,7 @@ export default function Editor({
         coordinates={selectionMenuCoordinates}
         menus={defaultSelectionMenu}
         onClose={() => {
-          popupRoot.unmount();
+          popupRoot.render(<Fragment />);
         }}
         onMenuSelected={(executable) => {
           selection.removeAllRanges();
@@ -523,7 +547,7 @@ export default function Editor({
       "keydown",
       () => {
         selection.removeAllRanges();
-        popupRoot.unmount();
+        popupRoot.render(<Fragment />);
       },
       {
         once: true,
@@ -533,12 +557,201 @@ export default function Editor({
       "mousedown",
       () => {
         selection.removeAllRanges();
-        popupRoot.unmount();
+        popupRoot.render(<Fragment />);
       },
       {
         once: true,
       }
     );
+  }
+
+  function actionKeyHandler(
+    nodeIndex: number,
+    block: Block,
+    previousContent: Content,
+    caretOffset: number
+  ): void {
+    const actionMenus: Menu[] = [
+      {
+        id: generateMenuId(),
+        name: "Title",
+        description: `Change ${block.role} to Title`,
+        icon: <TitleIcon />,
+        execute: {
+          type: "roleManager",
+          args: "title",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Sub Title",
+        description: `Change ${block.role} to Sub Title`,
+        icon: <SubTitleIcon />,
+        execute: {
+          type: "roleManager",
+          args: "subTitle",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Heading",
+        description: `Change ${block.role} to Heading`,
+        icon: <HeadingIcon />,
+        execute: {
+          type: "roleManager",
+          args: "heading",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Subheading",
+        description: `Change ${block.role} to Subheading`,
+        icon: <SubHeadingIcon />,
+        execute: {
+          type: "roleManager",
+          args: "subHeading",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Paragraph",
+        description: `Change ${block.role} to Paragraph`,
+        icon: <ParagraphIcon />,
+        execute: {
+          type: "roleManager",
+          args: "paragraph",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Align Start",
+        description: `Align text to start`,
+        icon: <AlignStartIcon />,
+        execute: {
+          type: "styleManager",
+          args: [
+            {
+              name: "textAlign",
+              value: "start",
+            },
+          ],
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Align Center",
+        description: `Align text at the center`,
+        icon: <AlignCenterIcon />,
+        execute: {
+          type: "styleManager",
+          args: [
+            {
+              name: "textAlign",
+              value: "center",
+            },
+          ],
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Align End",
+        description: `Align text at the end`,
+        icon: <AlignEndIcon />,
+        execute: {
+          type: "styleManager",
+          args: [
+            {
+              name: "textAlign",
+              value: "end",
+            },
+          ],
+        },
+      },
+    ];
+
+    const blockIndex = contents.indexOf(block);
+    const popupNode = window.document.getElementById(`popup-${blob.id}`);
+    const editorNode = window.document.getElementById(`editor-${blob.id}`);
+    const blockNode = getBlockNode(block.id);
+    if (
+      popupNode == null ||
+      editorNode == null ||
+      blockNode == null ||
+      popupRoot === undefined
+    ) {
+      return;
+    }
+
+    if (popupNode.childElementCount !== 0) {
+      popupRoot.render(<Fragment />);
+      window.dispatchEvent(actionMenuClosedEvent);
+      return;
+    }
+
+    if (!nodeInViewPort(blockNode)) {
+      blockNode.scrollIntoView();
+    }
+
+    const newBlock: Block = {
+      id: generateBlockId(),
+      type: block.type,
+      style: block.style,
+      reference: createRef(),
+      role: block.role,
+      content: previousContent,
+    };
+    const { x, y } = getCaretCoordinates(true);
+    const actionMenuCoordinates: Coordinates = {
+      x: block.content.length === 0 ? blockNode.getBoundingClientRect().x : x,
+      y: block.content.length === 0 ? blockNode.getBoundingClientRect().y : y,
+    };
+
+    window.dispatchEvent(actionMenuOpenedEvent);
+
+    popupRoot.render(
+      <ActionMenu
+        coordinates={actionMenuCoordinates}
+        menu={actionMenus}
+        onClose={() => {
+          window.dispatchEvent(actionMenuClosedEvent);
+          popupRoot.render(<Fragment />);
+        }}
+        onEscape={(query) => {
+          setFocusedNode({
+            nodeId: block.id,
+            caretOffset: caretOffset + query.length + 1,
+            nodeIndex,
+          });
+        }}
+        onSelect={(execute) => {
+          switch (execute.type) {
+            case "roleManager": {
+              if (typeof execute.args === "string") {
+                newBlock.role = execute.args as Role;
+              }
+              break;
+            }
+            case "styleManager": {
+              if (Array.isArray(execute.args)) {
+                newBlock.style.push(...execute.args);
+              }
+              break;
+            }
+          }
+          contents.splice(blockIndex, 1, newBlock);
+          updateContents(contents);
+          setFocusedNode({
+            nodeId: newBlock.id,
+            caretOffset,
+            nodeIndex,
+          });
+        }}
+      />
+    );
+
+    editorNode.addEventListener("mousedown", () => {
+      popupRoot.render(<Fragment />);
+    });
   }
 
   return (
@@ -564,6 +777,7 @@ export default function Editor({
               onDelete={deletionHandler}
               onPaste={pasteHandler}
               onSelect={selectionHandler}
+              onCommandKeyPressed={actionKeyHandler}
             />
           );
         })}

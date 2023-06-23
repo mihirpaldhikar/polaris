@@ -12,13 +12,4 @@
  * All Rights Reserved.
  */
 
-import type Style from "./Style";
-import type InputArgs from "./InputArgs";
-import { type Role } from "../types";
-
-interface Executable {
-  type: "styleManager" | "linkManager" | "userInput" | "roleManager";
-  args: Style[] | string | InputArgs | Role;
-}
-
-export default Executable;
+export * from "./ActionMenuEvents";

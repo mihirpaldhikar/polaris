@@ -61,5 +61,8 @@
     "tailwindcss": "^3.3.2",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "match-sorter": "^6.3.1"
   }
 }

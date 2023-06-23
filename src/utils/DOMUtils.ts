@@ -817,3 +817,11 @@ export function rgbStringToHex(rgb: string): string {
     parseInt(rgbArr[2])
   );
 }
+
+export function getNodeIndex(
+  parentElement: HTMLElement,
+  targetNode: Node
+): number {
+  const childNodes: Node[] = Array.from(parentElement.childNodes);
+  return childNodes.indexOf(targetNode);
+}

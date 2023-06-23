@@ -19,6 +19,7 @@ interface Menu {
   separator?: boolean;
   id: string;
   name: string;
+  description?: string;
   icon?: JSX.Element;
   active?: boolean;
   execute: Executable;

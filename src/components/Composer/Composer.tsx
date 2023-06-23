@@ -12,13 +12,12 @@
  * All Rights Reserved.
  */
 
-import { createRef, type JSX, useState } from "react";
+import { createRef, type JSX } from "react";
 import { Canvas } from "../Canvas";
 import { type Block } from "../../interfaces";
 import {
   areInlineSpecifierEqual,
   generateBlockId,
-  generateRefreshKey,
   getBlockNode,
   getNodeAt,
   isInlineSpecifierNode,
@@ -52,12 +51,19 @@ interface ComposerProps {
     caretOffset: number
   ) => void;
   onSelect: (block: Block) => void;
+  onCommandKeyPressed: (
+    nodeIndex: number,
+    block: Block,
+    previousContent: Content,
+    caretOffset: number
+  ) => void;
 }
 
 /**
  * @function Composer
  *
  * @param editable
+ * @param actionMenuOpen
  * @param previousBlock
  * @param block
  * @param nextBlock
@@ -67,6 +73,7 @@ interface ComposerProps {
  * @param onPaste
  *
  * @param onSelect
+ * @param onCommandKeyPressed
  * @description Composer is responsible for communicating with sibling blocks and handling events from the Canvas.
  *
  * @author Mihir Paldhikar
@@ -82,9 +89,8 @@ export default function Composer({
   onDelete,
   onPaste,
   onSelect,
+  onCommandKeyPressed,
 }: ComposerProps): JSX.Element {
-  const [refreshKey, setRefreshKey] = useState(generateRefreshKey());
-
   function enterHandler(splitContent: boolean, caretOffset: number): void {
     const blockNode = getBlockNode(block.id) as HTMLElement;
     const nodeAtCaretOffset = getNodeAt(blockNode, caretOffset);
@@ -277,7 +283,6 @@ export default function Composer({
 
   return (
     <Canvas
-      key={refreshKey}
       editable={editable}
       block={block}
       onChange={onChange}
@@ -286,6 +291,7 @@ export default function Composer({
       onNavigate={navigationHandler}
       onPaste={onPaste}
       onSelect={onSelect}
+      onActionKeyPressed={onCommandKeyPressed}
     />
   );
 }
