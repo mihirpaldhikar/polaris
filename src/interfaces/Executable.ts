@@ -17,7 +17,7 @@ import type InputArgs from "./InputArgs";
 import { type Role } from "../types";
 
 interface Executable {
-  type: "styleManager" | "linkManager" | "userInput" | "roleManager";
+  type: "style" | "link" | "input" | "role";
   args: Style[] | string | InputArgs | Role;
 }
 

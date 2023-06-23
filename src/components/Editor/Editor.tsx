@@ -347,7 +347,7 @@ export default function Editor({
         name: "Bold",
         icon: <BoldIcon />,
         execute: {
-          type: "styleManager",
+          type: "style",
           args: [
             {
               name: "font-weight",
@@ -361,7 +361,7 @@ export default function Editor({
         name: "Italic",
         icon: <ItalicIcon />,
         execute: {
-          type: "styleManager",
+          type: "style",
           args: [
             {
               name: "font-style",
@@ -375,7 +375,7 @@ export default function Editor({
         name: "Underline",
         icon: <UnderlineIcon />,
         execute: {
-          type: "styleManager",
+          type: "style",
           args: [
             {
               name: "text-decoration",
@@ -390,11 +390,11 @@ export default function Editor({
         separator: true,
         icon: <LinkIcon />,
         execute: {
-          type: "userInput",
+          type: "input",
           args: {
             hint: "Add Link..",
             type: "text",
-            executionTypeAfterInput: "linkManager",
+            executionTypeAfterInput: "link",
             initialPayload: "",
             payloadIfRemovedClicked: REMOVE_LINK,
             validStringRegExp:
@@ -408,12 +408,12 @@ export default function Editor({
         separator: true,
         icon: <TextSizeIcon />,
         execute: {
-          type: "userInput",
+          type: "input",
           args: {
             hint: "Text Size..",
             type: "number",
             unit: "px",
-            executionTypeAfterInput: "styleManager",
+            executionTypeAfterInput: "style",
             initialPayload: {
               name: "font-size",
               value: "",
@@ -428,11 +428,11 @@ export default function Editor({
         name: "Text Color",
         icon: <TextColorIcon />,
         execute: {
-          type: "userInput",
+          type: "input",
           args: {
             hint: "HEX Code",
             type: "color",
-            executionTypeAfterInput: "styleManager",
+            executionTypeAfterInput: "style",
             initialPayload: {
               name: "color",
               value: "",
@@ -447,11 +447,11 @@ export default function Editor({
         name: "Text Background Color",
         icon: <TextBackgroundColorIcon />,
         execute: {
-          type: "userInput",
+          type: "input",
           args: {
             hint: "HEX Code",
             type: "color",
-            executionTypeAfterInput: "styleManager",
+            executionTypeAfterInput: "style",
             initialPayload: {
               name: "background-color",
               value: "",
@@ -468,10 +468,7 @@ export default function Editor({
     }
 
     for (const menu of defaultSelectionMenu) {
-      if (
-        menu.execute.type === "styleManager" &&
-        Array.isArray(menu.execute.args)
-      ) {
+      if (menu.execute.type === "style" && Array.isArray(menu.execute.args)) {
         if (
           elementContainsStyle(startNodeParent, menu.execute.args) &&
           elementContainsStyle(endNodeParent, menu.execute.args)
@@ -480,11 +477,11 @@ export default function Editor({
         }
       }
 
-      if (menu.execute.type === "userInput") {
+      if (menu.execute.type === "input") {
         const inputArgs = menu.execute.args as InputArgs;
         if (
           typeof inputArgs.initialPayload === "object" &&
-          inputArgs.executionTypeAfterInput === "styleManager" &&
+          inputArgs.executionTypeAfterInput === "style" &&
           elementContainsStyle(startNodeParent, inputArgs.initialPayload) &&
           elementContainsStyle(endNodeParent, inputArgs.initialPayload)
         ) {
@@ -503,7 +500,7 @@ export default function Editor({
 
         if (
           typeof inputArgs.initialPayload === "string" &&
-          inputArgs.executionTypeAfterInput === "linkManager" &&
+          inputArgs.executionTypeAfterInput === "link" &&
           startNodeParent.getAttribute(LINK_ATTRIBUTE) !== null &&
           endNodeParent.getAttribute(LINK_ATTRIBUTE) !== null
         ) {
@@ -526,13 +523,13 @@ export default function Editor({
           selection.removeAllRanges();
           selection.addRange(range);
           switch (executable.type) {
-            case "styleManager": {
+            case "style": {
               inlineSpecifierManager(blockNode, executable.args as Style[]);
               block.content = blockNode.innerHTML;
               changeHandler(block);
               break;
             }
-            case "linkManager": {
+            case "link": {
               inlineSpecifierManager(blockNode, [], executable.args as string);
               block.content = blockNode.innerHTML;
               changeHandler(block);
@@ -579,7 +576,7 @@ export default function Editor({
         icon: <TitleIcon />,
         allowedOn: ["subTitle", "heading", "subHeading", "paragraph"],
         execute: {
-          type: "roleManager",
+          type: "role",
           args: "title",
         },
       },
@@ -590,7 +587,7 @@ export default function Editor({
         icon: <SubTitleIcon />,
         allowedOn: ["title", "heading", "subHeading", "paragraph"],
         execute: {
-          type: "roleManager",
+          type: "role",
           args: "subTitle",
         },
       },
@@ -601,7 +598,7 @@ export default function Editor({
         icon: <HeadingIcon />,
         allowedOn: ["title", "subTitle", "subHeading", "paragraph"],
         execute: {
-          type: "roleManager",
+          type: "role",
           args: "heading",
         },
       },
@@ -612,7 +609,7 @@ export default function Editor({
         icon: <SubHeadingIcon />,
         allowedOn: ["title", "subTitle", "heading", "paragraph"],
         execute: {
-          type: "roleManager",
+          type: "role",
           args: "subHeading",
         },
       },
@@ -623,7 +620,7 @@ export default function Editor({
         icon: <ParagraphIcon />,
         allowedOn: ["title", "subTitle", "heading", "subHeading"],
         execute: {
-          type: "roleManager",
+          type: "role",
           args: "paragraph",
         },
       },
@@ -634,7 +631,7 @@ export default function Editor({
         icon: <AlignStartIcon />,
         allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
         execute: {
-          type: "styleManager",
+          type: "style",
           args: [
             {
               name: "textAlign",
@@ -650,7 +647,7 @@ export default function Editor({
         icon: <AlignCenterIcon />,
         allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
         execute: {
-          type: "styleManager",
+          type: "style",
           args: [
             {
               name: "textAlign",
@@ -666,7 +663,7 @@ export default function Editor({
         icon: <AlignEndIcon />,
         allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
         execute: {
-          type: "styleManager",
+          type: "style",
           args: [
             {
               name: "textAlign",
@@ -740,13 +737,13 @@ export default function Editor({
         }}
         onSelect={(execute) => {
           switch (execute.type) {
-            case "roleManager": {
+            case "role": {
               if (typeof execute.args === "string") {
                 newBlock.role = execute.args as Role;
               }
               break;
             }
-            case "styleManager": {
+            case "style": {
               if (Array.isArray(execute.args)) {
                 newBlock.style.push(...execute.args);
               }

@@ -82,7 +82,7 @@ export default function SelectionMenu({
               )}
               title={menu.name}
               onClick={() => {
-                if (menu.execute.type !== "userInput") {
+                if (menu.execute.type !== "input") {
                   onMenuSelected(menu.execute);
                 } else {
                   const inputArgs = menu.execute.args as InputArgs;
@@ -111,7 +111,7 @@ export default function SelectionMenu({
                             },
                           ];
                           onMenuSelected({
-                            type: "styleManager",
+                            type: "style",
                             args: style,
                           });
                         }}
@@ -131,14 +131,14 @@ export default function SelectionMenu({
                         }}
                         onConfirm={(data, remove) => {
                           switch (inputArgs.executionTypeAfterInput) {
-                            case "linkManager": {
+                            case "link": {
                               onMenuSelected({
-                                type: "linkManager",
+                                type: "link",
                                 args: data,
                               });
                               break;
                             }
-                            case "styleManager": {
+                            case "style": {
                               const style: Style[] = [
                                 {
                                   name: (inputArgs.initialPayload as Style)
@@ -148,7 +148,7 @@ export default function SelectionMenu({
                                 },
                               ];
                               onMenuSelected({
-                                type: "styleManager",
+                                type: "style",
                                 args: style,
                               });
                               break;
