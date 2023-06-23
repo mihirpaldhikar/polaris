@@ -571,12 +571,13 @@ export default function Editor({
     previousContent: Content,
     caretOffset: number
   ): void {
-    const actionMenus: Menu[] = [
+    let actionMenus: Menu[] = [
       {
         id: generateMenuId(),
         name: "Title",
         description: `Change ${block.role} to Title`,
         icon: <TitleIcon />,
+        allowedOn: ["subTitle", "heading", "subHeading", "paragraph"],
         execute: {
           type: "roleManager",
           args: "title",
@@ -587,6 +588,7 @@ export default function Editor({
         name: "Sub Title",
         description: `Change ${block.role} to Sub Title`,
         icon: <SubTitleIcon />,
+        allowedOn: ["title", "heading", "subHeading", "paragraph"],
         execute: {
           type: "roleManager",
           args: "subTitle",
@@ -597,6 +599,7 @@ export default function Editor({
         name: "Heading",
         description: `Change ${block.role} to Heading`,
         icon: <HeadingIcon />,
+        allowedOn: ["title", "subTitle", "subHeading", "paragraph"],
         execute: {
           type: "roleManager",
           args: "heading",
@@ -607,6 +610,7 @@ export default function Editor({
         name: "Subheading",
         description: `Change ${block.role} to Subheading`,
         icon: <SubHeadingIcon />,
+        allowedOn: ["title", "subTitle", "heading", "paragraph"],
         execute: {
           type: "roleManager",
           args: "subHeading",
@@ -617,6 +621,7 @@ export default function Editor({
         name: "Paragraph",
         description: `Change ${block.role} to Paragraph`,
         icon: <ParagraphIcon />,
+        allowedOn: ["title", "subTitle", "heading", "subHeading"],
         execute: {
           type: "roleManager",
           args: "paragraph",
@@ -627,6 +632,7 @@ export default function Editor({
         name: "Align Start",
         description: `Align text to start`,
         icon: <AlignStartIcon />,
+        allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
         execute: {
           type: "styleManager",
           args: [
@@ -642,6 +648,7 @@ export default function Editor({
         name: "Align Center",
         description: `Align text at the center`,
         icon: <AlignCenterIcon />,
+        allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
         execute: {
           type: "styleManager",
           args: [
@@ -657,6 +664,7 @@ export default function Editor({
         name: "Align End",
         description: `Align text at the end`,
         icon: <AlignEndIcon />,
+        allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
         execute: {
           type: "styleManager",
           args: [
@@ -668,6 +676,13 @@ export default function Editor({
         },
       },
     ];
+
+    actionMenus = actionMenus.filter((menu) => {
+      if (menu.allowedOn !== undefined) {
+        return menu.allowedOn?.includes(block.role);
+      }
+      return true;
+    });
 
     const blockIndex = contents.indexOf(block);
     const popupNode = window.document.getElementById(`popup-${blob.id}`);
