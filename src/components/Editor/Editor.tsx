@@ -768,11 +768,24 @@ export default function Editor({
 
   return (
     <Fragment>
-      <div id={`popup-${blob.id}`}></div>
-      <div id={`dialog-${blob.id}`}></div>
+      <div
+        id={`popup-${blob.id}`}
+        onContextMenu={(event) => {
+          event.preventDefault();
+        }}
+      ></div>
+      <div
+        id={`dialog-${blob.id}`}
+        onContextMenu={(event) => {
+          event.preventDefault();
+        }}
+      ></div>
       <div
         id={`editor-${blob.id}`}
         className={"min-h-screen w-full px-2 pb-60"}
+        onContextMenu={(event) => {
+          event.preventDefault();
+        }}
       >
         {contents.map((block, index) => {
           return (

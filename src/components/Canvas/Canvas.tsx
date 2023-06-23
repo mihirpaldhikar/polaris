@@ -372,6 +372,9 @@ export default function Canvas({
       onMouseUp: () => {
         onSelect(block);
       },
+      onContextMenu: (event: MouseEvent) => {
+        event.preventDefault();
+      },
     });
   }
 
