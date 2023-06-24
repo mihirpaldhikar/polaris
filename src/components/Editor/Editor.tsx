@@ -715,7 +715,9 @@ export default function Editor({
     const { x, y } = getCaretCoordinates(true);
     const actionMenuCoordinates: Coordinates = {
       x: block.content.length === 0 ? blockNode.getBoundingClientRect().x : x,
-      y: block.content.length === 0 ? blockNode.getBoundingClientRect().y : y,
+      y:
+        (block.content.length === 0 ? blockNode.getBoundingClientRect().y : y) +
+        30,
     };
 
     window.dispatchEvent(actionMenuOpenedEvent);

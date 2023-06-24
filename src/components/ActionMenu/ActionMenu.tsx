@@ -17,6 +17,10 @@ import { type Coordinates, type Executable, type Menu } from "../../interfaces";
 import { isAllowedActionMenuKey } from "../../utils";
 import { matchSorter } from "match-sorter";
 
+const ACTION_MENU_HEIGHT: number = 246;
+const ACTION_MENU_WIDTH: number = 288;
+const ACTION_MENU_OPTION_HEIGHT: number = 58;
+
 interface ActionMenuProps {
   coordinates: Coordinates;
   menu: Menu[];
@@ -32,6 +36,17 @@ export default function ActionMenu({
   onClose,
   onEscape,
 }: ActionMenuProps): JSX.Element {
+  const xAxis =
+    window.innerWidth - (coordinates.x + ACTION_MENU_WIDTH) <= 0
+      ? coordinates.x - ACTION_MENU_WIDTH
+      : coordinates.x;
+
+  const [yAxis, setYAxis] = useState(
+    window.innerHeight - (coordinates.y + ACTION_MENU_HEIGHT) <= 0
+      ? coordinates.y - ACTION_MENU_HEIGHT - 40
+      : coordinates.y
+  );
+
   const currentMenuIndex = useRef(-1);
   const query = useRef("");
   const [matchedMenu, setMatchedMenu] = useState([...menu]);
@@ -58,10 +73,8 @@ export default function ActionMenu({
           event.preventDefault();
           currentMenuIndex.current =
             (currentMenuIndex.current + 1) % matchedMenu.length;
-          const menuNode = document.getElementById(
-            matchedMenu[currentMenuIndex.current].id
-          ) as HTMLElement;
-          menuNode.focus();
+
+          focusMenuNode();
           break;
         }
         case "arrowup": {
@@ -70,10 +83,8 @@ export default function ActionMenu({
             (currentMenuIndex.current - 1 < 0
               ? matchedMenu.length - 1
               : currentMenuIndex.current - 1) % matchedMenu.length;
-          const menuNode = document.getElementById(
-            matchedMenu[currentMenuIndex.current].id
-          ) as HTMLElement;
-          menuNode.focus();
+
+          focusMenuNode();
           break;
         }
         case "backspace": {
@@ -82,11 +93,21 @@ export default function ActionMenu({
           }
           query.current = query.current.substring(0, query.current.length - 1);
 
-          setMatchedMenu(
-            matchSorter(menu, query.current, {
-              keys: ["name"],
-            })
+          const matchedMenu =
+            query.current.length === 0
+              ? menu
+              : matchSorter(menu, query.current, {
+                  keys: ["name"],
+                });
+
+          setYAxis(
+            matchedMenu.length === menu.length &&
+              window.innerHeight - (coordinates.y + ACTION_MENU_HEIGHT) <= 0
+              ? coordinates.y - ACTION_MENU_HEIGHT - 40
+              : coordinates.y
           );
+
+          setMatchedMenu(matchedMenu);
           break;
         }
         default: {
@@ -103,8 +124,21 @@ export default function ActionMenu({
             if (matchedMenu.length === 0) {
               onClose();
             } else {
-              setMatchedMenu(matchedMenu);
               currentMenuIndex.current = 0;
+
+              setYAxis(
+                matchedMenu.length !== menu.length &&
+                  window.innerHeight -
+                    (coordinates.y +
+                      matchedMenu.length * ACTION_MENU_OPTION_HEIGHT) <=
+                    0
+                  ? coordinates.y -
+                      matchedMenu.length * ACTION_MENU_OPTION_HEIGHT -
+                      (matchedMenu.length <= 3 ? matchedMenu.length * 22 : 0)
+                  : coordinates.y
+              );
+
+              setMatchedMenu(matchedMenu);
             }
           }
           break;
@@ -116,13 +150,28 @@ export default function ActionMenu({
     return () => {
       window.removeEventListener("keydown", keyManager);
     };
-  }, [matchedMenu, menu, onClose, onEscape, onSelect]);
+  }, [
+    coordinates.y,
+    focusMenuNode,
+    matchedMenu,
+    menu,
+    onClose,
+    onEscape,
+    onSelect,
+  ]);
+
+  function focusMenuNode(): void {
+    const menuNode = document.getElementById(
+      matchedMenu[currentMenuIndex.current].id
+    ) as HTMLElement;
+    menuNode.focus();
+  }
 
   return (
     <div
       style={{
-        top: coordinates.y + 30,
-        left: coordinates.x,
+        top: yAxis,
+        left: xAxis,
       }}
       className={
         "fixed flex max-h-[246px] w-72 scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-md"
@@ -135,7 +184,7 @@ export default function ActionMenu({
             id={menu.id}
             tabIndex={0}
             className={
-              "flex cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-2 text-sm font-semibold text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
+              "flex h-[58px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-2 text-sm font-semibold text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
             }
             onClick={() => {
               onSelect(menu.execute);
