@@ -580,9 +580,13 @@ export default function Editor({
 
     editorNode.addEventListener(
       "keydown",
-      () => {
-        selection.removeAllRanges();
-        popupRoot.render(<Fragment />);
+      (event) => {
+        if (event.ctrlKey) {
+          popupRoot.render(<Fragment />);
+        } else {
+          selection.removeAllRanges();
+          popupRoot.render(<Fragment />);
+        }
       },
       {
         once: true,
