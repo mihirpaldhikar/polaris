@@ -17,9 +17,9 @@ import { type Coordinates, type Executable, type Menu } from "../../interfaces";
 import { isAllowedActionMenuKey } from "../../utils";
 import { matchSorter } from "match-sorter";
 
-const ACTION_MENU_HEIGHT: number = 246;
-const ACTION_MENU_WIDTH: number = 288;
-const ACTION_MENU_OPTION_HEIGHT: number = 58;
+const ACTION_MENU_HEIGHT: number = 250;
+const ACTION_MENU_WIDTH: number = 310;
+const ACTION_MENU_OPTION_HEIGHT: number = 60;
 
 interface ActionMenuProps {
   coordinates: Coordinates;
@@ -167,7 +167,7 @@ export default function ActionMenu({
         left: xAxis,
       }}
       className={
-        "fixed flex max-h-[246px] w-72 scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-md"
+        "fixed flex max-h-[250px] w-[310px] scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-md"
       }
     >
       {matchedMenu.map((menu) => {
@@ -177,7 +177,7 @@ export default function ActionMenu({
             id={menu.id}
             tabIndex={0}
             className={
-              "flex h-[58px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-2 text-sm font-semibold text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
+              "flex h-[60px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-2 text-sm font-semibold text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
             }
             onClick={() => {
               onSelect(menu.execute);
