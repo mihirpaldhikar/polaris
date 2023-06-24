@@ -18,6 +18,12 @@
  * @description Describes the role of the block in the Editor when rendered.
  * @author Mihir Paldhikar
  */
-type Role = "title" | "subTitle" | "heading" | "subHeading" | "paragraph";
+type Role =
+  | "title"
+  | "subTitle"
+  | "heading"
+  | "subHeading"
+  | "paragraph"
+  | "blockquote";
 
 export default Role;

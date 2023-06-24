@@ -40,6 +40,8 @@ export function createNodeFromRole(role: Role): string {
       return "h4";
     case "paragraph":
       return "p";
+    case "blockquote":
+      return "blockquote";
     default:
       return "p";
   }

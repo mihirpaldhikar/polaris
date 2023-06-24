@@ -49,6 +49,7 @@ import {
   AlignCenterIcon,
   AlignEndIcon,
   AlignStartIcon,
+  BlockquoteIcon,
   BoldIcon,
   HeadingIcon,
   ItalicIcon,
@@ -102,6 +103,43 @@ export default function Editor({
 }: WorkspaceProps): JSX.Element {
   const [contents, updateContents] = useState<Block[]>(
     blob.contents.map((block) => {
+      if (
+        block.role === "blockquote" &&
+        (block.style.length === 0 ||
+          !block.style.every(
+            (style) =>
+              style.name === "backgroundColor" ||
+              style.name === "padding" ||
+              style.name === "borderTopRightRadius" ||
+              style.name === "borderBottomRightRadius" ||
+              style.name === "borderLeft"
+          ))
+      ) {
+        block.style.push(
+          ...[
+            {
+              name: "backgroundColor",
+              value: "#f8f5f5",
+            },
+            {
+              name: "borderLeft",
+              value: "6px solid #ccc",
+            },
+            {
+              name: "padding",
+              value: "15px",
+            },
+            {
+              name: "borderTopRightRadius",
+              value: "8px",
+            },
+            {
+              name: "borderBottomRightRadius",
+              value: "8px",
+            },
+          ]
+        );
+      }
       return {
         ...block,
         reference: createRef<HTMLElement>(),
@@ -574,7 +612,13 @@ export default function Editor({
         name: "Title",
         description: `Change ${block.role} to Title`,
         icon: <TitleIcon />,
-        allowedOn: ["subTitle", "heading", "subHeading", "paragraph"],
+        allowedOn: [
+          "subTitle",
+          "heading",
+          "subHeading",
+          "paragraph",
+          "blockquote",
+        ],
         execute: {
           type: "role",
           args: "title",
@@ -585,7 +629,13 @@ export default function Editor({
         name: "Sub Title",
         description: `Change ${block.role} to Sub Title`,
         icon: <SubTitleIcon />,
-        allowedOn: ["title", "heading", "subHeading", "paragraph"],
+        allowedOn: [
+          "title",
+          "heading",
+          "subHeading",
+          "paragraph",
+          "blockquote",
+        ],
         execute: {
           type: "role",
           args: "subTitle",
@@ -596,7 +646,13 @@ export default function Editor({
         name: "Heading",
         description: `Change ${block.role} to Heading`,
         icon: <HeadingIcon />,
-        allowedOn: ["title", "subTitle", "subHeading", "paragraph"],
+        allowedOn: [
+          "title",
+          "subTitle",
+          "subHeading",
+          "paragraph",
+          "blockquote",
+        ],
         execute: {
           type: "role",
           args: "heading",
@@ -607,7 +663,7 @@ export default function Editor({
         name: "Subheading",
         description: `Change ${block.role} to Subheading`,
         icon: <SubHeadingIcon />,
-        allowedOn: ["title", "subTitle", "heading", "paragraph"],
+        allowedOn: ["title", "subTitle", "heading", "paragraph", "blockquote"],
         execute: {
           type: "role",
           args: "subHeading",
@@ -618,10 +674,21 @@ export default function Editor({
         name: "Paragraph",
         description: `Change ${block.role} to Paragraph`,
         icon: <ParagraphIcon />,
-        allowedOn: ["title", "subTitle", "heading", "subHeading"],
+        allowedOn: ["title", "subTitle", "heading", "subHeading", "blockquote"],
         execute: {
           type: "role",
           args: "paragraph",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Blockquote",
+        description: `Change ${block.role} to Blockquote`,
+        icon: <BlockquoteIcon />,
+        allowedOn: ["paragraph"],
+        execute: {
+          type: "role",
+          args: "blockquote",
         },
       },
       {
@@ -742,6 +809,42 @@ export default function Editor({
             case "role": {
               if (typeof execute.args === "string") {
                 newBlock.role = execute.args as Role;
+                if (newBlock.role === "blockquote") {
+                  newBlock.style.push(
+                    ...[
+                      {
+                        name: "backgroundColor",
+                        value: "#f8f5f5",
+                      },
+                      {
+                        name: "borderLeft",
+                        value: "6px solid #ccc",
+                      },
+                      {
+                        name: "padding",
+                        value: "15px",
+                      },
+                      {
+                        name: "borderTopRightRadius",
+                        value: "8px",
+                      },
+                      {
+                        name: "borderBottomRightRadius",
+                        value: "8px",
+                      },
+                    ]
+                  );
+                } else {
+                  newBlock.style = newBlock.style.filter((style) => {
+                    return !(
+                      style.name === "backgroundColor" ||
+                      style.name === "padding" ||
+                      style.name === "borderTopRightRadius" ||
+                      style.name === "borderBottomRightRadius" ||
+                      style.name === "borderLeft"
+                    );
+                  });
+                }
               }
               break;
             }
