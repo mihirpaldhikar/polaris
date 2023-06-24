@@ -74,7 +74,11 @@ export default function ActionMenu({
           currentMenuIndex.current =
             (currentMenuIndex.current + 1) % matchedMenu.length;
 
-          focusMenuNode();
+          const menuNode = document.getElementById(
+            matchedMenu[currentMenuIndex.current].id
+          ) as HTMLElement;
+          menuNode.focus();
+
           break;
         }
         case "arrowup": {
@@ -84,7 +88,11 @@ export default function ActionMenu({
               ? matchedMenu.length - 1
               : currentMenuIndex.current - 1) % matchedMenu.length;
 
-          focusMenuNode();
+          const menuNode = document.getElementById(
+            matchedMenu[currentMenuIndex.current].id
+          ) as HTMLElement;
+          menuNode.focus();
+
           break;
         }
         case "backspace": {
@@ -150,22 +158,7 @@ export default function ActionMenu({
     return () => {
       window.removeEventListener("keydown", keyManager);
     };
-  }, [
-    coordinates.y,
-    focusMenuNode,
-    matchedMenu,
-    menu,
-    onClose,
-    onEscape,
-    onSelect,
-  ]);
-
-  function focusMenuNode(): void {
-    const menuNode = document.getElementById(
-      matchedMenu[currentMenuIndex.current].id
-    ) as HTMLElement;
-    menuNode.focus();
-  }
+  }, [coordinates.y, matchedMenu, menu, onClose, onEscape, onSelect]);
 
   return (
     <div
