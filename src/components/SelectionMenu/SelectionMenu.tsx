@@ -50,7 +50,7 @@ export default function SelectionMenu({
 
   const xAxis =
     window.innerWidth - (ACTION_MENU_WIDTH + coordinates.x) <= 1
-      ? coordinates.x - ACTION_MENU_WIDTH
+      ? coordinates.x - ACTION_MENU_WIDTH - 30
       : coordinates.x;
 
   const yAxis =
