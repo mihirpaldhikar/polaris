@@ -31,7 +31,7 @@ export function parseBlobToHTML(blob: Blob): string {
           node.style.setProperty(style.name, style.value);
         }
       }
-      if (block.type === "text") {
+      if (block.type === "text" && typeof block.content === "string") {
         node.innerHTML = block.content;
         for (const childNode of node.childNodes) {
           if (isInlineSpecifierNode(childNode)) {

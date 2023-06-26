@@ -39,11 +39,18 @@ interface ComposerProps {
     newBlock: Block,
     position: "above" | "below"
   ) => void;
+  onCreateList: (parentBlock: Block, newChildBlock: Block) => void;
   onDelete: (
     block: Block,
     previousBlock: Block,
     childNodeIndex: number,
     caretOffset: number
+  ) => void;
+  onListChildDelete: (
+    parentBlock: Block,
+    childBlockIndex: number,
+    caretOffset: number,
+    childNodeIndex: number
   ) => void;
   onPaste: (
     block: Block,
@@ -69,7 +76,9 @@ interface ComposerProps {
  * @param nextBlock
  * @param onChange
  * @param onCreate
+ * @param onCreateList
  * @param onDelete
+ * @param onListChildDelete
  * @param onPaste
  *
  * @param onSelect
@@ -86,7 +95,9 @@ export default function Composer({
   nextBlock,
   onChange,
   onCreate,
+  onCreateList,
   onDelete,
+  onListChildDelete,
   onPaste,
   onSelect,
   onCommandKeyPressed,
@@ -206,7 +217,9 @@ export default function Composer({
             )
           );
       } else {
-        previousBlock.content = previousBlock.content.concat(block.content);
+        previousBlock.content = (previousBlock.content as string).concat(
+          block.content as string
+        );
       }
     }
 
@@ -281,6 +294,207 @@ export default function Composer({
     }
   }
 
+  function listEnterHandler(
+    childBlockIndex: number,
+    splitContent: boolean,
+    caretOffset: number
+  ): void {
+    if (
+      !Array.isArray(block.content) ||
+      typeof block.content[childBlockIndex].content !== "string"
+    )
+      return;
+
+    if (
+      block.content.length - 1 === childBlockIndex &&
+      block.content[childBlockIndex].content.length === 0 &&
+      caretOffset === 0
+    ) {
+      const textBlock: Block = {
+        id: generateBlockId(),
+        type: "text",
+        role: "paragraph",
+        reference: createRef<HTMLElement>(),
+        content: "",
+        style: [],
+      };
+      block.content.splice(childBlockIndex, 1);
+      onCreate(block, textBlock, "below");
+      return;
+    }
+
+    const newListChildBlock: Block = {
+      id: generateBlockId(),
+      type: "text",
+      role: "listChild",
+      content: "",
+      style: [],
+    };
+
+    if (splitContent) {
+      const tempNode = document.createElement("div");
+      const listChildNode = getBlockNode(block.content[childBlockIndex].id);
+      tempNode.innerHTML = block.content[childBlockIndex].content as string;
+      if (listChildNode == null) {
+        return;
+      }
+      const nodeAtCaretOffset = getNodeAt(listChildNode, caretOffset);
+      const caretNodeOffset = nodeOffset(listChildNode, nodeAtCaretOffset);
+      const caretNodeOffsetWithHTML = nodeOffset(
+        listChildNode,
+        nodeAtCaretOffset,
+        {
+          includeInnerHTML: true,
+        }
+      );
+      if (isInlineSpecifierNode(nodeAtCaretOffset)) {
+        const nodeSplitAtCaretOffset = splitElement(
+          nodeAtCaretOffset as HTMLElement,
+          caretOffset - caretNodeOffset
+        );
+
+        block.content[childBlockIndex].content = tempNode.innerHTML
+          .substring(0, caretNodeOffsetWithHTML)
+          .concat(nodeSplitAtCaretOffset[0]);
+
+        newListChildBlock.content = nodeSplitAtCaretOffset[1].concat(
+          tempNode.innerHTML.substring(
+            caretNodeOffsetWithHTML +
+              (nodeAtCaretOffset as HTMLElement).outerHTML.length
+          )
+        );
+      } else if (
+        listChildNode.innerHTML.substring(0, caretOffset) ===
+        listChildNode.innerText.substring(0, caretOffset)
+      ) {
+        block.content[childBlockIndex].content = tempNode.innerHTML.substring(
+          0,
+          caretOffset
+        );
+        newListChildBlock.content = tempNode.innerHTML.substring(caretOffset);
+      } else {
+        block.content[childBlockIndex].content = tempNode.innerHTML
+          .substring(0, caretNodeOffsetWithHTML)
+          .concat(
+            (nodeAtCaretOffset.textContent as string).substring(
+              0,
+              caretOffset - caretNodeOffset
+            )
+          );
+
+        newListChildBlock.content = (nodeAtCaretOffset.textContent as string)
+          .substring(caretOffset - caretNodeOffset)
+          .concat(
+            tempNode.innerHTML.substring(
+              caretNodeOffsetWithHTML +
+                (nodeAtCaretOffset.textContent as string).length
+            )
+          );
+      }
+      newListChildBlock.style = block.content[childBlockIndex].style;
+    }
+
+    block.content.splice(childBlockIndex + 1, 0, newListChildBlock);
+
+    onCreateList(block, newListChildBlock);
+  }
+
+  function deleteListChildHandler(
+    childBlockIndex: number,
+    joinContent: boolean
+  ): void {
+    if (!Array.isArray(block.content)) {
+      return;
+    }
+
+    const tempNode = document.createElement("div");
+
+    tempNode.innerHTML = block.content[childBlockIndex - 1].content as string;
+
+    const childNodeArray: Node[] = Array.from(tempNode.childNodes);
+
+    if (
+      joinContent &&
+      typeof block.content[childBlockIndex].content === "string" &&
+      typeof block.content[childBlockIndex - 1].content === "string"
+    ) {
+      block.content[childBlockIndex - 1].content = (
+        block.content[childBlockIndex - 1].content as string
+      ).concat(block.content[childBlockIndex].content as string);
+    }
+
+    block.content.splice(childBlockIndex, 1);
+
+    const computedCaretOffset =
+      childNodeArray[childNodeArray.length - 1] === undefined
+        ? 0
+        : (childNodeArray[childNodeArray.length - 1].textContent ?? "").length;
+
+    const computedChildNodeIndex =
+      childNodeArray[childNodeArray.length - 1] === undefined
+        ? -1
+        : childNodeArray.length - 1;
+
+    onListChildDelete(
+      block,
+      childBlockIndex - 1,
+      computedCaretOffset,
+      computedChildNodeIndex
+    );
+  }
+
+  function listNavigationHandler(
+    childBlockIndex: number,
+    navigate: "up" | "down",
+    caretOffset: number
+  ): void {
+    if (!Array.isArray(block.content)) {
+      return;
+    }
+
+    const listChildNode = getBlockNode(
+      block.content[childBlockIndex].id
+    ) as HTMLElement;
+
+    switch (navigate) {
+      case "up": {
+        const jumpNode: Node =
+          listChildNode.lastChild?.textContent != null
+            ? listChildNode.lastChild.nodeType === Node.TEXT_NODE
+              ? (listChildNode.lastChild as Node)
+              : (listChildNode.lastChild.firstChild as Node)
+            : listChildNode;
+
+        const computedCaretOffset: number =
+          caretOffset === -1 ||
+          caretOffset >= (jumpNode.textContent?.length as number)
+            ? (jumpNode.textContent?.length as number)
+            : caretOffset;
+
+        setCaretOffset(jumpNode, computedCaretOffset);
+        break;
+      }
+      case "down": {
+        const jumpNode: Node =
+          listChildNode.firstChild?.textContent != null
+            ? listChildNode.firstChild.nodeType === Node.TEXT_NODE
+              ? (listChildNode.firstChild as Node)
+              : (listChildNode.firstChild.firstChild as Node)
+            : listChildNode;
+
+        const computedCaretOffset: number =
+          caretOffset === -1
+            ? 0
+            : caretOffset >= (jumpNode.textContent?.length as number)
+            ? (jumpNode.textContent?.length as number)
+            : caretOffset;
+
+        setCaretOffset(jumpNode, computedCaretOffset);
+        break;
+      }
+    }
+  }
+
   return (
     <Canvas
       editable={editable}
@@ -292,6 +506,9 @@ export default function Composer({
       onPaste={onPaste}
       onSelect={onSelect}
       onActionKeyPressed={onCommandKeyPressed}
+      onListEnter={listEnterHandler}
+      onListChildDelete={deleteListChildHandler}
+      onListNavigate={listNavigationHandler}
     />
   );
 }

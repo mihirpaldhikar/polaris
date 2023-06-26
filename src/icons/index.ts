@@ -28,3 +28,5 @@ export { default as AlignStartIcon } from "./AlignStartIcon";
 export { default as AlignCenterIcon } from "./AlignCenterIcon";
 export { default as AlignEndIcon } from "./AlignEndIcon";
 export { default as BlockquoteIcon } from "./BlockquoteIcon";
+export { default as UnorderedListIcon } from "./UnorderedListIcon";
+export { default as OrderedListIcon } from "./OrderedListIcon";

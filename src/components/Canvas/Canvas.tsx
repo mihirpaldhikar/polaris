@@ -34,21 +34,33 @@ import {
   nodeOffset,
   setNodeStyle,
 } from "../../utils";
-import { type Content } from "../../types";
+import { type Content, type Type } from "../../types";
 import {
   BLOCK_NODE,
   INLINE_SPECIFIER_NODE,
   LINK_ATTRIBUTE,
   NODE_TYPE,
 } from "../../constants";
+import { ListChild } from "../ListChild";
 
 interface CanvasProps {
   editable: boolean;
   block: Block;
   onChange: (block: Block) => void;
   onEnter: (splitContent: boolean, caretOffset: number) => void;
+  onListEnter: (
+    childBlockIndex: number,
+    splitContent: boolean,
+    caretOffset: number
+  ) => void;
   onDelete: (block: Block, joinContent: boolean) => void;
+  onListChildDelete: (childBlockIndex: number, joinContent: boolean) => void;
   onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
+  onListNavigate: (
+    childBlockIndex: number,
+    navigate: "up" | "down",
+    caretOffset: number
+  ) => void;
   onPaste: (
     block: Block,
     content: Content | Content[],
@@ -70,8 +82,11 @@ interface CanvasProps {
  * @param block
  * @param onChange
  * @param onEnter
+ * @param onListEnter
  * @param onDelete
+ * @param onListChildDelete
  * @param onNavigate
+ * @param onListNavigate
  * @param onPaste
  *
  * @param onSelect
@@ -88,29 +103,32 @@ export default function Canvas({
   block,
   onChange,
   onEnter,
+  onListEnter,
   onDelete,
+  onListChildDelete,
   onNavigate,
+  onListNavigate,
   onPaste,
   onSelect,
   onActionKeyPressed,
 }: CanvasProps): JSX.Element {
-  const action = useRef(false);
+  const isActionMenuOpen = useRef(false);
 
   useEffect(() => {
     window.addEventListener("actionMenuOpened", () => {
-      action.current = true;
+      isActionMenuOpen.current = true;
     });
 
     window.addEventListener("actionMenuClosed", () => {
-      action.current = false;
+      isActionMenuOpen.current = false;
     });
     return () => {
       window.removeEventListener("actionMenuOpened", () => {
-        action.current = false;
+        isActionMenuOpen.current = false;
       });
 
       window.removeEventListener("actionMenuClosed", () => {
-        action.current = false;
+        isActionMenuOpen.current = false;
       });
     };
   }, []);
@@ -119,10 +137,29 @@ export default function Canvas({
    * @function notifyChange
    * @param event
    *
+   * @param blockType
+   * @param childBlock
    * @description Whenever the Node is mutated, this function updates the content of the block and notifies the changes to the listeners.
    */
-  function notifyChange(event: ChangeEvent<HTMLElement>): void {
-    block.content = event.target.innerHTML;
+  function notifyChange(
+    event: ChangeEvent<HTMLElement>,
+    blockType: Type,
+    childBlock?: Block
+  ): void {
+    switch (blockType) {
+      case "text": {
+        block.content = event.target.innerHTML;
+        break;
+      }
+      case "list": {
+        if (childBlock !== undefined && Array.isArray(block.content)) {
+          const blockIndex = block.content.indexOf(childBlock);
+          block.content[blockIndex].content = event.target.innerHTML;
+          break;
+        }
+      }
+    }
+
     onChange(block);
   }
 
@@ -130,13 +167,23 @@ export default function Canvas({
    * @function keyHandler
    * @param event
    *
+   * @param blockType
+   * @param index
    * @description Handles the events specified when keys are pressed.
    *
    * @author Mihir Paldhikar
    */
 
-  async function keyHandler(event: KeyboardEvent): Promise<void> {
-    const blockNode = getBlockNode(block.id);
+  function keyHandler(
+    event: KeyboardEvent,
+    blockType: Type,
+    index: number
+  ): void {
+    const blockNode = getBlockNode(
+      block.type === "list" && Array.isArray(block.content)
+        ? block.content[index].id
+        : block.id
+    );
 
     if (blockNode == null) return;
 
@@ -147,13 +194,31 @@ export default function Canvas({
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
-        if (action.current) {
+        if (isActionMenuOpen.current) {
           break;
         }
+
+        if (block.type === "list" && Array.isArray(block.content)) {
+          onListEnter(
+            index,
+            caretOffset !== block.content[index].content.length,
+            caretOffset
+          );
+          break;
+        }
+
         onEnter(caretOffset !== blockNode.innerText.length, caretOffset);
         break;
       }
       case "backspace": {
+        if (block.type === "list" && Array.isArray(block.content)) {
+          if (index !== 0 && caretOffset === 0) {
+            event.preventDefault();
+            onListChildDelete(index, block.content[index].content !== "");
+          }
+          break;
+        }
+
         if (
           caretOffset === 0 &&
           nodeSiblings.previous != null &&
@@ -166,6 +231,11 @@ export default function Canvas({
       }
       case "delete": {
         if (event.ctrlKey) {
+          if (block.type === "list" && Array.isArray(block.content)) {
+            onListChildDelete(index, false);
+            break;
+          }
+
           if (
             nodeSiblings.previous != null &&
             nodeSiblings.previous.getAttribute("data-block-type") === block.type
@@ -177,6 +247,18 @@ export default function Canvas({
         break;
       }
       case "arrowleft": {
+        if (block.type === "list" && Array.isArray(block.content)) {
+          if (
+            (!event.ctrlKey || !event.shiftKey) &&
+            caretOffset === 0 &&
+            index - 1 !== -1
+          ) {
+            event.preventDefault();
+            onListNavigate(index - 1, "up", -1);
+          }
+          break;
+        }
+
         if (
           (!event.ctrlKey || !event.shiftKey) &&
           caretOffset === 0 &&
@@ -190,6 +272,18 @@ export default function Canvas({
         break;
       }
       case "arrowright": {
+        if (block.type === "list" && Array.isArray(block.content)) {
+          if (
+            (!event.ctrlKey || !event.shiftKey) &&
+            caretOffset === blockNode.innerText.length &&
+            index + 1 !== -block.content.length
+          ) {
+            event.preventDefault();
+            onListNavigate(index + 1, "down", -1);
+          }
+          break;
+        }
+
         if (
           (!event.ctrlKey || !event.shiftKey) &&
           caretOffset === blockNode.innerText.length &&
@@ -203,10 +297,19 @@ export default function Canvas({
       }
 
       case "arrowup": {
-        if (action.current) {
+        if (isActionMenuOpen.current) {
           event.preventDefault();
           break;
         }
+
+        if (block.type === "list" && Array.isArray(block.content)) {
+          if (index - 1 !== -1) {
+            event.preventDefault();
+            onListNavigate(index - 1, "up", caretOffset);
+          }
+          break;
+        }
+
         const computedDistance: number =
           block.role === "paragraph" || block.role === "subTitle" ? 3 : 2;
 
@@ -225,10 +328,19 @@ export default function Canvas({
         break;
       }
       case "arrowdown": {
-        if (action.current) {
+        if (isActionMenuOpen.current) {
           event.preventDefault();
           break;
         }
+
+        if (block.type === "list" && Array.isArray(block.content)) {
+          if (index + 1 !== block.content.length) {
+            event.preventDefault();
+            onListNavigate(index + 1, "up", caretOffset);
+          }
+          break;
+        }
+
         const computedDistance: number =
           block.role === "title" ? 44 : block.role === "subTitle" ? 32 : 28;
 
@@ -246,12 +358,17 @@ export default function Canvas({
       case "v": {
         if (event.ctrlKey) {
           event.preventDefault();
-          const copiedText = await navigator.clipboard.readText();
-          if (copiedText.includes("\n")) {
-            onPaste(block, copiedText.trim().split(/\r?\n/), caretOffset);
-          } else {
-            onPaste(block, copiedText, caretOffset);
+
+          if (block.type === "list" && Array.isArray(block.content)) {
+            break;
           }
+          void navigator.clipboard.readText().then((copiedText) => {
+            if (copiedText.includes("\n")) {
+              onPaste(block, copiedText.trim().split(/\r?\n/), caretOffset);
+            } else {
+              onPaste(block, copiedText, caretOffset);
+            }
+          });
         }
         break;
       }
@@ -307,12 +424,26 @@ export default function Canvas({
         break;
       }
       case "/": {
-        onActionKeyPressed(
-          getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
-          block,
-          block.content,
-          caretOffset - nodeOffset(blockNode, getNodeAt(blockNode, caretOffset))
-        );
+        if (block.type === "list" && Array.isArray(block.content)) {
+          onActionKeyPressed(
+            getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
+            block.content[index],
+            block.content[index].content as string,
+            caretOffset -
+              nodeOffset(blockNode, getNodeAt(blockNode, caretOffset))
+          );
+          break;
+        }
+
+        if (typeof block.content === "string") {
+          onActionKeyPressed(
+            getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
+            block,
+            block.content,
+            caretOffset -
+              nodeOffset(blockNode, getNodeAt(blockNode, caretOffset))
+          );
+        }
         break;
       }
     }
@@ -366,8 +497,12 @@ export default function Canvas({
           ? "font-medium text-[19px]"
           : "font-normal text-[17px]"
       ),
-      onInput: notifyChange,
-      onKeyDown: keyHandler,
+      onInput: (event: ChangeEvent<HTMLElement>) => {
+        notifyChange(event, block.type);
+      },
+      onKeyDown: (event: KeyboardEvent) => {
+        keyHandler(event, block.type, -1);
+      },
       onClick: clickHandler,
       onMouseUp: () => {
         onSelect(block);
@@ -376,6 +511,48 @@ export default function Canvas({
         event.preventDefault();
       },
     });
+  }
+
+  if (block.type === "list" && Array.isArray(block.content)) {
+    return createElement(
+      createNodeFromRole(block.role),
+      {
+        "data-type": BLOCK_NODE,
+        "data-block-type": block.type,
+        id: block.id,
+        ref: block.reference,
+        role: block.role,
+        disabled: !editable,
+        style: setNodeStyle(block.style),
+        spellCheck: true,
+      },
+      block.content.map((content, index) => {
+        if (
+          content.type === "text" &&
+          content.role === "listChild" &&
+          typeof content.content === "string"
+        ) {
+          return (
+            <ListChild
+              key={content.id}
+              editable={editable}
+              content={content}
+              onClick={clickHandler}
+              onInput={(event) => {
+                notifyChange(event, block.type, content);
+              }}
+              onSelect={() => {
+                onSelect(content);
+              }}
+              onKeyDown={(event) => {
+                keyHandler(event, block.type, index);
+              }}
+            />
+          );
+        }
+        return <Fragment key={content.id} />;
+      })
+    );
   }
 
   /// If no valid block type is found, render an empty Fragment.

@@ -54,6 +54,7 @@ import {
   HeadingIcon,
   ItalicIcon,
   LinkIcon,
+  OrderedListIcon,
   ParagraphIcon,
   SubHeadingIcon,
   SubTitleIcon,
@@ -62,6 +63,7 @@ import {
   TextSizeIcon,
   TitleIcon,
   UnderlineIcon,
+  UnorderedListIcon,
 } from "../../icons";
 import {
   LINK_ATTRIBUTE,
@@ -136,6 +138,32 @@ export default function Editor({
             {
               name: "borderBottomRightRadius",
               value: "8px",
+            },
+          ]
+        );
+      } else if (
+        block.role === "unorderedList" &&
+        (block.style.length === 0 ||
+          !block.style.every((style) => style.name === "listStyleType"))
+      ) {
+        block.style.push(
+          ...[
+            {
+              name: "listStyleType",
+              value: "disc",
+            },
+          ]
+        );
+      } else if (
+        block.role === "orderedList" &&
+        (block.style.length === 0 ||
+          !block.style.every((style) => style.name === "listStyleType"))
+      ) {
+        block.style.push(
+          ...[
+            {
+              name: "listStyleType",
+              value: "decimal",
             },
           ]
         );
@@ -284,6 +312,7 @@ export default function Editor({
     content: Content | Content[],
     caretOffset: number
   ): void {
+    if (typeof block.content !== "string") return;
     const blockIndex = contents.indexOf(block);
     block.content = normalizeContent(block.content);
     const contentLengthAfterCaretOffset =
@@ -299,9 +328,13 @@ export default function Editor({
           style: block.style,
           content:
             index === 0
-              ? block.content.substring(0, caretOffset).concat(copiedText)
+              ? (block.content as string)
+                  .substring(0, caretOffset)
+                  .concat(copiedText)
               : index === content.length - 1
-              ? copiedText.concat(block.content.substring(caretOffset))
+              ? copiedText.concat(
+                  (block.content as string).substring(caretOffset)
+                )
               : copiedText,
         };
       });
@@ -309,7 +342,7 @@ export default function Editor({
       updateContents(contents);
 
       const pasteContentLength = normalizeContent(
-        pasteBlocks[pasteBlocks.length - 1].content
+        pasteBlocks[pasteBlocks.length - 1].content as string
       ).length;
 
       const computedCaretOffset: number =
@@ -322,10 +355,12 @@ export default function Editor({
         caretOffset: computedCaretOffset,
       });
     } else if (block.type === "text" && typeof content === "string") {
-      contents[blockIndex].content = contents[blockIndex].content
+      contents[blockIndex].content = (contents[blockIndex].content as string)
         .substring(0, caretOffset)
         .concat(content)
-        .concat(contents[blockIndex].content.substring(caretOffset));
+        .concat(
+          (contents[blockIndex].content as string).substring(caretOffset)
+        );
 
       updateContents(contents);
 
@@ -697,10 +732,41 @@ export default function Editor({
       },
       {
         id: generateMenuId(),
+        name: "Unordered List",
+        description: `Change ${block.role} to Unordered List`,
+        icon: <UnorderedListIcon />,
+        allowedOn: ["paragraph"],
+        execute: {
+          type: "role",
+          args: "unorderedList",
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Ordered List",
+        description: `Change ${block.role} to Ordered List`,
+        icon: <OrderedListIcon />,
+        allowedOn: ["paragraph"],
+        execute: {
+          type: "role",
+          args: "orderedList",
+        },
+      },
+      {
+        id: generateMenuId(),
         name: "Align Start",
         description: `Align text to start`,
         icon: <AlignStartIcon />,
-        allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
+        allowedOn: [
+          "title",
+          "subTitle",
+          "heading",
+          "subHeading",
+          "paragraph",
+          "orderedList",
+          "unorderedList",
+          "listChild",
+        ],
         execute: {
           type: "style",
           args: [
@@ -716,7 +782,16 @@ export default function Editor({
         name: "Align Center",
         description: `Align text at the center`,
         icon: <AlignCenterIcon />,
-        allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
+        allowedOn: [
+          "title",
+          "subTitle",
+          "heading",
+          "subHeading",
+          "paragraph",
+          "orderedList",
+          "unorderedList",
+          "listChild",
+        ],
         execute: {
           type: "style",
           args: [
@@ -732,7 +807,16 @@ export default function Editor({
         name: "Align End",
         description: `Align text at the end`,
         icon: <AlignEndIcon />,
-        allowedOn: ["title", "subTitle", "heading", "subHeading", "paragraph"],
+        allowedOn: [
+          "title",
+          "subTitle",
+          "heading",
+          "subHeading",
+          "paragraph",
+          "orderedList",
+          "unorderedList",
+          "listChild",
+        ],
         execute: {
           type: "style",
           args: [
@@ -752,7 +836,6 @@ export default function Editor({
       return true;
     });
 
-    const blockIndex = contents.indexOf(block);
     const popupNode = window.document.getElementById(`popup-${blob.id}`);
     const editorNode = window.document.getElementById(`editor-${blob.id}`);
     const blockNode = getBlockNode(block.id);
@@ -813,7 +896,45 @@ export default function Editor({
             case "role": {
               if (typeof execute.args === "string") {
                 newBlock.role = execute.args as Role;
-                if (newBlock.role === "blockquote") {
+                if (newBlock.role === "orderedList") {
+                  newBlock.type = "list";
+                  newBlock.style.push(
+                    ...[
+                      {
+                        name: "listStyleType",
+                        value: "number",
+                      },
+                    ]
+                  );
+                  newBlock.content = [
+                    {
+                      id: generateBlockId(),
+                      style: [],
+                      content: previousContent,
+                      type: "text",
+                      role: "listChild",
+                    },
+                  ];
+                } else if (newBlock.role === "unorderedList") {
+                  newBlock.type = "list";
+                  newBlock.style.push(
+                    ...[
+                      {
+                        name: "listStyleType",
+                        value: "disc",
+                      },
+                    ]
+                  );
+                  newBlock.content = [
+                    {
+                      id: generateBlockId(),
+                      style: [],
+                      content: previousContent,
+                      type: "text",
+                      role: "listChild",
+                    },
+                  ];
+                } else if (newBlock.role === "blockquote") {
                   newBlock.style.push(
                     ...[
                       {
@@ -845,7 +966,8 @@ export default function Editor({
                       style.name === "padding" ||
                       style.name === "borderTopRightRadius" ||
                       style.name === "borderBottomRightRadius" ||
-                      style.name === "borderLeft"
+                      style.name === "borderLeft" ||
+                      style.name === "listStyleType"
                     );
                   });
                 }
@@ -854,12 +976,29 @@ export default function Editor({
             }
             case "style": {
               if (Array.isArray(execute.args)) {
-                newBlock.style.push(...execute.args);
+                if (block.role === "listChild") {
+                  const listChildNode = getBlockNode(block.id) as HTMLElement;
+                  for (const contentBlock of contents) {
+                    if (
+                      (listChildNode.parentElement as HTMLElement).id ===
+                        contentBlock.id &&
+                      Array.isArray(contentBlock.content)
+                    ) {
+                      const childIndex = contentBlock.content.indexOf(block);
+                      contentBlock.content.splice(childIndex, 1, newBlock);
+                      contentBlock.style.push(...execute.args);
+                    }
+                  }
+                } else {
+                  newBlock.style.push(...execute.args);
+                }
               }
               break;
             }
           }
-          contents.splice(blockIndex, 1, newBlock);
+          if (block.role !== "listChild") {
+            contents.splice(contents.indexOf(block), 1, newBlock);
+          }
           updateContents(contents);
           setFocusedNode({
             nodeId: newBlock.id,
@@ -872,6 +1011,39 @@ export default function Editor({
 
     editorNode.addEventListener("mousedown", () => {
       popupRoot.render(<Fragment />);
+    });
+  }
+
+  function createListHandler(parentBlock: Block, newChildBlock: Block): void {
+    if (!Array.isArray(parentBlock.content)) {
+      return;
+    }
+    const parentBlockIndex = contents.indexOf(parentBlock);
+    contents[parentBlockIndex] = parentBlock;
+    updateContents(contents);
+    setFocusedNode({
+      nodeId: newChildBlock.id,
+      caretOffset: 0,
+      nodeIndex: 0,
+    });
+  }
+
+  function deleteListChildHandler(
+    parentBlock: Block,
+    childBlockIndex: number,
+    caretOffset: number,
+    childNodeIndex: number
+  ): void {
+    if (!Array.isArray(parentBlock.content)) {
+      return;
+    }
+    const parentBlockIndex = contents.indexOf(parentBlock);
+    contents[parentBlockIndex] = parentBlock;
+    updateContents(contents);
+    setFocusedNode({
+      nodeId: parentBlock.content[childBlockIndex].id,
+      caretOffset,
+      nodeIndex: childNodeIndex,
     });
   }
 
@@ -912,6 +1084,8 @@ export default function Editor({
               onPaste={pasteHandler}
               onSelect={selectionHandler}
               onCommandKeyPressed={actionKeyHandler}
+              onCreateList={createListHandler}
+              onListChildDelete={deleteListChildHandler}
             />
           );
         })}

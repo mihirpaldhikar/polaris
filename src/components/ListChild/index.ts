@@ -12,14 +12,4 @@
  * All Rights Reserved.
  */
 
-/**
- * @type Type
- *
- * @description Describes the type of the block. A text block will have type of text.
- *
- * @author Mihir Paldhikar
- */
-
-type Type = "text" | "list";
-
-export default Type;
+export { default as ListChild } from "./ListChild";

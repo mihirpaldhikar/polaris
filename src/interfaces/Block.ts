@@ -29,7 +29,7 @@ interface Block {
   reference?: RefObject<HTMLElement>;
   type: Type;
   role: Role;
-  content: Content;
+  content: Content | Block[];
   style: Style[];
 }
 

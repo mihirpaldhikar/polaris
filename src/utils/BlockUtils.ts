@@ -42,6 +42,10 @@ export function createNodeFromRole(role: Role): string {
       return "p";
     case "blockquote":
       return "blockquote";
+    case "unorderedList":
+      return "ul";
+    case "orderedList":
+      return "ol";
     default:
       return "p";
   }

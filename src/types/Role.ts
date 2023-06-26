@@ -24,6 +24,9 @@ type Role =
   | "heading"
   | "subHeading"
   | "paragraph"
-  | "blockquote";
+  | "blockquote"
+  | "unorderedList"
+  | "orderedList"
+  | "listChild";
 
 export default Role;
