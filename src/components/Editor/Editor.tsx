@@ -51,11 +51,12 @@ import {
   AlignStartIcon,
   BlockquoteIcon,
   BoldIcon,
+  BulletListIcon,
   CodeIcon,
   HeadingIcon,
   ItalicIcon,
   LinkIcon,
-  OrderedListIcon,
+  NumberedListIcon,
   ParagraphIcon,
   SubHeadingIcon,
   SubTitleIcon,
@@ -64,7 +65,6 @@ import {
   TextSizeIcon,
   TitleIcon,
   UnderlineIcon,
-  UnorderedListIcon,
 } from "../../icons";
 import {
   LINK_ATTRIBUTE,
@@ -143,7 +143,7 @@ export default function Editor({
           ]
         );
       } else if (
-        block.role === "unorderedList" &&
+        block.role === "bulletList" &&
         (block.style.length === 0 ||
           !block.style.every((style) => style.name === "listStyleType"))
       ) {
@@ -156,7 +156,7 @@ export default function Editor({
           ]
         );
       } else if (
-        block.role === "orderedList" &&
+        block.role === "numberedList" &&
         (block.style.length === 0 ||
           !block.style.every((style) => style.name === "listStyleType"))
       ) {
@@ -759,24 +759,24 @@ export default function Editor({
       },
       {
         id: generateMenuId(),
-        name: "Unordered List",
-        description: `Change ${block.role} to Unordered List`,
-        icon: <UnorderedListIcon />,
+        name: "Bullet List",
+        description: `Change ${block.role} to Bullet List`,
+        icon: <BulletListIcon />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
-          args: "unorderedList",
+          args: "bulletList",
         },
       },
       {
         id: generateMenuId(),
-        name: "Ordered List",
-        description: `Change ${block.role} to Ordered List`,
-        icon: <OrderedListIcon />,
+        name: "Numbered List",
+        description: `Change ${block.role} to Numbered List`,
+        icon: <NumberedListIcon />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
-          args: "orderedList",
+          args: "numberedList",
         },
       },
       {
@@ -790,8 +790,8 @@ export default function Editor({
           "heading",
           "subHeading",
           "paragraph",
-          "orderedList",
-          "unorderedList",
+          "numberedList",
+          "bulletList",
           "listChild",
         ],
         execute: {
@@ -815,8 +815,8 @@ export default function Editor({
           "heading",
           "subHeading",
           "paragraph",
-          "orderedList",
-          "unorderedList",
+          "numberedList",
+          "bulletList",
           "listChild",
         ],
         execute: {
@@ -840,8 +840,8 @@ export default function Editor({
           "heading",
           "subHeading",
           "paragraph",
-          "orderedList",
-          "unorderedList",
+          "numberedList",
+          "bulletList",
           "listChild",
         ],
         execute: {
@@ -923,7 +923,7 @@ export default function Editor({
             case "role": {
               if (typeof execute.args === "string") {
                 newBlock.role = execute.args as Role;
-                if (newBlock.role === "orderedList") {
+                if (newBlock.role === "numberedList") {
                   newBlock.type = "list";
                   newBlock.style.push(
                     ...[
@@ -942,7 +942,7 @@ export default function Editor({
                       role: "listChild",
                     },
                   ];
-                } else if (newBlock.role === "unorderedList") {
+                } else if (newBlock.role === "bulletList") {
                   newBlock.type = "list";
                   newBlock.style.push(
                     ...[

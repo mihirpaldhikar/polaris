@@ -525,6 +525,7 @@ export default function Canvas({
         disabled: !editable,
         style: setNodeStyle(block.style),
         spellCheck: true,
+        className: "px-4",
       },
       block.content.map((content, index) => {
         if (

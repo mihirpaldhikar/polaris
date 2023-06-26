@@ -14,7 +14,7 @@
 
 import { type JSX } from "react";
 
-export default function OrderedListIcon({
+export default function NumberedListIcon({
   size,
 }: {
   size?: number;

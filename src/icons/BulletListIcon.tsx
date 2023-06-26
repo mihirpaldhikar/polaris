@@ -14,7 +14,7 @@
 
 import { type JSX } from "react";
 
-export default function UnorderedListIcon({
+export default function BulletListIcon({
   size,
 }: {
   size?: number;

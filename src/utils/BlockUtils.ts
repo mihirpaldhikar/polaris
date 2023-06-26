@@ -42,9 +42,9 @@ export function createNodeFromRole(role: Role): string {
       return "p";
     case "blockquote":
       return "blockquote";
-    case "unorderedList":
+    case "bulletList":
       return "ul";
-    case "orderedList":
+    case "numberedList":
       return "ol";
     default:
       return "p";
