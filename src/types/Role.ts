@@ -24,7 +24,7 @@ type Role =
   | "heading"
   | "subHeading"
   | "paragraph"
-  | "blockquote"
+  | "quote"
   | "bulletList"
   | "numberedList"
   | "listChild";

@@ -14,11 +14,7 @@
 
 import { type JSX } from "react";
 
-export default function BlockquoteIcon({
-  size,
-}: {
-  size?: number;
-}): JSX.Element {
+export default function QuoteIcon({ size }: { size?: number }): JSX.Element {
   return (
     <svg
       width={size ?? 36}

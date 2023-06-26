@@ -27,7 +27,7 @@ export { default as ParagraphIcon } from "./ParagraphIcon";
 export { default as AlignStartIcon } from "./AlignStartIcon";
 export { default as AlignCenterIcon } from "./AlignCenterIcon";
 export { default as AlignEndIcon } from "./AlignEndIcon";
-export { default as BlockquoteIcon } from "./BlockquoteIcon";
+export { default as QuoteIcon } from "./QuoteIcon";
 export { default as BulletListIcon } from "./BulletListIcon";
 export { default as NumberedListIcon } from "./NumberedListIcon";
 export { default as CodeIcon } from "./CodeIcon";

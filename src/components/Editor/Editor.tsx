@@ -49,7 +49,6 @@ import {
   AlignCenterIcon,
   AlignEndIcon,
   AlignStartIcon,
-  BlockquoteIcon,
   BoldIcon,
   BulletListIcon,
   CodeIcon,
@@ -58,6 +57,7 @@ import {
   LinkIcon,
   NumberedListIcon,
   ParagraphIcon,
+  QuoteIcon,
   SubHeadingIcon,
   SubTitleIcon,
   TextBackgroundColorIcon,
@@ -107,7 +107,7 @@ export default function Editor({
   const [contents, updateContents] = useState<Block[]>(
     blob.contents.map((block) => {
       if (
-        block.role === "blockquote" &&
+        block.role === "quote" &&
         (block.style.length === 0 ||
           !block.style.every(
             (style) =>
@@ -678,13 +678,7 @@ export default function Editor({
         name: "Title",
         description: `Change ${block.role} to Title`,
         icon: <TitleIcon />,
-        allowedOn: [
-          "subTitle",
-          "heading",
-          "subHeading",
-          "paragraph",
-          "blockquote",
-        ],
+        allowedOn: ["subTitle", "heading", "subHeading", "paragraph", "quote"],
         execute: {
           type: "role",
           args: "title",
@@ -695,13 +689,7 @@ export default function Editor({
         name: "Sub Title",
         description: `Change ${block.role} to Sub Title`,
         icon: <SubTitleIcon />,
-        allowedOn: [
-          "title",
-          "heading",
-          "subHeading",
-          "paragraph",
-          "blockquote",
-        ],
+        allowedOn: ["title", "heading", "subHeading", "paragraph", "quote"],
         execute: {
           type: "role",
           args: "subTitle",
@@ -712,13 +700,7 @@ export default function Editor({
         name: "Heading",
         description: `Change ${block.role} to Heading`,
         icon: <HeadingIcon />,
-        allowedOn: [
-          "title",
-          "subTitle",
-          "subHeading",
-          "paragraph",
-          "blockquote",
-        ],
+        allowedOn: ["title", "subTitle", "subHeading", "paragraph", "quote"],
         execute: {
           type: "role",
           args: "heading",
@@ -729,7 +711,7 @@ export default function Editor({
         name: "Subheading",
         description: `Change ${block.role} to Subheading`,
         icon: <SubHeadingIcon />,
-        allowedOn: ["title", "subTitle", "heading", "paragraph", "blockquote"],
+        allowedOn: ["title", "subTitle", "heading", "paragraph", "quote"],
         execute: {
           type: "role",
           args: "subHeading",
@@ -740,7 +722,7 @@ export default function Editor({
         name: "Paragraph",
         description: `Change ${block.role} to Paragraph`,
         icon: <ParagraphIcon />,
-        allowedOn: ["title", "subTitle", "heading", "subHeading", "blockquote"],
+        allowedOn: ["title", "subTitle", "heading", "subHeading", "quote"],
         execute: {
           type: "role",
           args: "paragraph",
@@ -748,13 +730,13 @@ export default function Editor({
       },
       {
         id: generateMenuId(),
-        name: "Blockquote",
-        description: `Change ${block.role} to Blockquote`,
-        icon: <BlockquoteIcon />,
+        name: "Quote",
+        description: `Change ${block.role} to Quote`,
+        icon: <QuoteIcon />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
-          args: "blockquote",
+          args: "quote",
         },
       },
       {
@@ -961,7 +943,7 @@ export default function Editor({
                       role: "listChild",
                     },
                   ];
-                } else if (newBlock.role === "blockquote") {
+                } else if (newBlock.role === "quote") {
                   newBlock.style.push(
                     ...[
                       {
