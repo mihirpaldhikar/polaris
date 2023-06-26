@@ -27,9 +27,10 @@ export function serializeBlobToHTML(blob: Blob): string {
     } else {
       const node = document.createElement(createNodeFromRole(block.role));
       for (const style of block.style) {
-        if (style.enabled ?? false) {
-          node.style.setProperty(style.name, style.value);
-        }
+        node.style.setProperty(
+          style.name.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase()),
+          style.value
+        );
       }
       if (block.type === "text" && typeof block.content === "string") {
         node.innerHTML = block.content;
@@ -45,6 +46,28 @@ export function serializeBlobToHTML(blob: Blob): string {
               node.replaceChild(anchorNode, element);
             }
           }
+        }
+      } else if (block.type === "list" && Array.isArray(block.content)) {
+        node.style.setProperty("list-style-position", "inside");
+        for (const list of block.content) {
+          const listNode = document.createElement("li");
+          listNode.innerHTML = list.content as string;
+          for (const childNode of listNode.childNodes) {
+            if (isInlineSpecifierNode(childNode)) {
+              const element = childNode as HTMLElement;
+              if (element.getAttribute(LINK_ATTRIBUTE) !== null) {
+                const anchorNode = document.createElement("a");
+                anchorNode.href = element.getAttribute(
+                  LINK_ATTRIBUTE
+                ) as string;
+                anchorNode.target = "_blank";
+                anchorNode.innerText = element.innerText;
+                anchorNode.style.cssText = element.style.cssText;
+                listNode.replaceChild(anchorNode, element);
+              }
+            }
+          }
+          node.appendChild(listNode);
         }
       }
       htmlString = htmlString.concat(node.outerHTML);
