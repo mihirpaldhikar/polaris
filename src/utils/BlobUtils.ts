@@ -17,7 +17,7 @@ import { createNodeFromRole } from "./BlockUtils";
 import { LINK_ATTRIBUTE } from "../constants";
 import { isInlineSpecifierNode } from "./DOMUtils";
 
-export function parseBlobToHTML(blob: Blob): string {
+export function serializeBlobToHTML(blob: Blob): string {
   const contents: Block[] = blob.contents;
   let htmlString: string = "";
   for (const block of contents) {
