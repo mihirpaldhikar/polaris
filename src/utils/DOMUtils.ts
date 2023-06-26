@@ -620,15 +620,11 @@ export function elementContainsStyle(
     return element.style.getPropertyValue(style.name) !== "";
   }
 
-  const startNodeStyleArray = cssTextToStyle(element.style.cssText).map((s) => {
-    return `${s.name}:${s.value}`;
-  });
+  for (const s of style) {
+    if (element.style.getPropertyValue(s.name) === "") return false;
+  }
 
-  const sty = style.map((s) => {
-    return `${s.name}:${s.value}`;
-  });
-
-  return sty.every((k) => startNodeStyleArray.includes(k));
+  return true;
 }
 
 /**

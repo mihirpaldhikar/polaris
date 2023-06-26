@@ -51,6 +51,7 @@ import {
   AlignStartIcon,
   BlockquoteIcon,
   BoldIcon,
+  CodeIcon,
   HeadingIcon,
   ItalicIcon,
   LinkIcon,
@@ -532,6 +533,32 @@ export default function Editor({
             payloadIfRemovedClicked: REMOVE_COLOR,
             validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
           },
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Code",
+        icon: <CodeIcon />,
+        execute: {
+          type: "style",
+          args: [
+            {
+              name: "font-family",
+              value: "monospace",
+            },
+            {
+              name: "background-color",
+              value: "#e8e6e6",
+            },
+            {
+              name: "border-radius",
+              value: "3px",
+            },
+            {
+              name: "padding",
+              value: "2px",
+            },
+          ],
         },
       },
     ];
