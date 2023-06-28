@@ -12,7 +12,18 @@
  * All Rights Reserved.
  */
 
-export type { default as Role } from "./Role";
-export type { default as Type } from "./Type";
-export type { default as Content } from "./Content";
-export type { default as BlockFunction } from "./BlockFunction";
+import { type Block, type Coordinates } from "../interfaces";
+
+type BlockFunction = (
+  block: Block,
+  onComplete: (
+    block: Block | Block[],
+    focusBlockId: string,
+    caretOffset?: number
+  ) => void,
+  blocks?: Block[],
+  coordinates?: Coordinates,
+  caretOffset?: number
+) => void;
+
+export default BlockFunction;

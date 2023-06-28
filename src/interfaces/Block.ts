@@ -15,6 +15,7 @@
 import { type Content, type Role, type Type } from "../types";
 import type Style from "./Style";
 import { type RefObject } from "react";
+import { ImageContent } from "./index";
 
 /**
  * @interface Block
@@ -29,7 +30,7 @@ interface Block {
   reference?: RefObject<HTMLElement>;
   type: Type;
   role: Role;
-  content: Content | Block[];
+  content: Content | Block[] | ImageContent;
   style: Style[];
 }
 

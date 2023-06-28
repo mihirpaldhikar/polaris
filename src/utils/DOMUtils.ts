@@ -47,8 +47,9 @@ export function generateRefreshKey(): string {
  * @author Mihir Paldhikar
  */
 
-export function getCaretOffset(element: HTMLElement): number {
+export function getCaretOffset(element: HTMLElement | null): number {
   let position = 0;
+  if (element === null) return position;
   const selection = window.getSelection();
   if (selection !== null && selection.rangeCount !== 0) {
     const range = selection.getRangeAt(0);

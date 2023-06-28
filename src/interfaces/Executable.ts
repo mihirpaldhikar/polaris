@@ -14,11 +14,11 @@
 
 import type Style from "./Style";
 import type InputArgs from "./InputArgs";
-import { type Role } from "../types";
+import { type BlockFunction, type Role } from "../types";
 
 interface Executable {
-  type: "style" | "link" | "input" | "role";
-  args: Style[] | string | InputArgs | Role;
+  type: "style" | "link" | "input" | "role" | "blockFunction";
+  args: Style[] | string | InputArgs | Role | BlockFunction;
 }
 
 export default Executable;

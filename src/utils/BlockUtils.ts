@@ -46,6 +46,8 @@ export function createNodeFromRole(role: Role): string {
       return "ul";
     case "numberedList":
       return "ol";
+    case "image":
+      return "img";
     default:
       return "p";
   }

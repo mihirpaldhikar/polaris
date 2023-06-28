@@ -31,3 +31,6 @@ export { default as QuoteIcon } from "./QuoteIcon";
 export { default as BulletListIcon } from "./BulletListIcon";
 export { default as NumberedListIcon } from "./NumberedListIcon";
 export { default as CodeIcon } from "./CodeIcon";
+export { default as ResizeIcon } from "./ResizeIcon";
+export { default as DeleteIcon } from "./DeleteIcon";
+export { default as ChangeIcon } from "./ChangeIcon";

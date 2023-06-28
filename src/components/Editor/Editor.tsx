@@ -25,6 +25,7 @@ import {
   type Blob,
   type Block,
   type Coordinates,
+  type ImageContent,
   type InputArgs,
   type Menu,
   type Style,
@@ -51,13 +52,16 @@ import {
   AlignStartIcon,
   BoldIcon,
   BulletListIcon,
+  ChangeIcon,
   CodeIcon,
+  DeleteIcon,
   HeadingIcon,
   ItalicIcon,
   LinkIcon,
   NumberedListIcon,
   ParagraphIcon,
   QuoteIcon,
+  ResizeIcon,
   SubHeadingIcon,
   SubTitleIcon,
   TextBackgroundColorIcon,
@@ -74,6 +78,8 @@ import {
 } from "../../constants";
 import { ActionMenu } from "../ActionMenu";
 import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
+import { ContextMenu } from "../ContextMenu";
+import { SizeDialog } from "../SizeDialog";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -81,6 +87,7 @@ interface WorkspaceProps {
   onSave?: (blob: Blob) => void;
   autoSaveTimeout?: number;
   selectionMenu?: Menu[];
+  onImageSelected: (file: File) => Promise<string>;
 }
 
 /**
@@ -103,6 +110,7 @@ export default function Editor({
   autoSaveTimeout,
   selectionMenu,
   onSave,
+  onImageSelected,
 }: WorkspaceProps): JSX.Element {
   const [contents, updateContents] = useState<Block[]>(
     blob.contents.map((block) => {
@@ -183,13 +191,20 @@ export default function Editor({
   } | null>(null);
 
   const [popupRoot, setPopupRoot] = useState<Root>();
+  const [dialogRoot, setDialogRoot] = useState<Root>();
+  const [editorNode, setEditorNode] = useState<HTMLElement>();
 
   useEffect(() => {
     setPopupRoot(
       createRoot(document.getElementById(`popup-${blob.id}`) as HTMLElement)
     );
+    setDialogRoot(
+      createRoot(document.getElementById(`dialog-${blob.id}`) as HTMLElement)
+    );
+    setEditorNode(document.getElementById(`editor-${blob.id}`) as HTMLElement);
     return () => {
       setPopupRoot(undefined);
+      setEditorNode(undefined);
     };
   }, [blob.id]);
 
@@ -763,6 +778,17 @@ export default function Editor({
       },
       {
         id: generateMenuId(),
+        name: "Image",
+        description: `Change ${block.role} to Bullet List`,
+        icon: <BulletListIcon />,
+        allowedOn: ["paragraph"],
+        execute: {
+          type: "role",
+          args: "image",
+        },
+      },
+      {
+        id: generateMenuId(),
         name: "Align Start",
         description: `Align text to start`,
         icon: <AlignStartIcon />,
@@ -852,7 +878,8 @@ export default function Editor({
       popupNode == null ||
       editorNode == null ||
       blockNode == null ||
-      popupRoot === undefined
+      popupRoot === undefined ||
+      typeof block.content !== "string"
     ) {
       return;
     }
@@ -905,7 +932,42 @@ export default function Editor({
             case "role": {
               if (typeof execute.args === "string") {
                 newBlock.role = execute.args as Role;
-                if (newBlock.role === "numberedList") {
+                if (newBlock.role === "image") {
+                  newBlock.type = "image";
+                  newBlock.content = {
+                    url: "",
+                    height: 0,
+                    width: 0,
+                    description: "",
+                  };
+                  const emptyBlock: Block = {
+                    id: generateBlockId(),
+                    type: "text",
+                    role: "paragraph",
+                    content: "",
+                    style: [],
+                  };
+                  if (previousContent === "") {
+                    contents.splice(
+                      contents.indexOf(block),
+                      1,
+                      ...[newBlock, emptyBlock]
+                    );
+                  } else {
+                    contents[contents.indexOf(block)].content = previousContent;
+                    contents.splice(
+                      contents.indexOf(block) + 1,
+                      0,
+                      ...[newBlock, emptyBlock]
+                    );
+                  }
+                  updateContents(contents);
+                  setFocusedNode({
+                    nodeId: emptyBlock.id,
+                    caretOffset: 0,
+                  });
+                  return;
+                } else if (newBlock.role === "numberedList") {
                   newBlock.type = "list";
                   newBlock.style.push(
                     ...[
@@ -1056,16 +1118,201 @@ export default function Editor({
     });
   }
 
+  function imageRequestHandler(block: Block, file: File): void {
+    if (
+      block.type !== "image" ||
+      block.role !== "image" ||
+      typeof block.content !== "object"
+    ) {
+      return;
+    }
+
+    const blockIndex = contents.indexOf(block);
+    void onImageSelected(file).then((str) => {
+      (block.content as ImageContent).url = str;
+      (block.content as ImageContent).height = 300;
+      (block.content as ImageContent).width = 500;
+      block.id = generateBlockId();
+      contents[blockIndex] = block;
+      updateContents(contents);
+
+      setFocusedNode({
+        nodeId: block.id,
+        caretOffset: 0,
+      });
+    });
+  }
+
+  function contextMenuHandler(
+    block: Block,
+    coordinates: Coordinates,
+    caretOffset: number
+  ): void {
+    if (popupRoot === undefined || editorNode === undefined) return;
+
+    const contextMenu: Menu[] = [
+      {
+        id: generateMenuId(),
+        name: "Resize Image",
+        icon: <ResizeIcon />,
+        allowedOn: ["image"],
+        execute: {
+          type: "blockFunction",
+          args: (block, onComplete, blocks, coordinates) => {
+            if (
+              (block.type !== "image" &&
+                block.role !== "image" &&
+                typeof block.content !== "object") ||
+              blocks === undefined ||
+              coordinates === undefined
+            ) {
+              return;
+            }
+
+            const imageContent = block.content as ImageContent;
+
+            dialogRoot?.render(
+              <SizeDialog
+                initialSize={{
+                  width: imageContent.width,
+                  height: imageContent.height,
+                }}
+                coordinates={coordinates}
+                onConfirm={(width, height) => {
+                  imageContent.width = width;
+                  imageContent.height = height;
+                  onComplete(block, block.id);
+                }}
+                onClose={() => {
+                  dialogRoot?.render(<Fragment />);
+                }}
+              />
+            );
+          },
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Change Image",
+        icon: <ChangeIcon />,
+        allowedOn: ["image"],
+        execute: {
+          type: "blockFunction",
+          args: (block, onComplete) => {
+            if (
+              block.type !== "image" &&
+              block.role !== "image" &&
+              typeof block.content !== "object"
+            ) {
+              return;
+            }
+
+            const imageContent = block.content as ImageContent;
+            imageContent.url = "";
+            onComplete(block, block.id);
+          },
+        },
+      },
+      {
+        id: generateMenuId(),
+        name: "Delete",
+        icon: <DeleteIcon />,
+        execute: {
+          type: "blockFunction",
+          args: (block, onComplete, blocks) => {
+            if (blocks === undefined) return;
+            if (blocks.length === 1 && blocks.indexOf(block) === 0) {
+              const newBlock: Block = {
+                id: generateBlockId(),
+                type: "text",
+                role: "paragraph",
+                content: "",
+                style: [],
+              };
+              blocks.splice(0, 1, newBlock);
+              onComplete(blocks, newBlock.id);
+              return;
+            }
+            const targetBlockIndex = contents.indexOf(block);
+            blocks.splice(targetBlockIndex, 1);
+            onComplete(
+              contents,
+              blocks.length === 1
+                ? blocks[0].id
+                : targetBlockIndex - 1 < 0
+                ? blocks[targetBlockIndex + 1].id
+                : blocks[targetBlockIndex - 1].id
+            );
+          },
+        },
+      },
+    ];
+
+    const filteredContextMenu = contextMenu.filter((menu) => {
+      if (menu.allowedOn === undefined) return true;
+      return menu.allowedOn.includes(block.role);
+    });
+
+    if (filteredContextMenu.length === 0) return;
+
+    popupRoot.render(
+      <ContextMenu
+        coordinates={coordinates}
+        menu={filteredContextMenu}
+        onClose={() => {
+          popupRoot.render(<Fragment />);
+        }}
+        onClick={(execute) => {
+          if (
+            execute.type === "blockFunction" &&
+            typeof execute.args === "function"
+          ) {
+            execute.args(
+              block,
+              (updatedBlock, focusBlockId, caretOffset) => {
+                if (Array.isArray(updatedBlock)) {
+                  updateContents(updatedBlock);
+                } else {
+                  contents[contents.indexOf(updatedBlock)] = updatedBlock;
+                  updateContents(contents);
+                }
+                setFocusedNode({
+                  nodeId: focusBlockId,
+                  caretOffset: caretOffset ?? 0,
+                });
+              },
+              contents,
+              coordinates,
+              caretOffset
+            );
+          }
+        }}
+      />
+    );
+
+    editorNode.addEventListener(
+      "click",
+      () => {
+        popupRoot.render(<Fragment />);
+      },
+      {
+        once: true,
+      }
+    );
+  }
+
   return (
     <Fragment>
       <div
         id={`popup-${blob.id}`}
+        className={"select-none"}
         onContextMenu={(event) => {
           event.preventDefault();
         }}
       ></div>
       <div
         id={`dialog-${blob.id}`}
+        className={"select-none"}
         onContextMenu={(event) => {
           event.preventDefault();
         }}
@@ -1095,6 +1342,8 @@ export default function Editor({
               onCommandKeyPressed={actionKeyHandler}
               onCreateList={createListHandler}
               onListChildDelete={deleteListChildHandler}
+              onImageRequest={imageRequestHandler}
+              onContextMenu={contextMenuHandler}
             />
           );
         })}

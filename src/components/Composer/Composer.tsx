@@ -14,7 +14,7 @@
 
 import { createRef, type JSX } from "react";
 import { Canvas } from "../Canvas";
-import { type Block } from "../../interfaces";
+import { type Block, Coordinates } from "../../interfaces";
 import {
   areInlineSpecifierEqual,
   generateBlockId,
@@ -64,6 +64,12 @@ interface ComposerProps {
     previousContent: Content,
     caretOffset: number
   ) => void;
+  onImageRequest: (block: Block, file: File) => void;
+  onContextMenu: (
+    block: Block,
+    coordinates: Coordinates,
+    caretOffset: number
+  ) => void;
 }
 
 /**
@@ -101,6 +107,8 @@ export default function Composer({
   onPaste,
   onSelect,
   onCommandKeyPressed,
+  onImageRequest,
+  onContextMenu,
 }: ComposerProps): JSX.Element {
   function enterHandler(splitContent: boolean, caretOffset: number): void {
     const blockNode = getBlockNode(block.id) as HTMLElement;
@@ -307,7 +315,7 @@ export default function Composer({
 
     if (
       block.content.length - 1 === childBlockIndex &&
-      block.content[childBlockIndex].content.length === 0 &&
+      (block.content[childBlockIndex].content as string).length === 0 &&
       caretOffset === 0
     ) {
       const textBlock: Block = {
@@ -509,6 +517,8 @@ export default function Composer({
       onListEnter={listEnterHandler}
       onListChildDelete={deleteListChildHandler}
       onListNavigate={listNavigationHandler}
+      onImageRequest={onImageRequest}
+      onContextMenu={onContextMenu}
     />
   );
 }

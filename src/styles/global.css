@@ -15,3 +15,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.filePicker::-webkit-file-upload-button {
+    visibility: hidden;
+}
+
+.filePicker {
+    color: transparent;
+}

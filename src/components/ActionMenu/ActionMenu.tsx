@@ -167,7 +167,7 @@ export default function ActionMenu({
         left: xAxis,
       }}
       className={
-        "fixed flex max-h-[250px] w-[310px] scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-md"
+        "fixed z-10 flex max-h-[250px] w-[310px] scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-md"
       }
     >
       {matchedMenu.map((menu) => {

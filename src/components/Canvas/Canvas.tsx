@@ -20,7 +20,12 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { type Block, type Style } from "../../interfaces";
+import {
+  type Block,
+  type Coordinates,
+  type ImageContent,
+  type Style,
+} from "../../interfaces";
 import {
   conditionalClassName,
   createNodeFromRole,
@@ -42,6 +47,7 @@ import {
   NODE_TYPE,
 } from "../../constants";
 import { ListChild } from "../ListChild";
+import { FilePicker } from "../FilePicker";
 
 interface CanvasProps {
   editable: boolean;
@@ -71,6 +77,12 @@ interface CanvasProps {
     nodeIndex: number,
     block: Block,
     previousContent: Content,
+    caretOffset: number
+  ) => void;
+  onImageRequest: (block: Block, file: File) => void;
+  onContextMenu: (
+    block: Block,
+    coordinates: Coordinates,
     caretOffset: number
   ) => void;
 }
@@ -110,7 +122,9 @@ export default function Canvas({
   onListNavigate,
   onPaste,
   onSelect,
+  onImageRequest,
   onActionKeyPressed,
+  onContextMenu,
 }: CanvasProps): JSX.Element {
   const isActionMenuOpen = useRef(false);
 
@@ -201,7 +215,7 @@ export default function Canvas({
         if (block.type === "list" && Array.isArray(block.content)) {
           onListEnter(
             index,
-            caretOffset !== block.content[index].content.length,
+            caretOffset !== (block.content[index].content as string).length,
             caretOffset
           );
           break;
@@ -509,6 +523,11 @@ export default function Canvas({
       },
       onContextMenu: (event: MouseEvent) => {
         event.preventDefault();
+        onContextMenu(
+          block,
+          { x: event.clientX, y: event.clientY },
+          getCaretOffset(getBlockNode(block.id))
+        );
       },
     });
   }
@@ -526,6 +545,14 @@ export default function Canvas({
         style: setNodeStyle(block.style),
         spellCheck: true,
         className: "px-4 space-y-2 text-[17px] my-1",
+        onContextMenu: (event: MouseEvent) => {
+          event.preventDefault();
+          onContextMenu(
+            block,
+            { x: event.clientX, y: event.clientY },
+            getCaretOffset(getBlockNode(block.id))
+          );
+        },
       },
       block.content.map((content, index) => {
         if (
@@ -554,6 +581,52 @@ export default function Canvas({
         return <Fragment key={content.id} />;
       })
     );
+  }
+
+  if (
+    block.type === "image" &&
+    block.role === "image" &&
+    typeof block.content === "object"
+  ) {
+    const imageData = block.content as ImageContent;
+    if (imageData.url === "") {
+      return (
+        <FilePicker
+          message={"Drag or click here to add an image."}
+          accept={"image/png, image/jpg, image/jpeg, image/svg+xml, image/gif"}
+          onFilePicked={(file) => {
+            onImageRequest(block, file);
+          }}
+          onDelete={() => {
+            onDelete(block, false);
+          }}
+        />
+      );
+    }
+    return createElement(createNodeFromRole(block.role), {
+      "data-type": BLOCK_NODE,
+      "data-block-type": block.type,
+      id: block.id,
+      ref: block.reference,
+      role: block.role,
+      disabled: !editable,
+      draggable: false,
+      src: imageData.url,
+      alt: imageData.description,
+      style: {
+        height: imageData.height,
+        width: imageData.width,
+      },
+      className: "mx-auto display-block object-center w-full rounded-md",
+      onContextMenu: (event: MouseEvent) => {
+        event.preventDefault();
+        onContextMenu(
+          block,
+          { x: event.clientX, y: event.clientY },
+          getCaretOffset(getBlockNode(block.id))
+        );
+      },
+    });
   }
 
   /// If no valid block type is found, render an empty Fragment.

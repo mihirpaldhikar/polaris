@@ -20,6 +20,6 @@
  * @author Mihir Paldhikar
  */
 
-type Type = "text" | "list";
+type Type = "text" | "list" | "image";
 
 export default Type;
