@@ -12,7 +12,7 @@
  * All Rights Reserved.
  */
 
-import { type Blob, type Block, ImageContent } from "../interfaces";
+import { type Blob, type Block, type ImageContent } from "../interfaces";
 import { createNodeFromRole } from "./BlockUtils";
 import { LINK_ATTRIBUTE } from "../constants";
 import { isInlineSpecifierNode } from "./DOMUtils";

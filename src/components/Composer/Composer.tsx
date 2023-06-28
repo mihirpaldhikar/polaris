@@ -14,7 +14,7 @@
 
 import { createRef, type JSX } from "react";
 import { Canvas } from "../Canvas";
-import { type Block, Coordinates } from "../../interfaces";
+import { type Block, type Coordinates } from "../../interfaces";
 import {
   areInlineSpecifierEqual,
   generateBlockId,

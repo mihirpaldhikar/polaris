@@ -15,7 +15,7 @@
 import { type Content, type Role, type Type } from "../types";
 import type Style from "./Style";
 import { type RefObject } from "react";
-import { ImageContent } from "./index";
+import { type ImageContent } from "./index";
 
 /**
  * @interface Block
