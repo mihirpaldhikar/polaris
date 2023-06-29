@@ -3,6 +3,9 @@
 .vscode
 *.iml
 
+### GitHub Artifacts ###
+.github
+
 ### NodeJS Artifacts ###
 node_modules
 
