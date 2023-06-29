@@ -637,6 +637,7 @@ export default function Editor({
     popupRoot.render(
       <SelectionMenu
         blobId={blob.id}
+        dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
         menus={defaultSelectionMenu}
         onClose={() => {

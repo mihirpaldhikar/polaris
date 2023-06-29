@@ -29,7 +29,7 @@ import {
   type Style,
 } from "../../interfaces";
 import { conditionalClassName } from "../../utils";
-import { createRoot } from "react-dom/client";
+import { type Root } from "react-dom/client";
 import { InputDialog } from "../InputDialog";
 import { ColorPickerDialog } from "../ColorPickerDialog";
 import { REMOVE_COLOR } from "../../constants";
@@ -39,6 +39,7 @@ const ACTION_MENU_PADDING: number = 42;
 
 interface SelectionMenuProps {
   blobId: string;
+  dialogRoot: Root | undefined;
   coordinates: Coordinates;
   menus: Menu[];
   onMenuSelected: (executable: Executable) => void;
@@ -47,6 +48,7 @@ interface SelectionMenuProps {
 
 export default function SelectionMenu({
   blobId,
+  dialogRoot,
   coordinates,
   menus,
   onMenuSelected,
@@ -97,12 +99,8 @@ export default function SelectionMenu({
                   const editorNode = window.document.getElementById(
                     `editor-${blobId}`
                   );
-                  const dialogNode = document.getElementById(
-                    `dialog-${blobId}`
-                  );
-                  if (dialogNode == null || editorNode == null) return;
 
-                  const dialogRoot = createRoot(dialogNode);
+                  if (dialogRoot === undefined || editorNode == null) return;
 
                   if (inputArgs.type === "color") {
                     dialogRoot.render(
