@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type JSX } from "react";
+import { Fragment, type JSX } from "react";
 import {
   type Coordinates,
   type Executable,
@@ -122,7 +122,7 @@ export default function SelectionMenu({
                           });
                         }}
                         onClose={() => {
-                          dialogRoot.unmount();
+                          dialogRoot.render(<Fragment />);
                         }}
                       />
                     );
@@ -133,7 +133,7 @@ export default function SelectionMenu({
                         active={menu.active ?? false}
                         inputArgs={menu.execute.args as InputArgs}
                         onClose={() => {
-                          dialogRoot.unmount();
+                          dialogRoot.render(<Fragment />);
                         }}
                         onConfirm={(data, remove) => {
                           switch (inputArgs.executionTypeAfterInput) {
@@ -168,7 +168,7 @@ export default function SelectionMenu({
                   editorNode.addEventListener(
                     "mousedown",
                     () => {
-                      dialogRoot.unmount();
+                      dialogRoot.render(<Fragment />);
                     },
                     {
                       once: true,
