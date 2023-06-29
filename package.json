@@ -10,7 +10,7 @@
     "url": "git+https://github.com/mihirpaldhikar/polaris.git"
   },
   "publishConfig": {
-    "registry": "https://npmjs.com"
+    "registry": "https://registry.npmjs.org/"
   },
   "keywords": [
     "Content Editor"
