@@ -4,6 +4,7 @@ Polaris is a rich semantic content editor built on top of [React](https://react.
 content editing experience.
 
 ## Features
+
 1. [x] Title, SubTitle, Heading, Subheading, Paragraphs and Blockquotes.
 2. [x] Changing one block to another on the fly with slash (/) command.
 3. [x] Inline Styling
@@ -14,6 +15,7 @@ content editing experience.
 ## Usage
 
 Creating an Editor
+
 ```tsx
 import { Editor, Blob, generateBlockId } from "@mihirpaldhikar/polaris";
 
@@ -26,16 +28,16 @@ export default function MyApp(): JSX.Element {
         type: "text",
         role: "title",
         content: "Introducing Polaris",
-        style: []
+        style: [],
       },
       {
         id: generateBlockId(),
         type: "text",
         role: "paragraph",
         content: "Polaris is a rich semantic content editor.",
-        style: []
-      }
-    ]
+        style: [],
+      },
+    ],
   };
 
   function imageUploader(file: File): string {
@@ -52,19 +54,20 @@ export default function MyApp(): JSX.Element {
      */
   }
 
-  return <Fragment>
-    <Editor
-      blob={blob}
-      onImageSelected={(file) => {
-        return imageUploader(file);
-      }}
-      onSave={(blob) => {
-        saveBlob(blob);
-      }}
-    />
-  </Fragment>;
+  return (
+    <Fragment>
+      <Editor
+        blob={blob}
+        onImageSelected={(file) => {
+          return imageUploader(file);
+        }}
+        onSave={(blob) => {
+          saveBlob(blob);
+        }}
+      />
+    </Fragment>
+  );
 }
-
 ```
 
 > Note: If you are using React 18 & above or frameworks like NextJS, you need to explicitly specify the page or component consuming the Polaris Editor as a client component.
@@ -72,7 +75,11 @@ export default function MyApp(): JSX.Element {
 Exporting Generated Blob to HTML
 
 ```ts
-import { Blob ,generateBlockId, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
+import {
+  Blob,
+  generateBlockId,
+  serializeBlobToHTML,
+} from "@mihirpaldhikar/polaris";
 
 const blob: Blob = {
   id: "MB1624",
@@ -82,16 +89,16 @@ const blob: Blob = {
       type: "text",
       role: "title",
       content: "Introducing Polaris",
-      style: []
+      style: [],
     },
     {
       id: generateBlockId(),
       type: "text",
       role: "paragraph",
       content: "Polaris is a rich semantic content editor.",
-      style: []
-    }
-  ]
+      style: [],
+    },
+  ],
 };
 
 function exportBlobToHTML(blob) {
@@ -100,17 +107,17 @@ function exportBlobToHTML(blob) {
 ```
 
 Output
+
 ```html
 <h1>Introducing Polaris</h1>
 <p>Polaris is a rich semantic content editor.</p>
 ```
 
-
 ## Upcoming Features
+
 1. [ ] Embeds
 2. [ ] Tables
 3. [ ] Code
-
 
 #### Terminologies
 
