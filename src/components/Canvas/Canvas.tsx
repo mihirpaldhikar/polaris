@@ -47,7 +47,7 @@ import {
   nodeOffset,
   setNodeStyle,
 } from "../../utils";
-import { type Content, type Type } from "../../types";
+import { type Content, type Role, type Type } from "../../types";
 import {
   BLOCK_NODE,
   INLINE_SPECIFIER_NODE,
@@ -93,6 +93,7 @@ interface CanvasProps {
     coordinates: Coordinates,
     caretOffset: number
   ) => void;
+  onMarkdown: (block: Block, newRole: Role) => void;
 }
 
 /**
@@ -133,8 +134,12 @@ export default function Canvas({
   onImageRequest,
   onActionKeyPressed,
   onContextMenu,
+  onMarkdown,
 }: CanvasProps): JSX.Element {
   const isActionMenuOpen = useRef(false);
+
+  const initialRole = useRef(block.role);
+  const roleChangeByMarkdown = useRef(false);
 
   useEffect(() => {
     window.addEventListener("actionMenuOpened", () => {
@@ -233,6 +238,13 @@ export default function Canvas({
         break;
       }
       case "backspace": {
+        if (roleChangeByMarkdown.current) {
+          event.preventDefault();
+          onMarkdown(block, initialRole.current);
+          roleChangeByMarkdown.current = false;
+          return;
+        }
+
         if (block.type === "list" && Array.isArray(block.content)) {
           if (index !== 0 && caretOffset === 0) {
             event.preventDefault();
@@ -468,6 +480,61 @@ export default function Canvas({
         }
         break;
       }
+      case " ": {
+        if (
+          block.type === "text" &&
+          block.role !== "listChild" &&
+          typeof block.content === "string"
+        ) {
+          switch (block.content) {
+            case "-":
+            case "+":
+            case "*": {
+              event.preventDefault();
+              onMarkdown(block, "bulletList");
+              roleChangeByMarkdown.current = true;
+              break;
+            }
+            case "#": {
+              event.preventDefault();
+              onMarkdown(block, "title");
+              roleChangeByMarkdown.current = true;
+              break;
+            }
+            case "##": {
+              event.preventDefault();
+              onMarkdown(block, "subTitle");
+              roleChangeByMarkdown.current = true;
+              break;
+            }
+            case "###": {
+              event.preventDefault();
+              onMarkdown(block, "heading");
+              roleChangeByMarkdown.current = true;
+              break;
+            }
+            case "####": {
+              event.preventDefault();
+              onMarkdown(block, "subHeading");
+              roleChangeByMarkdown.current = true;
+              break;
+            }
+            default: {
+              if (/^\d+\.$/.test(block.content)) {
+                event.preventDefault();
+                roleChangeByMarkdown.current = true;
+                onMarkdown(block, "numberedList");
+              }
+              break;
+            }
+          }
+        }
+        break;
+      }
+      default: {
+        roleChangeByMarkdown.current = false;
+        break;
+      }
     }
   }
 
@@ -500,7 +567,6 @@ export default function Canvas({
       "data-type": BLOCK_NODE,
       "data-block-type": block.type,
       id: block.id,
-      ref: block.reference,
       role: block.role,
       disabled: !editable,
       contentEditable: editable,
@@ -547,12 +613,14 @@ export default function Canvas({
         "data-type": BLOCK_NODE,
         "data-block-type": block.type,
         id: block.id,
-        ref: block.reference,
         role: block.role,
         disabled: !editable,
         style: setNodeStyle(block.style),
         spellCheck: true,
-        className: "px-4 space-y-2 text-[17px] my-1",
+        className: conditionalClassName(
+          "px-4 space-y-2 text-[17px] my-1",
+          block.role === "numberedList" ? "list-decimal" : "list-disc"
+        ),
         onContextMenu: (event: MouseEvent) => {
           event.preventDefault();
           onContextMenu(
@@ -615,7 +683,6 @@ export default function Canvas({
       "data-type": BLOCK_NODE,
       "data-block-type": block.type,
       id: block.id,
-      ref: block.reference,
       role: block.role,
       disabled: !editable,
       draggable: false,

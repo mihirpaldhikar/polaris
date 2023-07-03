@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { createRef, type JSX } from "react";
+import { type JSX } from "react";
 import { Canvas } from "../Canvas";
 import { type Block, type Coordinates } from "../../interfaces";
 import {
@@ -34,7 +34,7 @@ import {
   setCaretOffset,
   splitElement,
 } from "../../utils";
-import { type Content } from "../../types";
+import { type Content, type Role } from "../../types";
 
 interface ComposerProps {
   editable: boolean;
@@ -78,6 +78,7 @@ interface ComposerProps {
     coordinates: Coordinates,
     caretOffset: number
   ) => void;
+  onMarkdown: (block: Block, newRole: Role) => void;
 }
 
 /**
@@ -117,6 +118,7 @@ export default function Composer({
   onCommandKeyPressed,
   onImageRequest,
   onContextMenu,
+  onMarkdown,
 }: ComposerProps): JSX.Element {
   function enterHandler(splitContent: boolean, caretOffset: number): void {
     const blockNode = getBlockNode(block.id) as HTMLElement;
@@ -132,7 +134,6 @@ export default function Composer({
 
     const newBlock: Block = {
       id: generateBlockId(),
-      reference: createRef<HTMLElement>(),
       type: "text",
       role: "paragraph",
       content: "",
@@ -199,7 +200,7 @@ export default function Composer({
   function deleteHandler(block: Block, joinContent: boolean): void {
     if (previousBlock === null) return;
     const currentNode = getBlockNode(block.id) as HTMLElement;
-    const previousNode = previousBlock.reference?.current as HTMLElement;
+    const previousNode = getBlockNode(previousBlock.id) as HTMLElement;
 
     if (joinContent) {
       previousBlock.id = generateBlockId();
@@ -265,8 +266,8 @@ export default function Composer({
   ): void {
     switch (navigate) {
       case "up": {
-        if (previousBlock?.reference?.current != null) {
-          const previousNode = previousBlock.reference.current;
+        if (previousBlock !== null) {
+          const previousNode = getBlockNode(previousBlock.id) as HTMLElement;
 
           const jumpNode: Node =
             previousNode.lastChild?.textContent != null
@@ -286,8 +287,10 @@ export default function Composer({
         break;
       }
       case "down": {
-        if (nextBlock?.reference?.current != null) {
-          const nextNode: HTMLElement = nextBlock.reference.current;
+        if (nextBlock != null) {
+          const nextNode: HTMLElement = getBlockNode(
+            nextBlock.id
+          ) as HTMLElement;
 
           const jumpNode: Node =
             nextNode.firstChild?.textContent != null
@@ -330,7 +333,6 @@ export default function Composer({
         id: generateBlockId(),
         type: "text",
         role: "paragraph",
-        reference: createRef<HTMLElement>(),
         content: "",
         style: [],
       };
@@ -527,6 +529,7 @@ export default function Composer({
       onListNavigate={listNavigationHandler}
       onImageRequest={onImageRequest}
       onContextMenu={onContextMenu}
+      onMarkdown={onMarkdown}
     />
   );
 }

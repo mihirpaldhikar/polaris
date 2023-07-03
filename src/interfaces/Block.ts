@@ -22,7 +22,6 @@
 
 import { type Content, type Role, type Type } from "../types";
 import type Style from "./Style";
-import { type RefObject } from "react";
 import { type ImageContent } from "./index";
 
 /**
@@ -35,7 +34,6 @@ import { type ImageContent } from "./index";
 
 interface Block {
   id: string;
-  reference?: RefObject<HTMLElement>;
   type: Type;
   role: Role;
   content: Content | Block[] | ImageContent;

@@ -120,77 +120,7 @@ export default function Editor({
   onSave,
   onImageSelected,
 }: WorkspaceProps): JSX.Element {
-  const [contents, updateContents] = useState<Block[]>(
-    blob.contents.map((block) => {
-      if (
-        block.role === "quote" &&
-        (block.style.length === 0 ||
-          !block.style.every(
-            (style) =>
-              style.name === "backgroundColor" ||
-              style.name === "padding" ||
-              style.name === "borderTopRightRadius" ||
-              style.name === "borderBottomRightRadius" ||
-              style.name === "borderLeft"
-          ))
-      ) {
-        block.style.push(
-          ...[
-            {
-              name: "backgroundColor",
-              value: "#f8f5f5",
-            },
-            {
-              name: "borderLeft",
-              value: "6px solid #ccc",
-            },
-            {
-              name: "padding",
-              value: "15px",
-            },
-            {
-              name: "borderTopRightRadius",
-              value: "8px",
-            },
-            {
-              name: "borderBottomRightRadius",
-              value: "8px",
-            },
-          ]
-        );
-      } else if (
-        block.role === "bulletList" &&
-        (block.style.length === 0 ||
-          !block.style.every((style) => style.name === "listStyleType"))
-      ) {
-        block.style.push(
-          ...[
-            {
-              name: "listStyleType",
-              value: "disc",
-            },
-          ]
-        );
-      } else if (
-        block.role === "numberedList" &&
-        (block.style.length === 0 ||
-          !block.style.every((style) => style.name === "listStyleType"))
-      ) {
-        block.style.push(
-          ...[
-            {
-              name: "listStyleType",
-              value: "decimal",
-            },
-          ]
-        );
-      }
-      return {
-        ...block,
-        reference: createRef<HTMLElement>(),
-      };
-    })
-  );
+  const [contents, updateContents] = useState<Block[]>(blob.contents);
 
   const [focusedNode, setFocusedNode] = useState<{
     nodeId: string;
@@ -907,7 +837,6 @@ export default function Editor({
       id: generateBlockId(),
       type: block.type,
       style: block.style,
-      reference: createRef(),
       role: block.role,
       content: previousContent,
     };
@@ -995,61 +924,6 @@ export default function Editor({
                       role: "listChild",
                     },
                   ];
-                } else if (newBlock.role === "bulletList") {
-                  newBlock.type = "list";
-                  newBlock.style.push(
-                    ...[
-                      {
-                        name: "listStyleType",
-                        value: "disc",
-                      },
-                    ]
-                  );
-                  newBlock.content = [
-                    {
-                      id: generateBlockId(),
-                      style: [],
-                      content: previousContent,
-                      type: "text",
-                      role: "listChild",
-                    },
-                  ];
-                } else if (newBlock.role === "quote") {
-                  newBlock.style.push(
-                    ...[
-                      {
-                        name: "backgroundColor",
-                        value: "#f8f5f5",
-                      },
-                      {
-                        name: "borderLeft",
-                        value: "6px solid #ccc",
-                      },
-                      {
-                        name: "padding",
-                        value: "15px",
-                      },
-                      {
-                        name: "borderTopRightRadius",
-                        value: "8px",
-                      },
-                      {
-                        name: "borderBottomRightRadius",
-                        value: "8px",
-                      },
-                    ]
-                  );
-                } else {
-                  newBlock.style = newBlock.style.filter((style) => {
-                    return !(
-                      style.name === "backgroundColor" ||
-                      style.name === "padding" ||
-                      style.name === "borderTopRightRadius" ||
-                      style.name === "borderBottomRightRadius" ||
-                      style.name === "borderLeft" ||
-                      style.name === "listStyleType"
-                    );
-                  });
                 }
               }
               break;
@@ -1310,6 +1184,32 @@ export default function Editor({
     );
   }
 
+  function markdownHandler(block: Block, newRole: Role): void {
+    const blockIndex = contents.indexOf(block);
+    block.role = newRole;
+    if (newRole === "numberedList" || newRole === "bulletList") {
+      block.type = "list";
+      block.content = [
+        {
+          id: generateBlockId(),
+          content: "",
+          type: "text",
+          role: "listChild",
+          style: [],
+        },
+      ];
+    } else {
+      block.type = "text";
+      contents[blockIndex].content = "";
+    }
+    contents[blockIndex] = block;
+    updateContents(contents);
+    setFocusedNode({
+      nodeId: block.id,
+      caretOffset: 0,
+    });
+  }
+
   return (
     <Fragment>
       <div
@@ -1353,6 +1253,7 @@ export default function Editor({
               onListChildDelete={deleteListChildHandler}
               onImageRequest={imageRequestHandler}
               onContextMenu={contextMenuHandler}
+              onMarkdown={markdownHandler}
             />
           );
         })}
