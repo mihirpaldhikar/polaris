@@ -7,10 +7,17 @@ content editing experience.
 
 1. [x] Title, SubTitle, Heading, Subheading, Paragraphs and Blockquotes.
 2. [x] Changing one block to another on the fly with slash (/) command.
-3. [x] Inline Styling
-4. [x] Inline Links
-5. [x] Image
-6. [x] Lists
+3. [x] Markdown Support
+4. [x] Inline Styling
+5. [x] Inline Links
+6. [x] Image
+7. [x] Lists
+
+## Installation
+
+```
+npm install @mihirpaldhikar/polaris
+```
 
 ## Usage
 
@@ -70,7 +77,8 @@ export default function MyApp(): JSX.Element {
 }
 ```
 
-> Note: If you are using React 18 & above or frameworks like NextJS, you need to explicitly specify the page or component consuming the Polaris Editor as a client component.
+> Note: If you are using React 18 & above or frameworks like NextJS, you need to explicitly specify the page or
+> component consuming the Polaris Editor as a client component.
 
 Exporting Generated Blob to HTML
 
@@ -124,7 +132,8 @@ Output
 1. `block` - A Block is the smallest unit holding all the necessary information required to render contents.
 2. `blob` - A Blob is a collection of blocks holding all the information and position of the blocks.
 3. `canvas` - Canvas uses block to determine how to render contents.
-4. `editor` - An Editor is an orchestrator for all the blocks. It uses blob to handle the creation, update, deletion of the blocks.
+4. `editor` - An Editor is an orchestrator for all the blocks. It uses blob to handle the creation, update, deletion of
+   the blocks.
 
 #### Block Types
 

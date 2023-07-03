@@ -1,6 +1,6 @@
 {
   "name": "@mihirpaldhikar/polaris",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A rich semantic content editor.",
   "scripts": {
     "build": "rollup -c"
@@ -13,7 +13,11 @@
     "registry": "https://registry.npmjs.org/"
   },
   "keywords": [
-    "Content Editor"
+    "Content Editor",
+    "Text Editor",
+    "Markdown",
+    "React",
+    "Editor"
   ],
   "author": "Mihir Paldhikar",
   "license": "MIT",
