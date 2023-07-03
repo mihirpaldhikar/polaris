@@ -61,6 +61,11 @@ export function serializeBlobToHTML(blob: Blob): string {
         }
       } else if (block.type === "list" && Array.isArray(block.content)) {
         node.style.setProperty("list-style-position", "inside");
+        if (block.role === "numberedList") {
+          node.style.setProperty("list-style-type", "decimal");
+        } else {
+          node.style.setProperty("list-style-type", "disc");
+        }
         for (const list of block.content) {
           const listNode = document.createElement("li");
           listNode.innerHTML = list.content as string;
