@@ -583,6 +583,8 @@ export default function Canvas({
           ? "font-bold text-[22px]"
           : block.role === "subHeading"
           ? "font-medium text-[19px]"
+          : block.role === "quote"
+          ? "rounded-md border-l-[6px] border-gray-400 bg-gray-200 p-4"
           : "font-normal text-[17px]"
       ),
       onInput: (event: ChangeEvent<HTMLElement>) => {
