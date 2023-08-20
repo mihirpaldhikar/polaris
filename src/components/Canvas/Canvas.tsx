@@ -58,6 +58,7 @@ import {
 import { ListChild } from "../ListChild";
 import { FilePicker } from "../FilePicker";
 import RenderType from "../../enums/RenderType";
+import { TextRenderer } from "../../renderers";
 
 interface CanvasProps {
   editable: boolean;
@@ -576,49 +577,17 @@ export default function Canvas({
   }
 
   if (blockRenderType(block.role) === RenderType.TEXT) {
-    return createElement(createNodeFromRole(block.role), {
-      "data-type": BLOCK_NODE,
-      "data-block-render-type": blockRenderType(block.role),
-      id: block.id,
-      role: block.role,
-      disabled: !editable,
-      contentEditable: editable,
-      dangerouslySetInnerHTML: { __html: block.content },
-      style: setNodeStyle(block.style),
-      spellCheck: true,
-      className: conditionalClassName(
-        "focus:outline-none focus:ring-0 outline-none ring-0 w-full cursor-text break-words",
-        block.role === "title"
-          ? "font-bold text-4xl"
-          : block.role === "subTitle"
-          ? "font-medium text-[24px]"
-          : block.role === "heading"
-          ? "font-bold text-[22px]"
-          : block.role === "subHeading"
-          ? "font-medium text-[19px]"
-          : block.role === "quote"
-          ? "rounded-md border-l-[6px] border-gray-400 bg-gray-200 p-4"
-          : "font-normal text-[17px]"
-      ),
-      onInput: (event: ChangeEvent<HTMLElement>) => {
-        notifyChange(event, blockRenderType(block.role));
-      },
-      onKeyDown: (event: KeyboardEvent) => {
-        keyHandler(event, -1);
-      },
-      onClick: clickHandler,
-      onMouseUp: () => {
-        onSelect(block);
-      },
-      onContextMenu: (event: MouseEvent) => {
-        event.preventDefault();
-        onContextMenu(
-          block,
-          { x: event.clientX, y: event.clientY },
-          getCaretOffset(getBlockNode(block.id))
-        );
-      },
-    });
+    return (
+      <TextRenderer
+        block={block}
+        editable={editable}
+        onUpdate={notifyChange}
+        onContextMenu={onContextMenu}
+        onClick={clickHandler}
+        onSelect={onSelect}
+        onKeyPressed={keyHandler}
+      />
+    );
   }
 
   if (
