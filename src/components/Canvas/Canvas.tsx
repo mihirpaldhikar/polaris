@@ -20,19 +20,10 @@
  * SOFTWARE.
  */
 
-import {
-  type ChangeEvent,
-  createElement,
-  Fragment,
-  type JSX,
-  useEffect,
-  useRef,
-} from "react";
+import { type ChangeEvent, Fragment, type JSX, useEffect, useRef } from "react";
 import { type Block, type Coordinates, type Style } from "../../interfaces";
 import {
   blockRenderType,
-  conditionalClassName,
-  createNodeFromRole,
   getBlockNode,
   getCaretCoordinates,
   getCaretOffset,
@@ -41,18 +32,15 @@ import {
   getNodeSiblings,
   inlineSpecifierManager,
   nodeOffset,
-  setNodeStyle,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
 import {
-  BLOCK_NODE,
   INLINE_SPECIFIER_NODE,
   LINK_ATTRIBUTE,
   NODE_TYPE,
 } from "../../constants";
-import { ListChild } from "../ListChild";
 import RenderType from "../../enums/RenderType";
-import { ImageRenderer, TextRenderer } from "../../renderers";
+import { ImageRenderer, ListRenderer, TextRenderer } from "../../renderers";
 
 interface CanvasProps {
   editable: boolean;
@@ -599,59 +587,17 @@ export default function Canvas({
     );
   }
 
-  if (
-    blockRenderType(block.role) === RenderType.LIST &&
-    Array.isArray(block.content)
-  ) {
-    return createElement(
-      createNodeFromRole(block.role),
-      {
-        "data-type": BLOCK_NODE,
-        "data-block-render-type": blockRenderType(block.role),
-        id: block.id,
-        role: block.role,
-        disabled: !editable,
-        style: setNodeStyle(block.style),
-        spellCheck: true,
-        className: conditionalClassName(
-          "px-4 space-y-2 text-[17px] my-1",
-          block.role === "numberedList" ? "list-decimal" : "list-disc"
-        ),
-        onContextMenu: (event: MouseEvent) => {
-          event.preventDefault();
-          onContextMenu(
-            block,
-            { x: event.clientX, y: event.clientY },
-            getCaretOffset(getBlockNode(block.id))
-          );
-        },
-      },
-      block.content.map((content, index) => {
-        if (
-          blockRenderType(content.role) === RenderType.TEXT &&
-          content.role === "listChild" &&
-          typeof content.content === "string"
-        ) {
-          return (
-            <ListChild
-              key={content.id}
-              editable={editable}
-              content={content}
-              onClick={clickHandler}
-              onInput={(event) => {
-                notifyChange(event, blockRenderType(block.role), content);
-              }}
-              onSelect={() => {
-                onSelect(content);
-              }}
-              onKeyDown={(event) => {
-                keyHandler(event, index);
-              }}
-            />
-          );
-        }
-        return <Fragment key={content.id} />;
-      })
+  if (blockRenderType(block.role) === RenderType.LIST) {
+    return (
+      <ListRenderer
+        block={block}
+        editable={editable}
+        onContextMenu={onContextMenu}
+        onClick={clickHandler}
+        onUpdate={notifyChange}
+        onSelect={onSelect}
+        onKeyPressed={keyHandler}
+      />
     );
   }
 

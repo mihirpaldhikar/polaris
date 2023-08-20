@@ -20,6 +20,4 @@
  * SOFTWARE.
  */
 
-export { TextRenderer } from "./TextRenderer";
-export { ImageRenderer } from "./ImageRenderer";
-export { ListRenderer } from "./ListRenderer";
+export { default as ListRenderer } from "./ListRenderer";
