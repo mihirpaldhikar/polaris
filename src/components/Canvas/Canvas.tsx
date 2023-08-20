@@ -475,7 +475,6 @@ export default function Canvas({
       case " ": {
         if (
           blockRenderType(block.role) === RenderType.TEXT &&
-          block.role !== "listChild" &&
           typeof block.content === "string"
         ) {
           switch (block.content) {

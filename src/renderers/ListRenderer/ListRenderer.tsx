@@ -32,7 +32,6 @@ import {
 import { BLOCK_NODE } from "../../constants";
 import { type Block, type Coordinates } from "../../interfaces";
 import RenderType from "../../enums/RenderType";
-import { ListChild } from "../../components/ListChild";
 
 interface ListRendererProps {
   block: Block;
@@ -91,23 +90,32 @@ export default function ListRenderer({
         content.role === "listChild" &&
         typeof content.content === "string"
       ) {
-        return (
-          <ListChild
-            key={content.id}
-            editable={editable}
-            content={content}
-            onClick={onClick}
-            onInput={(event) => {
-              onUpdate(event, blockRenderType(block.role), content);
-            }}
-            onSelect={() => {
-              onSelect(content);
-            }}
-            onKeyDown={(event) => {
-              onKeyPressed(event, index);
-            }}
-          />
-        );
+        return createElement("li", {
+          "data-type": BLOCK_NODE,
+          "data-block-render-type": blockRenderType(content.role),
+          key: content.id,
+          id: content.id,
+          className:
+            "w-full cursor-text break-words outline-none ring-0 focus:outline-none focus:ring-0",
+          disabled: !editable,
+          contentEditable: editable,
+          style: setNodeStyle(content.style),
+          spellCheck: true,
+          dangerouslySetInnerHTML: { __html: content.content },
+          onInput: (event: ChangeEvent<HTMLElement>) => {
+            onUpdate(event, blockRenderType(block.role), content);
+          },
+          onClick,
+          onKeyDown: (event: KeyboardEvent) => {
+            onKeyPressed(event, index);
+          },
+          onMouseUp: () => {
+            onSelect(content);
+          },
+          onContextMenu: (event: MouseEvent) => {
+            event.preventDefault();
+          },
+        });
       }
       return <Fragment key={content.id} />;
     })
