@@ -21,7 +21,7 @@
  */
 
 import { type Role } from "../types";
-import { type Siblings, type Style } from "../interfaces";
+import { Block, type Siblings, type Style } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
@@ -167,5 +167,39 @@ export function blockRenderType(role: Role): RenderType {
       return RenderType.IMAGE;
     default:
       return RenderType.UNKNOWN;
+  }
+}
+
+export function nodeHierarchy(node: HTMLElement | null): HTMLElement[] {
+  if (node === null) return [];
+  const hierarchy: HTMLElement[] = [];
+  hierarchy.push(getBlockNode(node.id) as HTMLElement);
+  while (
+    hierarchy[hierarchy.length - 1].tagName.toLowerCase() !== "div" &&
+    !hierarchy[hierarchy.length - 1].id.includes("editor")
+  ) {
+    const p = getBlockNode(hierarchy[hierarchy.length - 1].id);
+    if (p?.parentElement != null) {
+      if (p.parentElement?.tagName.toLowerCase() === "li") {
+        hierarchy.push(p.parentElement.parentElement as HTMLElement);
+      } else {
+        hierarchy.push(p.parentElement);
+      }
+    } else {
+      break;
+    }
+  }
+  return hierarchy.reverse();
+}
+
+export function traverseAndUpdate(contents: Block[], targetId: string): void {
+  for (let i = 0; i < contents.length; i++) {
+    if (contents[i].id === targetId) {
+      const node: HTMLElement = getBlockNode(contents[i].id) as HTMLElement;
+      contents[i].content = node.innerHTML;
+    }
+    if (blockRenderType(contents[i].role) === RenderType.LIST) {
+      traverseAndUpdate(contents[i].content as Block[], targetId);
+    }
   }
 }
