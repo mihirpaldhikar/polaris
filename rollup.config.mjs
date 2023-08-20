@@ -39,39 +39,39 @@ const rollupConfiguration = [
       {
         file: packageJson.main,
         format: "cjs",
-        sourcemap: true,
+        sourcemap: true
       },
       {
         file: packageJson.module,
         format: "esm",
-        sourcemap: true,
-      },
+        sourcemap: true
+      }
     ],
     plugins: [
       postcss({
-        extract: false,
+        extract: false
       }),
       resolve({
-        extensions: [".css"],
+        extensions: [".css"]
       }),
       commonjs({
         transformMixedEsModules: true,
-        include: [],
+        include: []
       }),
       pluginPeerDepsExternalModule(),
       typescript({
         tsconfig: "./tsconfig.json",
-        exclude: ["**/tests/", "**/*.test.ts", "**/*.test.tsx"],
+        exclude: ["**/tests/", "**/*.test.ts", "**/*.test.tsx"]
       }),
-      terser(),
-    ],
+      terser()
+    ]
   },
   {
     input: "dist/esm/types/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "esm" }],
     plugins: [dts()],
-    external: [/\.css$/],
-  },
+    external: [/\.css$/]
+  }
 ];
 
 export default rollupConfiguration;

@@ -24,6 +24,7 @@ import { type Role } from "../types";
 import { type Siblings, type Style } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 import { BLOCK_NODE, NODE_TYPE } from "../constants";
+import RenderType from "../enums/RenderType";
 
 /**
  * @function createNodeFromRole
@@ -147,4 +148,23 @@ export function getNodeSiblings(blockId: string): Siblings {
 
 export function normalizeContent(string: string): string {
   return string.replaceAll(/&nbsp;|\u202F|\u00A0/g, " ");
+}
+
+export function blockRenderType(role: Role): RenderType {
+  switch (role) {
+    case "title":
+    case "subTitle":
+    case "heading":
+    case "subHeading":
+    case "paragraph":
+    case "quote":
+      return RenderType.TEXT;
+    case "bulletList":
+    case "numberedList":
+      return RenderType.LIST;
+    case "image":
+      return RenderType.IMAGE;
+    default:
+      return RenderType.UNKNOWN;
+  }
 }
