@@ -28,12 +28,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import {
-  type Block,
-  type Coordinates,
-  type ImageContent,
-  type Style,
-} from "../../interfaces";
+import { type Block, type Coordinates, type Style } from "../../interfaces";
 import {
   blockRenderType,
   conditionalClassName,
@@ -56,9 +51,8 @@ import {
   NODE_TYPE,
 } from "../../constants";
 import { ListChild } from "../ListChild";
-import { FilePicker } from "../FilePicker";
 import RenderType from "../../enums/RenderType";
-import { TextRenderer } from "../../renderers";
+import { ImageRenderer, TextRenderer } from "../../renderers";
 
 interface CanvasProps {
   editable: boolean;
@@ -591,6 +585,21 @@ export default function Canvas({
   }
 
   if (
+    blockRenderType(block.role) === RenderType.IMAGE &&
+    typeof block.content === "object"
+  ) {
+    return (
+      <ImageRenderer
+        block={block}
+        editable={editable}
+        onContextMenu={onContextMenu}
+        onImageRequest={onImageRequest}
+        onDelete={onDelete}
+      />
+    );
+  }
+
+  if (
     blockRenderType(block.role) === RenderType.LIST &&
     Array.isArray(block.content)
   ) {
@@ -644,51 +653,6 @@ export default function Canvas({
         return <Fragment key={content.id} />;
       })
     );
-  }
-
-  if (
-    blockRenderType(block.role) === RenderType.IMAGE &&
-    block.role === "image" &&
-    typeof block.content === "object"
-  ) {
-    const imageData = block.content as ImageContent;
-    if (imageData.url === "") {
-      return (
-        <FilePicker
-          message={"Drag or click here to add an image."}
-          accept={"image/png, image/jpg, image/jpeg, image/svg+xml, image/gif"}
-          onFilePicked={(file) => {
-            onImageRequest(block, file);
-          }}
-          onDelete={() => {
-            onDelete(block, false);
-          }}
-        />
-      );
-    }
-    return createElement(createNodeFromRole(block.role), {
-      "data-type": BLOCK_NODE,
-      "data-block-render-type": blockRenderType(block.role),
-      id: block.id,
-      role: block.role,
-      disabled: !editable,
-      draggable: false,
-      src: imageData.url,
-      alt: imageData.description,
-      style: {
-        height: imageData.height,
-        width: imageData.width,
-      },
-      className: "mx-auto display-block object-center w-full rounded-md",
-      onContextMenu: (event: MouseEvent) => {
-        event.preventDefault();
-        onContextMenu(
-          block,
-          { x: event.clientX, y: event.clientY },
-          getCaretOffset(getBlockNode(block.id))
-        );
-      },
-    });
   }
 
   /// If no valid block type is found, render an empty Fragment.

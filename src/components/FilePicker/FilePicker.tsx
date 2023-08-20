@@ -61,7 +61,7 @@ export default function FilePicker({
       />
       <span
         className={
-          "absolute flex w-full justify-end px-2 py-1 text-sm text-red-600"
+          "absolute flex w-fit justify-start px-2 py-1 text-sm text-red-600"
         }
         onClick={(event) => {
           event.stopPropagation();

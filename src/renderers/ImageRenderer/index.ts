@@ -20,5 +20,4 @@
  * SOFTWARE.
  */
 
-export { TextRenderer } from "./TextRenderer";
-export { ImageRenderer } from "./ImageRenderer";
+export { default as ImageRenderer } from "./ImageRenderer";
