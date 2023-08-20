@@ -21,7 +21,7 @@
  */
 
 import { type ChangeEvent, createElement, type JSX } from "react";
-import { setNodeStyle } from "../../utils";
+import { blockRenderType, setNodeStyle } from "../../utils";
 import { type Block } from "../../interfaces";
 import { BLOCK_NODE } from "../../constants";
 
@@ -44,7 +44,7 @@ export default function ListChild({
 }: ListChildProps): JSX.Element {
   return createElement("li", {
     "data-type": BLOCK_NODE,
-    "data-block-type": content.type,
+    "data-block-render-type": blockRenderType(content.role),
     key: content.id,
     id: content.id,
     className:

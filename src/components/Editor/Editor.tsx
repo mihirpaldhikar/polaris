@@ -20,14 +20,7 @@
  * SOFTWARE.
  */
 
-import {
-  createRef,
-  Fragment,
-  type JSX,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Fragment, type JSX, useCallback, useEffect, useState } from "react";
 import { Composer } from "../Composer";
 import {
   type Blob,
@@ -39,6 +32,7 @@ import {
   type Style,
 } from "../../interfaces";
 import {
+  blockRenderType,
   elementContainsStyle,
   generateBlockId,
   generateMenuId,
@@ -88,6 +82,7 @@ import { ActionMenu } from "../ActionMenu";
 import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
 import { ContextMenu } from "../ContextMenu";
 import { SizeDialog } from "../SizeDialog";
+import RenderType from "../../enums/RenderType";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -294,12 +289,13 @@ export default function Editor({
     const contentLengthAfterCaretOffset =
       block.content.substring(caretOffset).length;
 
-    if (block.type === "text" && Array.isArray(content)) {
+    if (
+      blockRenderType(block.role) === RenderType.TEXT &&
+      Array.isArray(content)
+    ) {
       const pasteBlocks: Block[] = content.map((copiedText, index) => {
         return {
           id: generateBlockId(),
-          reference: createRef<HTMLElement>(),
-          type: block.type,
           role: block.role,
           style: block.style,
           content:
@@ -329,7 +325,10 @@ export default function Editor({
         nodeId: pasteBlocks[pasteBlocks.length - 1].id,
         caretOffset: computedCaretOffset,
       });
-    } else if (block.type === "text" && typeof content === "string") {
+    } else if (
+      blockRenderType(block.role) === RenderType.TEXT &&
+      typeof content === "string"
+    ) {
       contents[blockIndex].content = (contents[blockIndex].content as string)
         .substring(0, caretOffset)
         .concat(content)
@@ -854,7 +853,6 @@ export default function Editor({
 
     const newBlock: Block = {
       id: generateBlockId(),
-      type: block.type,
       style: block.style,
       role: block.role,
       content: previousContent,
@@ -890,7 +888,6 @@ export default function Editor({
               if (typeof execute.args === "string") {
                 newBlock.role = execute.args as Role;
                 if (newBlock.role === "image") {
-                  newBlock.type = "image";
                   newBlock.content = {
                     url: "",
                     height: 0,
@@ -899,7 +896,6 @@ export default function Editor({
                   };
                   const emptyBlock: Block = {
                     id: generateBlockId(),
-                    type: "text",
                     role: "paragraph",
                     content: "",
                     style: [],
@@ -924,7 +920,6 @@ export default function Editor({
                   });
                   return;
                 } else if (newBlock.role === "numberedList") {
-                  newBlock.type = "list";
                   newBlock.style.push(
                     ...[
                       {
@@ -938,7 +933,6 @@ export default function Editor({
                       id: generateBlockId(),
                       style: [],
                       content: previousContent,
-                      type: "text",
                       role: "listChild",
                     },
                   ];
@@ -1017,11 +1011,7 @@ export default function Editor({
   }
 
   function imageRequestHandler(block: Block, file: File): void {
-    if (
-      block.type !== "image" ||
-      block.role !== "image" ||
-      typeof block.content !== "object"
-    ) {
+    if (block.role !== "image" || typeof block.content !== "object") {
       return;
     }
 
@@ -1056,9 +1046,7 @@ export default function Editor({
           type: "blockFunction",
           args: (block, onComplete, blocks, coordinates) => {
             if (
-              (block.type !== "image" &&
-                block.role !== "image" &&
-                typeof block.content !== "object") ||
+              (block.role !== "image" && typeof block.content !== "object") ||
               blocks === undefined ||
               coordinates === undefined
             ) {
@@ -1095,11 +1083,7 @@ export default function Editor({
         execute: {
           type: "blockFunction",
           args: (block, onComplete) => {
-            if (
-              block.type !== "image" &&
-              block.role !== "image" &&
-              typeof block.content !== "object"
-            ) {
+            if (block.role !== "image" && typeof block.content !== "object") {
               return;
             }
 
@@ -1120,7 +1104,6 @@ export default function Editor({
             if (blocks.length === 1 && blocks.indexOf(block) === 0) {
               const newBlock: Block = {
                 id: generateBlockId(),
-                type: "text",
                 role: "paragraph",
                 content: "",
                 style: [],
@@ -1202,18 +1185,15 @@ export default function Editor({
     const blockIndex = contents.indexOf(block);
     block.role = newRole;
     if (newRole === "numberedList" || newRole === "bulletList") {
-      block.type = "list";
       block.content = [
         {
           id: generateBlockId(),
           content: "",
-          type: "text",
           role: "listChild",
           style: [],
         },
       ];
     } else {
-      block.type = "text";
       contents[blockIndex].content = "";
     }
     contents[blockIndex] = block;

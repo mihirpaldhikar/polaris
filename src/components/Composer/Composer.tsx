@@ -134,7 +134,6 @@ export default function Composer({
 
     const newBlock: Block = {
       id: generateBlockId(),
-      type: "text",
       role: "paragraph",
       content: "",
       style: [],
@@ -190,7 +189,6 @@ export default function Composer({
       block.content = currentBlockContent;
       newBlock.content = newBlockContent;
       newBlock.role = block.role;
-      newBlock.type = block.type;
       newBlock.style = block.style;
     }
 
@@ -331,7 +329,6 @@ export default function Composer({
     ) {
       const textBlock: Block = {
         id: generateBlockId(),
-        type: "text",
         role: "paragraph",
         content: "",
         style: [],
@@ -343,7 +340,6 @@ export default function Composer({
 
     const newListChildBlock: Block = {
       id: generateBlockId(),
-      type: "text",
       role: "listChild",
       content: "",
       style: [],

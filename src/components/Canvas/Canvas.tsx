@@ -35,6 +35,7 @@ import {
   type Style,
 } from "../../interfaces";
 import {
+  blockRenderType,
   conditionalClassName,
   createNodeFromRole,
   getBlockNode,
@@ -47,7 +48,7 @@ import {
   nodeOffset,
   setNodeStyle,
 } from "../../utils";
-import { type Content, type Role, type Type } from "../../types";
+import { type Content, type Role } from "../../types";
 import {
   BLOCK_NODE,
   INLINE_SPECIFIER_NODE,
@@ -56,6 +57,7 @@ import {
 } from "../../constants";
 import { ListChild } from "../ListChild";
 import { FilePicker } from "../FilePicker";
+import RenderType from "../../enums/RenderType";
 
 interface CanvasProps {
   editable: boolean;
@@ -164,21 +166,21 @@ export default function Canvas({
    * @function notifyChange
    * @param event
    *
-   * @param blockType
+   * @param blockRenderType
    * @param childBlock
    * @description Whenever the Node is mutated, this function updates the content of the block and notifies the changes to the listeners.
    */
   function notifyChange(
     event: ChangeEvent<HTMLElement>,
-    blockType: Type,
+    blockRenderType: RenderType,
     childBlock?: Block
   ): void {
-    switch (blockType) {
-      case "text": {
+    switch (blockRenderType) {
+      case RenderType.TEXT: {
         block.content = event.target.innerHTML;
         break;
       }
-      case "list": {
+      case RenderType.LIST: {
         if (childBlock !== undefined && Array.isArray(block.content)) {
           const blockIndex = block.content.indexOf(childBlock);
           block.content[blockIndex].content = event.target.innerHTML;
@@ -194,20 +196,16 @@ export default function Canvas({
    * @function keyHandler
    * @param event
    *
-   * @param blockType
    * @param index
    * @description Handles the events specified when keys are pressed.
    *
    * @author Mihir Paldhikar
    */
 
-  function keyHandler(
-    event: KeyboardEvent,
-    blockType: Type,
-    index: number
-  ): void {
+  function keyHandler(event: KeyboardEvent, index: number): void {
     const blockNode = getBlockNode(
-      block.type === "list" && Array.isArray(block.content)
+      blockRenderType(block.role) === RenderType.LIST &&
+        Array.isArray(block.content)
         ? block.content[index].id
         : block.id
     );
@@ -225,7 +223,10 @@ export default function Canvas({
           break;
         }
 
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           onListEnter(
             index,
             caretOffset !== (block.content[index].content as string).length,
@@ -245,7 +246,10 @@ export default function Canvas({
           return;
         }
 
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           if (index !== 0 && caretOffset === 0) {
             event.preventDefault();
             onListChildDelete(index, block.content[index].content !== "");
@@ -253,11 +257,7 @@ export default function Canvas({
           break;
         }
 
-        if (
-          caretOffset === 0 &&
-          nodeSiblings.previous != null &&
-          nodeSiblings.previous.getAttribute("data-block-type") === block.type
-        ) {
+        if (caretOffset === 0 && nodeSiblings.previous != null) {
           event.preventDefault();
           onDelete(block, true);
         }
@@ -265,15 +265,15 @@ export default function Canvas({
       }
       case "delete": {
         if (event.ctrlKey) {
-          if (block.type === "list" && Array.isArray(block.content)) {
+          if (
+            blockRenderType(block.role) === RenderType.LIST &&
+            Array.isArray(block.content)
+          ) {
             onListChildDelete(index, false);
             break;
           }
 
-          if (
-            nodeSiblings.previous != null &&
-            nodeSiblings.previous.getAttribute("data-block-type") === block.type
-          ) {
+          if (nodeSiblings.previous != null) {
             event.preventDefault();
             onDelete(block, false);
           }
@@ -281,7 +281,10 @@ export default function Canvas({
         break;
       }
       case "arrowleft": {
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           if (
             (!event.ctrlKey || !event.shiftKey) &&
             caretOffset === 0 &&
@@ -296,8 +299,7 @@ export default function Canvas({
         if (
           (!event.ctrlKey || !event.shiftKey) &&
           caretOffset === 0 &&
-          nodeSiblings.previous !== null &&
-          nodeSiblings.previous.getAttribute("data-block-type") === block.type
+          nodeSiblings.previous !== null
         ) {
           event.preventDefault();
           onNavigate("up", -1);
@@ -306,7 +308,10 @@ export default function Canvas({
         break;
       }
       case "arrowright": {
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           if (
             (!event.ctrlKey || !event.shiftKey) &&
             caretOffset === blockNode.innerText.length &&
@@ -321,8 +326,7 @@ export default function Canvas({
         if (
           (!event.ctrlKey || !event.shiftKey) &&
           caretOffset === blockNode.innerText.length &&
-          nodeSiblings.next !== null &&
-          nodeSiblings.next.getAttribute("data-block-type") === block.type
+          nodeSiblings.next !== null
         ) {
           event.preventDefault();
           onNavigate("down", -1);
@@ -336,7 +340,10 @@ export default function Canvas({
           break;
         }
 
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           if (index - 1 !== -1) {
             event.preventDefault();
             onListNavigate(index - 1, "up", caretOffset);
@@ -349,8 +356,6 @@ export default function Canvas({
 
         if (
           nodeSiblings.previous !== null &&
-          nodeSiblings.previous.getAttribute("data-block-type") ===
-            block.type &&
           Math.floor(
             caretCoordinates.y -
               nodeSiblings.previous.getBoundingClientRect().bottom
@@ -367,7 +372,10 @@ export default function Canvas({
           break;
         }
 
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           if (index + 1 !== block.content.length) {
             event.preventDefault();
             onListNavigate(index + 1, "up", caretOffset);
@@ -380,7 +388,6 @@ export default function Canvas({
 
         if (
           nodeSiblings.next !== null &&
-          nodeSiblings.next.getAttribute("data-block-type") === block.type &&
           caretCoordinates.y - nodeSiblings.next.getBoundingClientRect().top <=
             computedDistance
         ) {
@@ -393,7 +400,10 @@ export default function Canvas({
         if (event.ctrlKey) {
           event.preventDefault();
 
-          if (block.type === "list" && Array.isArray(block.content)) {
+          if (
+            blockRenderType(block.role) === RenderType.LIST &&
+            Array.isArray(block.content)
+          ) {
             break;
           }
           void navigator.clipboard.readText().then((copiedText) => {
@@ -458,7 +468,10 @@ export default function Canvas({
         break;
       }
       case "/": {
-        if (block.type === "list" && Array.isArray(block.content)) {
+        if (
+          blockRenderType(block.role) === RenderType.LIST &&
+          Array.isArray(block.content)
+        ) {
           onActionKeyPressed(
             getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
             block.content[index],
@@ -482,7 +495,7 @@ export default function Canvas({
       }
       case " ": {
         if (
-          block.type === "text" &&
+          blockRenderType(block.role) === RenderType.TEXT &&
           block.role !== "listChild" &&
           typeof block.content === "string"
         ) {
@@ -562,10 +575,10 @@ export default function Canvas({
     }
   }
 
-  if (block.type === "text") {
+  if (blockRenderType(block.role) === RenderType.TEXT) {
     return createElement(createNodeFromRole(block.role), {
       "data-type": BLOCK_NODE,
-      "data-block-type": block.type,
+      "data-block-render-type": blockRenderType(block.role),
       id: block.id,
       role: block.role,
       disabled: !editable,
@@ -588,10 +601,10 @@ export default function Canvas({
           : "font-normal text-[17px]"
       ),
       onInput: (event: ChangeEvent<HTMLElement>) => {
-        notifyChange(event, block.type);
+        notifyChange(event, blockRenderType(block.role));
       },
       onKeyDown: (event: KeyboardEvent) => {
-        keyHandler(event, block.type, -1);
+        keyHandler(event, -1);
       },
       onClick: clickHandler,
       onMouseUp: () => {
@@ -608,12 +621,15 @@ export default function Canvas({
     });
   }
 
-  if (block.type === "list" && Array.isArray(block.content)) {
+  if (
+    blockRenderType(block.role) === RenderType.LIST &&
+    Array.isArray(block.content)
+  ) {
     return createElement(
       createNodeFromRole(block.role),
       {
         "data-type": BLOCK_NODE,
-        "data-block-type": block.type,
+        "data-block-render-type": blockRenderType(block.role),
         id: block.id,
         role: block.role,
         disabled: !editable,
@@ -634,7 +650,7 @@ export default function Canvas({
       },
       block.content.map((content, index) => {
         if (
-          content.type === "text" &&
+          blockRenderType(content.role) === RenderType.TEXT &&
           content.role === "listChild" &&
           typeof content.content === "string"
         ) {
@@ -645,13 +661,13 @@ export default function Canvas({
               content={content}
               onClick={clickHandler}
               onInput={(event) => {
-                notifyChange(event, block.type, content);
+                notifyChange(event, blockRenderType(block.role), content);
               }}
               onSelect={() => {
                 onSelect(content);
               }}
               onKeyDown={(event) => {
-                keyHandler(event, block.type, index);
+                keyHandler(event, index);
               }}
             />
           );
@@ -662,7 +678,7 @@ export default function Canvas({
   }
 
   if (
-    block.type === "image" &&
+    blockRenderType(block.role) === RenderType.IMAGE &&
     block.role === "image" &&
     typeof block.content === "object"
   ) {
@@ -683,7 +699,7 @@ export default function Canvas({
     }
     return createElement(createNodeFromRole(block.role), {
       "data-type": BLOCK_NODE,
-      "data-block-type": block.type,
+      "data-block-render-type": blockRenderType(block.role),
       id: block.id,
       role: block.role,
       disabled: !editable,

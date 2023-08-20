@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type Content, type Role, type Type } from "../types";
+import { type Content, type Role } from "../types";
 import type Style from "./Style";
 import { type ImageContent } from "./index";
 
@@ -34,7 +34,6 @@ import { type ImageContent } from "./index";
 
 interface Block {
   id: string;
-  type: Type;
   role: Role;
   content: Content | Block[] | ImageContent;
   style: Style[];

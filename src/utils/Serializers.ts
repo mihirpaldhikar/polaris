@@ -21,9 +21,10 @@
  */
 
 import { type Blob, type Block, type ImageContent } from "../interfaces";
-import { createNodeFromRole } from "./BlockUtils";
+import { blockRenderType, createNodeFromRole } from "./BlockUtils";
 import { LINK_ATTRIBUTE } from "../constants";
 import { isInlineSpecifierNode } from "./DOMUtils";
+import RenderType from "../enums/RenderType";
 
 export function serializeBlobToHTML(blob: Blob): string {
   const contents: Block[] = blob.contents;
@@ -44,7 +45,10 @@ export function serializeBlobToHTML(blob: Blob): string {
           style.value
         );
       }
-      if (block.type === "text" && typeof block.content === "string") {
+      if (
+        blockRenderType(block.role) === RenderType.TEXT &&
+        typeof block.content === "string"
+      ) {
         node.innerHTML = block.content;
         for (const childNode of node.childNodes) {
           if (isInlineSpecifierNode(childNode)) {
@@ -59,7 +63,10 @@ export function serializeBlobToHTML(blob: Blob): string {
             }
           }
         }
-      } else if (block.type === "list" && Array.isArray(block.content)) {
+      } else if (
+        blockRenderType(block.role) === RenderType.LIST &&
+        Array.isArray(block.content)
+      ) {
         node.style.setProperty("list-style-position", "inside");
         if (block.role === "numberedList") {
           node.style.setProperty("list-style-type", "decimal");
@@ -86,7 +93,10 @@ export function serializeBlobToHTML(blob: Blob): string {
           }
           node.appendChild(listNode);
         }
-      } else if (block.type === "image" && block.role === "image") {
+      } else if (
+        blockRenderType(block.role) === RenderType.IMAGE &&
+        block.role === "image"
+      ) {
         const imageContent = block.content as ImageContent;
         if (imageContent.url === "") continue;
         node.setAttribute("src", imageContent.url);

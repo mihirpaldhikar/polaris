@@ -158,6 +158,7 @@ export function blockRenderType(role: Role): RenderType {
     case "subHeading":
     case "paragraph":
     case "quote":
+    case "listChild":
       return RenderType.TEXT;
     case "bulletList":
     case "numberedList":
