@@ -32,13 +32,9 @@ import {
   getNodeSiblings,
   inlineSpecifierManager,
   nodeOffset,
+  openLinkInNewTab,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
-import {
-  INLINE_SPECIFIER_NODE,
-  LINK_ATTRIBUTE,
-  NODE_TYPE,
-} from "../../constants";
 import RenderType from "../../enums/RenderType";
 import { ImageRenderer, ListRenderer, TextRenderer } from "../../renderers";
 
@@ -534,30 +530,6 @@ export default function Canvas({
     }
   }
 
-  function clickHandler(event: MouseEvent): void {
-    if (event.ctrlKey) {
-      const nodeAtMouseCoordinates = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      );
-
-      if (nodeAtMouseCoordinates == null) return;
-
-      if (
-        nodeAtMouseCoordinates.getAttribute(NODE_TYPE) ===
-          INLINE_SPECIFIER_NODE &&
-        nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) != null
-      ) {
-        setTimeout(() => {
-          window.open(
-            nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) as string,
-            "_blank"
-          );
-        }, 10);
-      }
-    }
-  }
-
   if (blockRenderType(block.role) === RenderType.TEXT) {
     return (
       <TextRenderer
@@ -565,7 +537,7 @@ export default function Canvas({
         editable={editable}
         onUpdate={notifyChange}
         onContextMenu={onContextMenu}
-        onClick={clickHandler}
+        onClick={openLinkInNewTab}
         onSelect={onSelect}
         onKeyPressed={keyHandler}
       />
@@ -593,7 +565,7 @@ export default function Canvas({
         block={block}
         editable={editable}
         onContextMenu={onContextMenu}
-        onClick={clickHandler}
+        onClick={openLinkInNewTab}
         onUpdate={notifyChange}
         onSelect={onSelect}
         onKeyPressed={keyHandler}

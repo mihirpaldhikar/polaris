@@ -830,3 +830,27 @@ export function getNodeIndex(
   const childNodes: Node[] = Array.from(parentElement.childNodes);
   return childNodes.indexOf(targetNode);
 }
+
+export function openLinkInNewTab(event: MouseEvent): void {
+  if (event.ctrlKey) {
+    const nodeAtMouseCoordinates = document.elementFromPoint(
+      event.clientX,
+      event.clientY
+    );
+
+    if (nodeAtMouseCoordinates == null) return;
+
+    if (
+      nodeAtMouseCoordinates.getAttribute(NODE_TYPE) ===
+        INLINE_SPECIFIER_NODE &&
+      nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) != null
+    ) {
+      setTimeout(() => {
+        window.open(
+          nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) as string,
+          "_blank"
+        );
+      }, 10);
+    }
+  }
+}
