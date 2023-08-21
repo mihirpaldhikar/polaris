@@ -203,3 +203,13 @@ export function traverseAndUpdate(contents: Block[], targetId: string): void {
     }
   }
 }
+
+export function getParentBlock(
+  masterBlocks: Block[],
+  blockId: string
+): Block[] {
+  const find = (block: Block): any =>
+    block.id.includes(blockId) ||
+    (Array.isArray(block.content) && block.content.find(find));
+  return masterBlocks.filter(find);
+}
