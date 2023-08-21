@@ -21,9 +21,9 @@
  */
 
 import { type JSX } from "react";
-import { generateRandomString } from "../../utils";
 
 interface FilePickerProps {
+  id: string;
   message: string;
   accept: string;
   onFilePicked: (file: File) => void;
@@ -31,20 +31,21 @@ interface FilePickerProps {
 }
 
 export default function FilePicker({
+  id,
   message,
   accept,
   onFilePicked,
   onDelete,
 }: FilePickerProps): JSX.Element {
-  const randomImageId = generateRandomString(30);
   return (
     <div
+      id={id}
       className={
         "relative my-4 h-32 w-full cursor-pointer rounded-lg border-2 border-dashed border-black/20 bg-gray-200"
       }
     >
       <input
-        id={`filePicker-${randomImageId}`}
+        id={`filePicker-${id}`}
         className={
           "filePicker absolute h-full w-full cursor-pointer select-none"
         }
@@ -52,7 +53,7 @@ export default function FilePicker({
         accept={accept}
         onChange={() => {
           const filePicker = document.getElementById(
-            `filePicker-${randomImageId}`
+            `filePicker-${id}`
           ) as HTMLInputElement;
           if (filePicker.files !== null) {
             onFilePicked(filePicker.files[0]);

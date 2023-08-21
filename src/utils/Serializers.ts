@@ -21,7 +21,7 @@
  */
 
 import { type Blob, type Block, type ImageContent } from "../interfaces";
-import { blockRenderType, createNodeFromRole } from "./BlockUtils";
+import { blockRenderTypeFromRole, createNodeFromRole } from "./BlockUtils";
 import { LINK_ATTRIBUTE } from "../constants";
 import { isInlineSpecifierNode } from "./DOMUtils";
 import RenderType from "../enums/RenderType";
@@ -46,7 +46,7 @@ export function serializeBlobToHTML(blob: Blob): string {
         );
       }
       if (
-        blockRenderType(block.role) === RenderType.TEXT &&
+        blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
         typeof block.content === "string"
       ) {
         node.innerHTML = block.content;
@@ -64,7 +64,7 @@ export function serializeBlobToHTML(blob: Blob): string {
           }
         }
       } else if (
-        blockRenderType(block.role) === RenderType.LIST &&
+        blockRenderTypeFromRole(block.role) === RenderType.LIST &&
         Array.isArray(block.content)
       ) {
         node.style.setProperty("list-style-position", "inside");
@@ -94,7 +94,7 @@ export function serializeBlobToHTML(blob: Blob): string {
           node.appendChild(listNode);
         }
       } else if (
-        blockRenderType(block.role) === RenderType.IMAGE &&
+        blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
         block.role === "image"
       ) {
         const imageContent = block.content as ImageContent;

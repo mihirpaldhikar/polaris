@@ -22,7 +22,7 @@
 
 import { type ChangeEvent, createElement, type JSX } from "react";
 import {
-  blockRenderType,
+  blockRenderTypeFromRole,
   conditionalClassName,
   createNodeFromRole,
   getBlockNode,
@@ -58,7 +58,7 @@ export default function TextRenderer({
 }: TextRendererProps): JSX.Element {
   return createElement(createNodeFromRole(block.role), {
     "data-type": BLOCK_NODE,
-    "data-block-render-type": blockRenderType(block.role),
+    "data-block-render-type": blockRenderTypeFromRole(block.role),
     id: block.id,
     role: block.role,
     disabled: !editable,
@@ -81,7 +81,7 @@ export default function TextRenderer({
         : "font-normal text-[17px]"
     ),
     onInput: (event: ChangeEvent<HTMLElement>) => {
-      onUpdate(event, blockRenderType(block.role));
+      onUpdate(event, blockRenderTypeFromRole(block.role));
     },
     onKeyDown: (event: KeyboardEvent) => {
       onKeyPressed(event, -1);

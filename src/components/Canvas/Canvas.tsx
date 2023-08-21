@@ -28,21 +28,20 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { type Block, type Coordinates, type Style } from "../../interfaces";
+import { type Block, type Coordinates } from "../../interfaces";
 import {
-  blockRenderType,
+  blockRenderTypeFromNode,
+  blockRenderTypeFromRole,
   conditionalClassName,
   createNodeFromRole,
+  generateBlockId,
   getBlockNode,
-  getCaretCoordinates,
   getCaretOffset,
-  getNodeAt,
-  getNodeIndex,
   getNodeSiblings,
-  inlineSpecifierManager,
-  nodeOffset,
   openLinkInNewTab,
+  serializeNodeToBlock,
   setNodeStyle,
+  splitBlocksAtCaretOffset,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
 import RenderType from "../../enums/RenderType";
@@ -51,22 +50,17 @@ import { BLOCK_NODE } from "../../constants";
 
 interface CanvasProps {
   editable: boolean;
+  parentBlock?: Block;
   block: Block;
   onChange: (block: Block) => void;
-  onEnter: (splitContent: boolean, caretOffset: number) => void;
-  onListEnter: (
-    childBlockIndex: number,
-    splitContent: boolean,
+  onCreate: (parentBlock: Block, targetBlock: Block) => void;
+  onDelete: (
+    block: Block,
+    previousBlock: Block,
+    nodeIndex: number,
     caretOffset: number
   ) => void;
-  onDelete: (block: Block, joinContent: boolean) => void;
-  onListChildDelete: (childBlockIndex: number, joinContent: boolean) => void;
   onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
-  onListNavigate: (
-    childBlockIndex: number,
-    navigate: "up" | "down",
-    caretOffset: number
-  ) => void;
   onPaste: (
     block: Block,
     content: Content | Content[],
@@ -95,15 +89,11 @@ interface CanvasProps {
  * @param block
  * @param onChange
  * @param onEnter
- * @param onListEnter
  * @param onDelete
- * @param onListChildDelete
  * @param onNavigate
- * @param onListNavigate
  * @param onPaste
- *
  * @param onSelect
- * @param onCommandKeyPressed
+ * @param onActionKeyPressed
  * @returns JSX.Element
  *
  * @description Canvas is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
@@ -113,14 +103,12 @@ interface CanvasProps {
 
 export default function Canvas({
   editable,
+  parentBlock,
   block,
   onChange,
-  onEnter,
-  onListEnter,
+  onCreate,
   onDelete,
-  onListChildDelete,
   onNavigate,
-  onListNavigate,
   onPaste,
   onSelect,
   onImageRequest,
@@ -186,361 +174,157 @@ export default function Canvas({
    * @function keyHandler
    * @param event
    *
-   * @param index
    * @description Handles the events specified when keys are pressed.
    *
    * @author Mihir Paldhikar
    */
 
-  function keyHandler(event: KeyboardEvent, index: number): void {
-    const blockNode = getBlockNode(
-      blockRenderType(block.role) === RenderType.LIST &&
-        Array.isArray(block.content)
-        ? block.content[index].id
-        : block.id
-    );
+  function keyHandler(event: KeyboardEvent): void {
+    const currentBlockNode = getBlockNode(block.id);
+    if (currentBlockNode === null) return;
 
-    if (blockNode == null) return;
-
-    const caretOffset = getCaretOffset(blockNode);
-    const nodeSiblings = getNodeSiblings(block.id);
-    const caretCoordinates = getCaretCoordinates();
+    const caretOffset = getCaretOffset(currentBlockNode);
 
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
-        if (isActionMenuOpen.current) {
-          break;
-        }
-
+        let newBlock: Block = {
+          id: generateBlockId(),
+          content: "",
+          role: "paragraph",
+          style: [],
+        };
         if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
+          parentBlock !== undefined &&
+          blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
+          Array.isArray(parentBlock.content)
         ) {
-          onListEnter(
-            index,
-            caretOffset !== (block.content[index].content as string).length,
-            caretOffset
-          );
-          break;
-        }
+          const currentChildBlockIndex = parentBlock.content
+            .map((blk) => blk.id)
+            .indexOf(block.id);
 
-        onEnter(caretOffset !== blockNode.innerText.length, caretOffset);
+          if (caretOffset !== currentBlockNode.innerText.length) {
+            const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
+            newBlock = spiltBlockPair[1];
+            parentBlock.content.splice(
+              currentChildBlockIndex,
+              1,
+              ...spiltBlockPair
+            );
+          } else {
+            parentBlock.content.splice(currentChildBlockIndex + 1, 0, newBlock);
+          }
+          onCreate(parentBlock, newBlock);
+        } else {
+          if (caretOffset !== currentBlockNode.innerText.length) {
+            const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
+            block = spiltBlockPair[0];
+            newBlock = spiltBlockPair[1];
+          }
+          onCreate(block, newBlock);
+        }
         break;
       }
       case "backspace": {
-        if (roleChangeByMarkdown.current) {
-          event.preventDefault();
-          onMarkdown(block, initialRole.current);
-          roleChangeByMarkdown.current = false;
-          return;
-        }
-
         if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
-        ) {
-          if (index !== 0 && caretOffset === 0) {
-            event.preventDefault();
-            onListChildDelete(index, block.content[index].content !== "");
-          }
-          break;
-        }
-
-        if (caretOffset === 0 && nodeSiblings.previous != null) {
-          event.preventDefault();
-          onDelete(block, true);
-        }
-        break;
-      }
-      case "delete": {
-        if (event.ctrlKey) {
-          if (
-            blockRenderType(block.role) === RenderType.LIST &&
-            Array.isArray(block.content)
-          ) {
-            onListChildDelete(index, false);
-            break;
-          }
-
-          if (nodeSiblings.previous != null) {
-            event.preventDefault();
-            onDelete(block, false);
-          }
-        }
-        break;
-      }
-      case "arrowleft": {
-        if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
-        ) {
-          if (
-            (!event.ctrlKey || !event.shiftKey) &&
-            caretOffset === 0 &&
-            index - 1 !== -1
-          ) {
-            event.preventDefault();
-            onListNavigate(index - 1, "up", -1);
-          }
-          break;
-        }
-
-        if (
-          (!event.ctrlKey || !event.shiftKey) &&
-          caretOffset === 0 &&
-          nodeSiblings.previous !== null
+          parentBlock !== undefined &&
+          blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
+          Array.isArray(parentBlock.content) &&
+          caretOffset === 0
         ) {
           event.preventDefault();
-          onNavigate("up", -1);
-        }
 
-        break;
-      }
-      case "arrowright": {
-        if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
-        ) {
-          if (
-            (!event.ctrlKey || !event.shiftKey) &&
-            caretOffset === blockNode.innerText.length &&
-            index + 1 !== -block.content.length
-          ) {
-            event.preventDefault();
-            onListNavigate(index + 1, "down", -1);
-          }
-          break;
-        }
-
-        if (
-          (!event.ctrlKey || !event.shiftKey) &&
-          caretOffset === blockNode.innerText.length &&
-          nodeSiblings.next !== null
-        ) {
-          event.preventDefault();
-          onNavigate("down", -1);
-        }
-        break;
-      }
-
-      case "arrowup": {
-        if (isActionMenuOpen.current) {
-          event.preventDefault();
-          break;
-        }
-
-        if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
-        ) {
-          if (index - 1 !== -1) {
-            event.preventDefault();
-            onListNavigate(index - 1, "up", caretOffset);
-          }
-          break;
-        }
-
-        const computedDistance: number =
-          block.role === "paragraph" || block.role === "subTitle" ? 3 : 2;
-
-        if (
-          nodeSiblings.previous !== null &&
-          Math.floor(
-            caretCoordinates.y -
-              nodeSiblings.previous.getBoundingClientRect().bottom
-          ) <= computedDistance
-        ) {
-          event.preventDefault();
-          onNavigate("up", caretOffset);
-        }
-        break;
-      }
-      case "arrowdown": {
-        if (isActionMenuOpen.current) {
-          event.preventDefault();
-          break;
-        }
-
-        if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
-        ) {
-          if (index + 1 !== block.content.length) {
-            event.preventDefault();
-            onListNavigate(index + 1, "up", caretOffset);
-          }
-          break;
-        }
-
-        const computedDistance: number =
-          block.role === "title" ? 44 : block.role === "subTitle" ? 32 : 28;
-
-        if (
-          nodeSiblings.next !== null &&
-          caretCoordinates.y - nodeSiblings.next.getBoundingClientRect().top <=
-            computedDistance
-        ) {
-          event.preventDefault();
-          onNavigate("down", caretOffset);
-        }
-        break;
-      }
-      case "v": {
-        if (event.ctrlKey) {
-          event.preventDefault();
+          const currentChildBlockIndex = parentBlock.content
+            .map((blk) => blk.id)
+            .indexOf(block.id);
 
           if (
-            blockRenderType(block.role) === RenderType.LIST &&
-            Array.isArray(block.content)
+            blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
+            currentChildBlockIndex !== 0
           ) {
-            break;
-          }
-          void navigator.clipboard.readText().then((copiedText) => {
-            if (copiedText.includes("\n")) {
-              onPaste(block, copiedText.trim().split(/\r?\n/), caretOffset);
-            } else {
-              onPaste(block, copiedText, caretOffset);
-            }
-          });
-        }
-        break;
-      }
-      case "b": {
-        if (event.ctrlKey) {
-          event.preventDefault();
+            const previousBlock =
+              parentBlock.content[currentChildBlockIndex - 1];
 
-          const style: Style[] = [
-            {
-              name: "font-weight",
-              value: "bold",
-            },
-          ];
+            if (
+              blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
+            ) {
+              const previousNode = getBlockNode(
+                previousBlock.id
+              ) as HTMLElement;
+              const computedCaretOffset =
+                previousNode.lastChild != null
+                  ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
+                    ? (previousNode.lastChild.textContent as string).length
+                    : previousNode.lastChild.textContent?.length ??
+                      previousNode.innerText.length
+                  : previousNode.innerText.length;
 
-          inlineSpecifierManager(blockNode, style);
+              const previousBlockLastChildNodeIndex =
+                previousNode.childNodes.length - 1;
 
-          block.content = blockNode.innerHTML;
-          onChange(block);
-        }
-        break;
-      }
-      case "i": {
-        if (event.ctrlKey) {
-          event.preventDefault();
-          const style: Style[] = [
-            {
-              name: "font-style",
-              value: "italic",
-            },
-          ];
+              previousBlock.id = generateBlockId();
+              previousBlock.content = (previousBlock.content as string).concat(
+                block.content as string
+              );
 
-          inlineSpecifierManager(blockNode, style);
-          block.content = blockNode.innerHTML;
-          onChange(block);
-        }
-        break;
-      }
-      case "u": {
-        if (event.ctrlKey) {
-          event.preventDefault();
+              parentBlock.content.splice(
+                currentChildBlockIndex - 1,
+                2,
+                previousBlock
+              );
 
-          const style: Style[] = [
-            {
-              name: "text-decoration",
-              value: "underline",
-            },
-          ];
-
-          inlineSpecifierManager(blockNode, style);
-          block.content = blockNode.innerHTML;
-          onChange(block);
-        }
-        break;
-      }
-      case "/": {
-        if (
-          blockRenderType(block.role) === RenderType.LIST &&
-          Array.isArray(block.content)
-        ) {
-          onActionKeyPressed(
-            getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
-            block.content[index],
-            block.content[index].content as string,
-            caretOffset -
-              nodeOffset(blockNode, getNodeAt(blockNode, caretOffset))
-          );
-          break;
-        }
-
-        if (typeof block.content === "string") {
-          onActionKeyPressed(
-            getNodeIndex(blockNode, getNodeAt(blockNode, caretOffset)),
-            block,
-            block.content,
-            caretOffset -
-              nodeOffset(blockNode, getNodeAt(blockNode, caretOffset))
-          );
-        }
-        break;
-      }
-      case " ": {
-        if (
-          blockRenderType(block.role) === RenderType.TEXT &&
-          typeof block.content === "string"
-        ) {
-          switch (block.content) {
-            case "-":
-            case "+":
-            case "*": {
-              event.preventDefault();
-              onMarkdown(block, "bulletList");
-              roleChangeByMarkdown.current = true;
-              break;
-            }
-            case "#": {
-              event.preventDefault();
-              onMarkdown(block, "title");
-              roleChangeByMarkdown.current = true;
-              break;
-            }
-            case "##": {
-              event.preventDefault();
-              onMarkdown(block, "subTitle");
-              roleChangeByMarkdown.current = true;
-              break;
-            }
-            case "###": {
-              event.preventDefault();
-              onMarkdown(block, "heading");
-              roleChangeByMarkdown.current = true;
-              break;
-            }
-            case "####": {
-              event.preventDefault();
-              onMarkdown(block, "subHeading");
-              roleChangeByMarkdown.current = true;
-              break;
-            }
-            default: {
-              if (/^\d+\.$/.test(block.content)) {
-                event.preventDefault();
-                roleChangeByMarkdown.current = true;
-                onMarkdown(block, "numberedList");
-              }
-              break;
+              onDelete(
+                parentBlock,
+                previousBlock,
+                previousBlockLastChildNodeIndex,
+                computedCaretOffset
+              );
             }
           }
+        } else if (caretOffset === 0) {
+          event.preventDefault();
+          const currentNodeSiblings = getNodeSiblings(block.id);
+          if (
+            currentNodeSiblings.previous !== null &&
+            blockRenderTypeFromNode(currentNodeSiblings.previous) ===
+              RenderType.TEXT
+          ) {
+            const previousBlock = serializeNodeToBlock(
+              currentNodeSiblings.previous
+            );
+
+            const previousNode = getBlockNode(previousBlock.id) as HTMLElement;
+
+            const computedCaretOffset =
+              previousNode.lastChild != null
+                ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
+                  ? (previousNode.lastChild.textContent as string).length
+                  : previousNode.lastChild.textContent?.length ??
+                    previousNode.innerText.length
+                : previousNode.innerText.length;
+
+            const previousBlockLastChildNodeIndex =
+              previousNode.childNodes.length - 1;
+
+            previousBlock.id = generateBlockId();
+            previousBlock.content = (previousBlock.content as string).concat(
+              block.content as string
+            );
+
+            onDelete(
+              block,
+              previousBlock,
+              previousBlockLastChildNodeIndex,
+              computedCaretOffset
+            );
+          }
         }
-        break;
-      }
-      default: {
-        roleChangeByMarkdown.current = false;
         break;
       }
     }
   }
 
-  if (blockRenderType(block.role) === RenderType.TEXT) {
+  if (blockRenderTypeFromRole(block.role) === RenderType.TEXT) {
     return (
       <TextRenderer
         block={block}
@@ -554,7 +338,7 @@ export default function Canvas({
     );
   }
 
-  if (blockRenderType(block.role) === RenderType.IMAGE) {
+  if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
     return (
       <ImageRenderer
         block={block}
@@ -567,14 +351,14 @@ export default function Canvas({
   }
 
   if (
-    blockRenderType(block.role) === RenderType.LIST &&
+    blockRenderTypeFromRole(block.role) === RenderType.LIST &&
     Array.isArray(block.content)
   ) {
     return createElement(
       createNodeFromRole(block.role),
       {
         "data-type": BLOCK_NODE,
-        "data-block-render-type": blockRenderType(block.role),
+        "data-block-render-type": blockRenderTypeFromRole(block.role),
         id: block.id,
         role: block.role,
         disabled: !editable,
@@ -597,15 +381,13 @@ export default function Canvas({
         return (
           <li key={childBlock.id}>
             <Canvas
+              parentBlock={block}
               editable={editable}
               block={childBlock}
               onChange={onChange}
-              onEnter={onEnter}
-              onListEnter={onListEnter}
+              onCreate={onCreate}
               onDelete={onDelete}
-              onListChildDelete={onListChildDelete}
               onNavigate={onNavigate}
-              onListNavigate={onListNavigate}
               onPaste={onPaste}
               onSelect={onSelect}
               onActionKeyPressed={onActionKeyPressed}

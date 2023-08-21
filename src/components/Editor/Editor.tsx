@@ -32,7 +32,7 @@ import {
   type Style,
 } from "../../interfaces";
 import {
-  blockRenderType,
+  blockRenderTypeFromRole,
   elementContainsStyle,
   generateBlockId,
   generateMenuId,
@@ -44,6 +44,7 @@ import {
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
   setCaretOffset,
+  traverseAndUpdate,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
@@ -243,21 +244,19 @@ export default function Editor({
     }
   }
 
-  function createHandler(
-    block: Block,
-    newBlock: Block,
-    position: "above" | "below"
-  ): void {
-    const blockIndex = masterBlocks.indexOf(block);
-    masterBlocks[blockIndex] = block;
-    masterBlocks.splice(
-      position === "below" ? blockIndex + 1 : blockIndex,
-      0,
-      newBlock
-    );
+  function createHandler(parentBlock: Block, targetBlock: Block): void {
+    if (blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST) {
+      traverseAndUpdate(masterBlocks, parentBlock);
+    } else {
+      const blockIndex = masterBlocks
+        .map((blk) => blk.id)
+        .indexOf(parentBlock.id);
+      masterBlocks[blockIndex] = parentBlock;
+      masterBlocks.splice(blockIndex + 1, 0, targetBlock);
+    }
     updateMasterBlocks(masterBlocks);
     setFocusedNode({
-      nodeId: newBlock.id,
+      nodeId: targetBlock.id,
       caretOffset: 0,
       nodeIndex: 0,
     });
@@ -269,8 +268,13 @@ export default function Editor({
     nodeIndex: number,
     caretOffset: number
   ): void {
-    const blockIndex = masterBlocks.indexOf(block);
-    masterBlocks.splice(blockIndex, 1);
+    if (blockRenderTypeFromRole(block.role) === RenderType.LIST) {
+      traverseAndUpdate(masterBlocks, block);
+    } else {
+      const blockIndex = masterBlocks.map((blk) => blk.id).indexOf(block.id);
+      masterBlocks[blockIndex - 1] = previousBlock;
+      masterBlocks.splice(blockIndex, 1);
+    }
     propagateChanges(masterBlocks, {
       nodeId: previousBlock.id,
       caretOffset,
@@ -290,7 +294,7 @@ export default function Editor({
       block.content.substring(caretOffset).length;
 
     if (
-      blockRenderType(block.role) === RenderType.TEXT &&
+      blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
       Array.isArray(content)
     ) {
       const pasteBlocks: Block[] = content.map((copiedText, index) => {
@@ -326,7 +330,7 @@ export default function Editor({
         caretOffset: computedCaretOffset,
       });
     } else if (
-      blockRenderType(block.role) === RenderType.TEXT &&
+      blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
       typeof content === "string"
     ) {
       masterBlocks[blockIndex].content = (

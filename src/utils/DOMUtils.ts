@@ -21,13 +21,14 @@
  */
 
 import { generateRandomString } from "./SharedUtils";
-import { type Coordinates, type Style } from "../interfaces";
+import { Block, type Coordinates, type Style } from "../interfaces";
 import {
   INLINE_SPECIFIER_NODE,
   LINK_ATTRIBUTE,
   NODE_TYPE,
   REMOVE_LINK,
 } from "../constants";
+import { generateBlockId, getBlockNode } from "./BlockUtils";
 
 /**
  * @function generateRefreshKey
@@ -853,4 +854,80 @@ export function openLinkInNewTab(event: MouseEvent): void {
       }, 10);
     }
   }
+}
+
+export function splitBlocksAtCaretOffset(
+  block: Block,
+  caretOffset: number
+): Block[] {
+  const blockNode = getBlockNode(block.id) as HTMLElement;
+  const nodeAtCaretOffset = getNodeAt(blockNode, caretOffset);
+  const caretNodeOffset = nodeOffset(blockNode, nodeAtCaretOffset);
+  const caretNodeOffsetWithInnerHTML = nodeOffset(
+    blockNode,
+    nodeAtCaretOffset,
+    {
+      includeInnerHTML: true,
+    }
+  );
+
+  const newBlock: Block = {
+    id: generateBlockId(),
+    role: "paragraph",
+    content: "",
+    style: [],
+  };
+
+  let currentBlockContent: string;
+  let newBlockContent: string;
+
+  if (
+    blockNode.innerHTML.substring(0, caretOffset) ===
+    blockNode.innerText.substring(0, caretOffset)
+  ) {
+    currentBlockContent = blockNode.innerHTML.substring(0, caretOffset);
+    newBlockContent = blockNode.innerHTML.substring(caretOffset);
+  } else {
+    const htmlFragment = blockNode.innerHTML.substring(
+      0,
+      caretNodeOffsetWithInnerHTML
+    );
+
+    if (isInlineSpecifierNode(nodeAtCaretOffset)) {
+      const caretNodeFragments = splitElement(
+        nodeAtCaretOffset as HTMLElement,
+        caretOffset - caretNodeOffset
+      );
+      currentBlockContent = htmlFragment.concat(caretNodeFragments[0]);
+      newBlockContent = caretNodeFragments[1].concat(
+        blockNode.innerHTML.substring(
+          htmlFragment.length +
+            (nodeAtCaretOffset as HTMLElement).outerHTML.length
+        )
+      );
+    } else {
+      currentBlockContent = htmlFragment.concat(
+        (nodeAtCaretOffset.textContent as string).substring(
+          0,
+          caretOffset - caretNodeOffset
+        )
+      );
+
+      newBlockContent = (nodeAtCaretOffset.textContent as string)
+        .substring(caretOffset - caretNodeOffset)
+        .concat(
+          blockNode.innerHTML.substring(
+            htmlFragment.length +
+              (nodeAtCaretOffset.textContent as string).length
+          )
+        );
+    }
+  }
+  block.id = generateBlockId();
+  block.content = currentBlockContent;
+  newBlock.content = newBlockContent;
+  newBlock.role = block.role;
+  newBlock.style = block.style;
+
+  return [block, newBlock];
 }

@@ -22,7 +22,7 @@
 
 import { createElement, type JSX } from "react";
 import {
-  blockRenderType,
+  blockRenderTypeFromRole,
   createNodeFromRole,
   getBlockNode,
   getCaretOffset,
@@ -44,7 +44,12 @@ interface ImageRendererProps {
     caretOffset: number
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
-  onDelete: (block: Block, joinContent: boolean) => void;
+  onDelete: (
+    block: Block,
+    previousBlock: Block,
+    nodeIndex: number,
+    caretOffset: number
+  ) => void;
 }
 
 export default function ImageRenderer({
@@ -58,20 +63,21 @@ export default function ImageRenderer({
   if (imageData.url === "") {
     return (
       <FilePicker
+        id={block.id}
         message={"Drag or click here to add an image."}
         accept={"image/png, image/jpg, image/jpeg, image/svg+xml, image/gif"}
         onFilePicked={(file) => {
           onImageRequest(block, file);
         }}
         onDelete={() => {
-          onDelete(block, false);
+          onDelete(block, block, 0, 0);
         }}
       />
     );
   }
   return createElement(createNodeFromRole(block.role), {
     "data-type": BLOCK_NODE,
-    "data-block-render-type": blockRenderType(block.role),
+    "data-block-render-type": blockRenderTypeFromRole(block.role),
     id: block.id,
     role: block.role,
     disabled: !editable,

@@ -25,6 +25,7 @@ import { Block, type Siblings, type Style } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
+import { camelCase } from "lodash";
 
 /**
  * @function createNodeFromRole
@@ -150,7 +151,7 @@ export function normalizeContent(string: string): string {
   return string.replaceAll(/&nbsp;|\u202F|\u00A0/g, " ");
 }
 
-export function blockRenderType(role: Role): RenderType {
+export function blockRenderTypeFromRole(role: Role): RenderType {
   switch (role) {
     case "title":
     case "subTitle":
@@ -164,6 +165,24 @@ export function blockRenderType(role: Role): RenderType {
     case "numberedList":
       return RenderType.LIST;
     case "image":
+      return RenderType.IMAGE;
+    default:
+      return RenderType.UNKNOWN;
+  }
+}
+
+export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
+  if (node.parentElement?.tagName.toLowerCase() === "li")
+    return RenderType.LIST;
+  switch (node.tagName.toLowerCase()) {
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "p":
+    case "blockquote":
+      return RenderType.TEXT;
+    case "img":
       return RenderType.IMAGE;
     default:
       return RenderType.UNKNOWN;
@@ -192,14 +211,16 @@ export function nodeHierarchy(node: HTMLElement | null): HTMLElement[] {
   return hierarchy.reverse();
 }
 
-export function traverseAndUpdate(contents: Block[], targetId: string): void {
-  for (let i = 0; i < contents.length; i++) {
-    if (contents[i].id === targetId) {
-      const node: HTMLElement = getBlockNode(contents[i].id) as HTMLElement;
-      contents[i].content = node.innerHTML;
+export function traverseAndUpdate(
+  masterBlocks: Block[],
+  targetBlock: Block
+): void {
+  for (let i = 0; i < masterBlocks.length; i++) {
+    if (masterBlocks[i].id === targetBlock.id) {
+      masterBlocks[i] = targetBlock;
     }
-    if (blockRenderType(contents[i].role) === RenderType.LIST) {
-      traverseAndUpdate(contents[i].content as Block[], targetId);
+    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+      traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
     }
   }
 }
@@ -212,4 +233,106 @@ export function getParentBlock(
     block.id.includes(blockId) ||
     (Array.isArray(block.content) && block.content.find(find));
   return masterBlocks.filter(find);
+}
+
+export function getBlockRoleFromNode(node: HTMLElement): Role {
+  switch (node.tagName.toLowerCase()) {
+    case "h1":
+      return "title";
+    case "h2":
+      return "subTitle";
+    case "h3":
+      return "heading";
+    case "h4":
+      return "subHeading";
+    case "p":
+      return "paragraph";
+    case "img":
+      return "image";
+    case "blockquote":
+      return "quote";
+    case "ol":
+      return "numberedList";
+    case "ul":
+      return "bulletList";
+    default:
+      if (node.parentElement?.parentElement?.tagName.toLowerCase() === "ul")
+        return "bulletList";
+      if (node.parentElement?.parentElement?.tagName.toLowerCase() === "ol")
+        return "numberedList";
+      return "paragraph";
+  }
+}
+
+export function serializeNodeToBlock(node: HTMLElement): Block {
+  const style: Style[] = [];
+  const cssTextArray: string[] = node.style.cssText.split(";");
+
+  for (let i = 0; i < cssTextArray.length; i++) {
+    if (cssTextArray[i].length !== 0) {
+      style.push({
+        name: camelCase(cssTextArray[i].split(":")[0].trim()),
+        value: camelCase(cssTextArray[i].split(":")[1].trim()),
+      });
+    }
+  }
+
+  if (
+    node.tagName.toLowerCase() === "ul" ||
+    node.tagName.toLowerCase() === "ol"
+  ) {
+    const blocks: Block[] = [];
+    const childNodes = node.children;
+    for (let i = 0; i < childNodes.length; i++) {
+      const tempNode = childNodes[i].firstElementChild;
+      if (tempNode !== null) {
+        blocks.push(serializeNodeToBlock(tempNode as HTMLElement));
+      }
+    }
+    return {
+      id: node.id,
+      content: blocks,
+      role: getBlockRoleFromNode(node),
+      style,
+    };
+  }
+
+  if (node.tagName.toLowerCase() === "img") {
+    const imageNode = node as HTMLImageElement;
+    return {
+      id: node.id,
+      content: {
+        url: imageNode.src,
+        description: imageNode.alt,
+        width: imageNode.width,
+        height: imageNode.height,
+      },
+      role: getBlockRoleFromNode(node),
+      style,
+    };
+  }
+
+  if (
+    node.tagName.toLowerCase() === "div" &&
+    node.firstElementChild?.tagName.toLowerCase() === "input"
+  ) {
+    return {
+      id: node.id,
+      content: {
+        url: "",
+        description: "",
+        width: 0,
+        height: 0,
+      },
+      role: "image",
+      style,
+    };
+  }
+
+  return {
+    id: node.id,
+    content: node.innerHTML,
+    role: getBlockRoleFromNode(node),
+    style,
+  };
 }
