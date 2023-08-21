@@ -32,11 +32,16 @@ interface ComposerProps {
   block: Block;
   nextBlock: Block | null;
   onChange: (block: Block) => void;
-  onCreate: (parentBlock: Block, targetBlock: Block) => void;
+  onCreate: (
+    parentBlock: Block,
+    targetBlock: Block,
+    creationType: "list" | "nonList"
+  ) => void;
   onCreateList: (parentBlock: Block, newChildBlock: Block) => void;
   onDelete: (
     block: Block,
-    previousBlock: Block,
+    previousBlock: Block | Block[],
+    nodeId: string,
     childNodeIndex: number,
     caretOffset: number
   ) => void;

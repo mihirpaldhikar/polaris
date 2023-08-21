@@ -21,7 +21,7 @@
  */
 
 import { type Role } from "../types";
-import { Block, type Siblings, type Style } from "../interfaces";
+import { type Block, type Siblings, type Style } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
@@ -159,7 +159,6 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
     case "subHeading":
     case "paragraph":
     case "quote":
-    case "listChild":
       return RenderType.TEXT;
     case "bulletList":
     case "numberedList":
@@ -223,6 +222,36 @@ export function traverseAndUpdate(
       traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
     }
   }
+}
+
+export function traverseAndUpdateBelow(
+  masterBlocks: Block[],
+  parentBlock: Block,
+  targetBlock: Block
+): void {
+  for (let i = 0; i < masterBlocks.length; i++) {
+    if (masterBlocks[i].id === parentBlock.id) {
+      masterBlocks.splice(i + 1, 0, targetBlock);
+    }
+    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+      traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
+    }
+  }
+}
+
+export function traverseAndFindBlockPosition(
+  masterBlocks: Block[],
+  targetBlock: Block
+): number {
+  for (let i = 0; i < masterBlocks.length; i++) {
+    if (masterBlocks[i].id === targetBlock.id) {
+      return i;
+    }
+    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+      traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
+    }
+  }
+  return -1;
 }
 
 export function getParentBlock(

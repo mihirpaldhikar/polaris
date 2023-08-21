@@ -32,6 +32,7 @@ import {
   type Style,
 } from "../../interfaces";
 import {
+  blockRenderTypeFromNode,
   blockRenderTypeFromRole,
   elementContainsStyle,
   generateBlockId,
@@ -43,8 +44,11 @@ import {
   normalizeContent,
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
+  serializeNodeToBlock,
   setCaretOffset,
+  traverseAndFindBlockPosition,
   traverseAndUpdate,
+  traverseAndUpdateBelow,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
@@ -244,8 +248,12 @@ export default function Editor({
     }
   }
 
-  function createHandler(parentBlock: Block, targetBlock: Block): void {
-    if (blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST) {
+  function createHandler(
+    parentBlock: Block,
+    targetBlock: Block,
+    creationType: "list" | "nonList"
+  ): void {
+    if (creationType === "list") {
       traverseAndUpdate(masterBlocks, parentBlock);
     } else {
       const blockIndex = masterBlocks
@@ -264,19 +272,31 @@ export default function Editor({
 
   function deletionHandler(
     block: Block,
-    previousBlock: Block,
+    previousBlock: Block | Block[],
+    nodeId: string,
     nodeIndex: number,
     caretOffset: number
   ): void {
     if (blockRenderTypeFromRole(block.role) === RenderType.LIST) {
       traverseAndUpdate(masterBlocks, block);
     } else {
-      const blockIndex = masterBlocks.map((blk) => blk.id).indexOf(block.id);
-      masterBlocks[blockIndex - 1] = previousBlock;
-      masterBlocks.splice(blockIndex, 1);
+      if (Array.isArray(previousBlock)) {
+        traverseAndUpdateBelow(masterBlocks, block, previousBlock[0]);
+        for (let i = 1; i < previousBlock.length; i++) {
+          traverseAndUpdateBelow(
+            masterBlocks,
+            previousBlock[i - 1],
+            previousBlock[i]
+          );
+        }
+      } else {
+        const blockIndex = masterBlocks.map((blk) => blk.id).indexOf(block.id);
+        masterBlocks[blockIndex - 1] = previousBlock;
+        masterBlocks.splice(blockIndex, 1);
+      }
     }
     propagateChanges(masterBlocks, {
-      nodeId: previousBlock.id,
+      nodeId,
       caretOffset,
       nodeIndex,
     });
@@ -763,7 +783,6 @@ export default function Editor({
           "paragraph",
           "numberedList",
           "bulletList",
-          "listChild",
         ],
         execute: {
           type: "style",
@@ -788,7 +807,6 @@ export default function Editor({
           "paragraph",
           "numberedList",
           "bulletList",
-          "listChild",
         ],
         execute: {
           type: "style",
@@ -813,7 +831,6 @@ export default function Editor({
           "paragraph",
           "numberedList",
           "bulletList",
-          "listChild",
         ],
         execute: {
           type: "style",
@@ -836,11 +853,11 @@ export default function Editor({
 
     const popupNode = window.document.getElementById(`popup-${blob.id}`);
     const editorNode = window.document.getElementById(`editor-${blob.id}`);
-    const blockNode = getBlockNode(block.id);
+    const currentNode = getBlockNode(block.id);
     if (
       popupNode == null ||
       editorNode == null ||
-      blockNode == null ||
+      currentNode == null ||
       popupRoot === undefined ||
       typeof block.content !== "string"
     ) {
@@ -853,8 +870,8 @@ export default function Editor({
       return;
     }
 
-    if (!nodeInViewPort(blockNode)) {
-      blockNode.scrollIntoView();
+    if (!nodeInViewPort(currentNode)) {
+      currentNode.scrollIntoView();
     }
 
     const newBlock: Block = {
@@ -865,10 +882,11 @@ export default function Editor({
     };
     const { x, y } = getCaretCoordinates(true);
     const actionMenuCoordinates: Coordinates = {
-      x: block.content.length === 0 ? blockNode.getBoundingClientRect().x : x,
+      x: block.content.length === 0 ? currentNode.getBoundingClientRect().x : x,
       y:
-        (block.content.length === 0 ? blockNode.getBoundingClientRect().y : y) +
-        30,
+        (block.content.length === 0
+          ? currentNode.getBoundingClientRect().y
+          : y) + 30,
     };
 
     window.dispatchEvent(actionMenuOpenedEvent);
@@ -891,92 +909,135 @@ export default function Editor({
         onSelect={(execute) => {
           switch (execute.type) {
             case "role": {
-              if (typeof execute.args === "string") {
-                newBlock.role = execute.args as Role;
-                if (newBlock.role === "image") {
-                  newBlock.content = {
-                    url: "",
-                    height: 0,
-                    width: 0,
-                    description: "",
-                  };
-                  const emptyBlock: Block = {
+              newBlock.role = execute.args as Role;
+
+              if (blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE) {
+                newBlock.content = {
+                  url: "",
+                  description: "",
+                  width: 300,
+                  height: 200,
+                } satisfies ImageContent;
+              }
+
+              if (blockRenderTypeFromRole(newBlock.role) === RenderType.LIST) {
+                newBlock.content = [
+                  {
                     id: generateBlockId(),
-                    role: "paragraph",
-                    content: "",
+                    content: previousContent,
+                    role: block.role,
                     style: [],
-                  };
-                  if (previousContent === "") {
-                    masterBlocks.splice(
-                      masterBlocks.indexOf(block),
+                  },
+                ];
+              }
+
+              if (
+                blockRenderTypeFromNode(currentNode) === RenderType.LIST &&
+                currentNode.parentElement !== null &&
+                currentNode.parentElement.parentElement !== null
+              ) {
+                const currentBlockParent = serializeNodeToBlock(
+                  currentNode.parentElement?.parentElement
+                );
+
+                if (Array.isArray(currentBlockParent.content)) {
+                  const currentBlockIndex = currentBlockParent.content
+                    .map((blk) => blk.id)
+                    .indexOf(block.id);
+
+                  if (
+                    blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
+                  ) {
+                    if (
+                      currentBlockIndex ===
+                      currentBlockParent.content.length - 1
+                    ) {
+                      const emptyBlock: Block = {
+                        id: generateBlockId(),
+                        content: "",
+                        role: "paragraph",
+                        style: [],
+                      };
+                      currentBlockParent.content.splice(
+                        currentBlockIndex + 1,
+                        0,
+                        emptyBlock
+                      );
+                    }
+                    block.content = previousContent;
+                    currentBlockParent.content.splice(
+                      currentBlockIndex,
                       1,
-                      ...[newBlock, emptyBlock]
+                      ...[block, newBlock]
                     );
                   } else {
-                    masterBlocks[masterBlocks.indexOf(block)].content =
-                      previousContent;
-                    masterBlocks.splice(
-                      masterBlocks.indexOf(block) + 1,
-                      0,
-                      ...[newBlock, emptyBlock]
+                    currentBlockParent.content.splice(
+                      currentBlockIndex,
+                      1,
+                      newBlock
                     );
                   }
-                  propagateChanges(masterBlocks, {
-                    nodeId: emptyBlock.id,
-                    caretOffset: 0,
-                  });
-                  return;
-                } else if (newBlock.role === "numberedList") {
-                  newBlock.style.push(
-                    ...[
-                      {
-                        name: "listStyleType",
-                        value: "number",
-                      },
-                    ]
+
+                  traverseAndUpdate(masterBlocks, currentBlockParent);
+                }
+              } else {
+                if (
+                  blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
+                ) {
+                  block.content = previousContent;
+                  traverseAndUpdate(masterBlocks, block);
+                  traverseAndUpdateBelow(masterBlocks, block, newBlock);
+                  const newBlockIndex = traverseAndFindBlockPosition(
+                    masterBlocks,
+                    newBlock
                   );
-                  newBlock.content = [
-                    {
+
+                  if (newBlockIndex === masterBlocks.length - 1) {
+                    const emptyBlock: Block = {
                       id: generateBlockId(),
+                      content: "",
+                      role: "paragraph",
                       style: [],
-                      content: previousContent,
-                      role: "listChild",
-                    },
-                  ];
+                    };
+                    traverseAndUpdateBelow(masterBlocks, newBlock, emptyBlock);
+                  }
+                } else {
+                  newBlock.id = block.id;
+                  traverseAndUpdate(masterBlocks, newBlock);
                 }
               }
+              propagateChanges(
+                masterBlocks,
+                blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
+                  ? {
+                      nodeId: block.id,
+                      caretOffset,
+                    }
+                  : blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
+                  ? {
+                      nodeId: (newBlock.content as Block[])[0].id,
+                      caretOffset,
+                    }
+                  : {
+                      nodeId: newBlock.id,
+                      caretOffset,
+                    }
+              );
               break;
             }
             case "style": {
               if (Array.isArray(execute.args)) {
-                if (block.role === "listChild") {
-                  const listChildNode = getBlockNode(block.id) as HTMLElement;
-                  for (const contentBlock of masterBlocks) {
-                    if (
-                      (listChildNode.parentElement as HTMLElement).id ===
-                        contentBlock.id &&
-                      Array.isArray(contentBlock.content)
-                    ) {
-                      const childIndex = contentBlock.content.indexOf(block);
-                      contentBlock.content.splice(childIndex, 1, newBlock);
-                      contentBlock.style.push(...execute.args);
-                    }
-                  }
-                } else {
-                  newBlock.style.push(...execute.args);
-                }
+                block.content = previousContent;
+                block.style.push(...execute.args);
+                traverseAndUpdate(masterBlocks, block);
+                propagateChanges(masterBlocks, {
+                  nodeId: block.id,
+                  caretOffset,
+                });
               }
               break;
             }
           }
-          if (block.role !== "listChild") {
-            masterBlocks.splice(masterBlocks.indexOf(block), 1, newBlock);
-          }
-          propagateChanges(masterBlocks, {
-            nodeId: newBlock.id,
-            caretOffset,
-            nodeIndex,
-          });
         }}
       />
     );
@@ -1197,7 +1258,7 @@ export default function Editor({
         {
           id: generateBlockId(),
           content: "",
-          role: "listChild",
+          role: "paragraph",
           style: [],
         },
       ];

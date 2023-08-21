@@ -37,11 +37,15 @@ import {
   generateBlockId,
   getBlockNode,
   getCaretOffset,
+  getNodeAt,
+  getNodeIndex,
   getNodeSiblings,
+  nodeOffset,
   openLinkInNewTab,
   serializeNodeToBlock,
   setNodeStyle,
   splitBlocksAtCaretOffset,
+  traverseAndUpdate,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
 import RenderType from "../../enums/RenderType";
@@ -53,10 +57,15 @@ interface CanvasProps {
   parentBlock?: Block;
   block: Block;
   onChange: (block: Block) => void;
-  onCreate: (parentBlock: Block, targetBlock: Block) => void;
+  onCreate: (
+    parentBlock: Block,
+    targetBlock: Block,
+    creationType: "list" | "nonList"
+  ) => void;
   onDelete: (
     block: Block,
-    previousBlock: Block,
+    previousBlock: Block | Block[],
+    nodeId: string,
     nodeIndex: number,
     caretOffset: number
   ) => void;
@@ -188,6 +197,11 @@ export default function Canvas({
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
+
+        if (isActionMenuOpen.current) {
+          break;
+        }
+
         let newBlock: Block = {
           id: generateBlockId(),
           content: "",
@@ -203,7 +217,29 @@ export default function Canvas({
             .map((blk) => blk.id)
             .indexOf(block.id);
 
-          if (caretOffset !== currentBlockNode.innerText.length) {
+          if (currentBlockNode.innerText.length === 0) {
+            const parentSiblings = getNodeSiblings(parentBlock.id);
+
+            if (
+              parentSiblings.previous?.parentElement?.parentElement != null &&
+              blockRenderTypeFromNode(parentSiblings.previous) ===
+                RenderType.LIST
+            ) {
+              const previousParentBlock = serializeNodeToBlock(
+                parentSiblings.previous.parentElement.parentElement
+              );
+              parentBlock.content.splice(currentChildBlockIndex, 1);
+              traverseAndUpdate(
+                previousParentBlock.content as Block[],
+                parentBlock
+              );
+              (previousParentBlock.content as Block[]).push(newBlock);
+              onCreate(previousParentBlock, newBlock, "list");
+            } else {
+              parentBlock.content.pop();
+              onCreate(parentBlock, newBlock, "nonList");
+            }
+          } else if (caretOffset !== currentBlockNode.innerText.length) {
             const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
             newBlock = spiltBlockPair[1];
             parentBlock.content.splice(
@@ -214,14 +250,14 @@ export default function Canvas({
           } else {
             parentBlock.content.splice(currentChildBlockIndex + 1, 0, newBlock);
           }
-          onCreate(parentBlock, newBlock);
+          onCreate(parentBlock, newBlock, "list");
         } else {
           if (caretOffset !== currentBlockNode.innerText.length) {
             const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
             block = spiltBlockPair[0];
             newBlock = spiltBlockPair[1];
           }
-          onCreate(block, newBlock);
+          onCreate(block, newBlock, "nonList");
         }
         break;
       }
@@ -276,9 +312,55 @@ export default function Canvas({
               onDelete(
                 parentBlock,
                 previousBlock,
+                previousBlock.id,
                 previousBlockLastChildNodeIndex,
                 computedCaretOffset
               );
+            }
+          } else {
+            const parentSiblings = getNodeSiblings(parentBlock.id);
+
+            if (
+              parentSiblings.previous?.parentElement?.parentElement != null &&
+              blockRenderTypeFromNode(parentSiblings.previous) ===
+                RenderType.LIST
+            ) {
+              const previousParentBlock = serializeNodeToBlock(
+                parentSiblings.previous.parentElement.parentElement
+              );
+              if (Array.isArray(previousParentBlock.content)) {
+                const parentBlockIndex = previousParentBlock.content
+                  .map((blk) => blk.id)
+                  .indexOf(parentBlock.id);
+
+                previousParentBlock.content.splice(
+                  parentBlockIndex,
+                  1,
+                  ...parentBlock.content
+                );
+                onDelete(
+                  previousParentBlock,
+                  previousParentBlock.content[parentBlockIndex],
+                  previousParentBlock.content[parentBlockIndex].id,
+                  0,
+                  0
+                );
+              }
+            } else {
+              if (parentSiblings.previous !== null) {
+                const previousParentBlock = serializeNodeToBlock(
+                  parentSiblings.previous
+                );
+                const parentFirstChild = parentBlock.content[0];
+                parentBlock.content.splice(0, 1);
+                onDelete(
+                  previousParentBlock,
+                  [parentFirstChild],
+                  parentFirstChild.id,
+                  0,
+                  0
+                );
+              }
             }
           }
         } else if (caretOffset === 0) {
@@ -314,10 +396,51 @@ export default function Canvas({
             onDelete(
               block,
               previousBlock,
+              previousBlock.id,
               previousBlockLastChildNodeIndex,
               computedCaretOffset
             );
           }
+        }
+        break;
+      }
+      case "/": {
+        if (
+          parentBlock !== undefined &&
+          blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
+          Array.isArray(parentBlock.content) &&
+          typeof block.content === "string"
+        ) {
+          onActionKeyPressed(
+            getNodeIndex(
+              currentBlockNode,
+              getNodeAt(currentBlockNode, caretOffset)
+            ),
+            block,
+            block.content,
+            caretOffset -
+              nodeOffset(
+                currentBlockNode,
+                getNodeAt(currentBlockNode, caretOffset)
+              )
+          );
+          break;
+        }
+
+        if (typeof block.content === "string") {
+          onActionKeyPressed(
+            getNodeIndex(
+              currentBlockNode,
+              getNodeAt(currentBlockNode, caretOffset)
+            ),
+            block,
+            block.content,
+            caretOffset -
+              nodeOffset(
+                currentBlockNode,
+                getNodeAt(currentBlockNode, caretOffset)
+              )
+          );
         }
         break;
       }

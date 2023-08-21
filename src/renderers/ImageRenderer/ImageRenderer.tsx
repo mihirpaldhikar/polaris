@@ -46,7 +46,8 @@ interface ImageRendererProps {
   onImageRequest: (block: Block, file: File) => void;
   onDelete: (
     block: Block,
-    previousBlock: Block,
+    previousBlock: Block | Block[],
+    nodeId: string,
     nodeIndex: number,
     caretOffset: number
   ) => void;
@@ -70,7 +71,7 @@ export default function ImageRenderer({
           onImageRequest(block, file);
         }}
         onDelete={() => {
-          onDelete(block, block, 0, 0);
+          onDelete(block, block, block.id, 0, 0);
         }}
       />
     );
