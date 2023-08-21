@@ -20,10 +20,19 @@
  * SOFTWARE.
  */
 
-import { type ChangeEvent, Fragment, type JSX, useEffect, useRef } from "react";
+import {
+  type ChangeEvent,
+  createElement,
+  Fragment,
+  type JSX,
+  useEffect,
+  useRef,
+} from "react";
 import { type Block, type Coordinates, type Style } from "../../interfaces";
 import {
   blockRenderType,
+  conditionalClassName,
+  createNodeFromRole,
   getBlockNode,
   getCaretCoordinates,
   getCaretOffset,
@@ -33,10 +42,12 @@ import {
   inlineSpecifierManager,
   nodeOffset,
   openLinkInNewTab,
+  setNodeStyle,
 } from "../../utils";
 import { type Content, type Role } from "../../types";
 import RenderType from "../../enums/RenderType";
-import { ImageRenderer, ListRenderer, TextRenderer } from "../../renderers";
+import { ImageRenderer, TextRenderer } from "../../renderers";
+import { BLOCK_NODE } from "../../constants";
 
 interface CanvasProps {
   editable: boolean;
@@ -543,10 +554,7 @@ export default function Canvas({
     );
   }
 
-  if (
-    blockRenderType(block.role) === RenderType.IMAGE &&
-    typeof block.content === "object"
-  ) {
+  if (blockRenderType(block.role) === RenderType.IMAGE) {
     return (
       <ImageRenderer
         block={block}
@@ -558,17 +566,56 @@ export default function Canvas({
     );
   }
 
-  if (blockRenderType(block.role) === RenderType.LIST) {
-    return (
-      <ListRenderer
-        block={block}
-        editable={editable}
-        onContextMenu={onContextMenu}
-        onClick={openLinkInNewTab}
-        onUpdate={notifyChange}
-        onSelect={onSelect}
-        onKeyPressed={keyHandler}
-      />
+  if (
+    blockRenderType(block.role) === RenderType.LIST &&
+    Array.isArray(block.content)
+  ) {
+    return createElement(
+      createNodeFromRole(block.role),
+      {
+        "data-type": BLOCK_NODE,
+        "data-block-render-type": blockRenderType(block.role),
+        id: block.id,
+        role: block.role,
+        disabled: !editable,
+        style: setNodeStyle(block.style),
+        spellCheck: true,
+        className: conditionalClassName(
+          "px-4 space-y-2 text-[17px] my-2 mx-2",
+          block.role === "numberedList" ? "list-decimal" : "list-disc"
+        ),
+        onContextMenu: (event: MouseEvent) => {
+          event.preventDefault();
+          onContextMenu(
+            block,
+            { x: event.clientX, y: event.clientY },
+            getCaretOffset(getBlockNode(block.id))
+          );
+        },
+      },
+      block.content.map((childBlock) => {
+        return (
+          <li key={childBlock.id}>
+            <Canvas
+              editable={editable}
+              block={childBlock}
+              onChange={onChange}
+              onEnter={onEnter}
+              onListEnter={onListEnter}
+              onDelete={onDelete}
+              onListChildDelete={onListChildDelete}
+              onNavigate={onNavigate}
+              onListNavigate={onListNavigate}
+              onPaste={onPaste}
+              onSelect={onSelect}
+              onActionKeyPressed={onActionKeyPressed}
+              onImageRequest={onImageRequest}
+              onContextMenu={onContextMenu}
+              onMarkdown={onMarkdown}
+            />
+          </li>
+        );
+      })
     );
   }
 
