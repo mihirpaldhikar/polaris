@@ -117,7 +117,7 @@ export default function Editor({
   onImageSelected,
   onChange,
 }: WorkspaceProps): JSX.Element {
-  const [contents, updateContents] = useState<Block[]>(blob.contents);
+  const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.contents);
 
   const [focusedNode, setFocusedNode] = useState<
     | {
@@ -153,7 +153,7 @@ export default function Editor({
           if (event.ctrlKey) {
             event.preventDefault();
             if (onSave !== undefined) {
-              const blockRef = contents.map((block) => {
+              const blockRef = masterBlocks.map((block) => {
                 return {
                   ...block,
                   reference: undefined,
@@ -169,13 +169,13 @@ export default function Editor({
         }
       }
     },
-    [contents, blob, onSave]
+    [masterBlocks, blob, onSave]
   );
 
   useEffect(() => {
     if (editable && autoSaveTimeout !== undefined && onSave !== undefined) {
       setInterval(() => {
-        const blockRef = contents.map((block) => {
+        const blockRef = masterBlocks.map((block) => {
           return {
             ...block,
             reference: undefined,
@@ -186,7 +186,7 @@ export default function Editor({
         onSave(blobRef);
       }, autoSaveTimeout);
     }
-  }, [autoSaveTimeout, contents, blob, editable, onSave]);
+  }, [autoSaveTimeout, masterBlocks, blob, editable, onSave]);
 
   useEffect(() => {
     window.addEventListener("keydown", keyboardManager);
@@ -220,9 +220,9 @@ export default function Editor({
   }, [focusedNode]);
 
   function changeHandler(block: Block): void {
-    const blockIndex: number = contents.indexOf(block);
-    contents[blockIndex] = block;
-    updateContents(contents);
+    const blockIndex: number = masterBlocks.indexOf(block);
+    masterBlocks[blockIndex] = block;
+    updateMasterBlocks(masterBlocks);
     if (onChange !== undefined) {
       onChange(blob);
     }
@@ -236,7 +236,7 @@ export default function Editor({
       nodeIndex?: number;
     }
   ): void {
-    updateContents(blocks);
+    updateMasterBlocks(blocks);
     setFocusedNode(focus);
     if (onChange !== undefined) {
       onChange(blob);
@@ -248,14 +248,14 @@ export default function Editor({
     newBlock: Block,
     position: "above" | "below"
   ): void {
-    const blockIndex = contents.indexOf(block);
-    contents[blockIndex] = block;
-    contents.splice(
+    const blockIndex = masterBlocks.indexOf(block);
+    masterBlocks[blockIndex] = block;
+    masterBlocks.splice(
       position === "below" ? blockIndex + 1 : blockIndex,
       0,
       newBlock
     );
-    updateContents(contents);
+    updateMasterBlocks(masterBlocks);
     setFocusedNode({
       nodeId: newBlock.id,
       caretOffset: 0,
@@ -269,9 +269,9 @@ export default function Editor({
     nodeIndex: number,
     caretOffset: number
   ): void {
-    const blockIndex = contents.indexOf(block);
-    contents.splice(blockIndex, 1);
-    propagateChanges(contents, {
+    const blockIndex = masterBlocks.indexOf(block);
+    masterBlocks.splice(blockIndex, 1);
+    propagateChanges(masterBlocks, {
       nodeId: previousBlock.id,
       caretOffset,
       nodeIndex,
@@ -284,7 +284,7 @@ export default function Editor({
     caretOffset: number
   ): void {
     if (typeof block.content !== "string") return;
-    const blockIndex = contents.indexOf(block);
+    const blockIndex = masterBlocks.indexOf(block);
     block.content = normalizeContent(block.content);
     const contentLengthAfterCaretOffset =
       block.content.substring(caretOffset).length;
@@ -310,7 +310,7 @@ export default function Editor({
               : copiedText,
         };
       });
-      contents.splice(blockIndex, 1, ...pasteBlocks);
+      masterBlocks.splice(blockIndex, 1, ...pasteBlocks);
 
       const pasteContentLength = normalizeContent(
         pasteBlocks[pasteBlocks.length - 1].content as string
@@ -321,7 +321,7 @@ export default function Editor({
           ? contentLengthAfterCaretOffset - pasteContentLength
           : pasteContentLength - contentLengthAfterCaretOffset;
 
-      propagateChanges(contents, {
+      propagateChanges(masterBlocks, {
         nodeId: pasteBlocks[pasteBlocks.length - 1].id,
         caretOffset: computedCaretOffset,
       });
@@ -329,11 +329,13 @@ export default function Editor({
       blockRenderType(block.role) === RenderType.TEXT &&
       typeof content === "string"
     ) {
-      contents[blockIndex].content = (contents[blockIndex].content as string)
+      masterBlocks[blockIndex].content = (
+        masterBlocks[blockIndex].content as string
+      )
         .substring(0, caretOffset)
         .concat(content)
         .concat(
-          (contents[blockIndex].content as string).substring(caretOffset)
+          (masterBlocks[blockIndex].content as string).substring(caretOffset)
         );
 
       const pasteContentLength = normalizeContent(block.content).length;
@@ -343,7 +345,7 @@ export default function Editor({
           ? contentLengthAfterCaretOffset - pasteContentLength
           : pasteContentLength - contentLengthAfterCaretOffset;
 
-      propagateChanges(contents, {
+      propagateChanges(masterBlocks, {
         nodeId: block.id,
         caretOffset: computedCaretOffset,
       });
@@ -901,20 +903,21 @@ export default function Editor({
                     style: [],
                   };
                   if (previousContent === "") {
-                    contents.splice(
-                      contents.indexOf(block),
+                    masterBlocks.splice(
+                      masterBlocks.indexOf(block),
                       1,
                       ...[newBlock, emptyBlock]
                     );
                   } else {
-                    contents[contents.indexOf(block)].content = previousContent;
-                    contents.splice(
-                      contents.indexOf(block) + 1,
+                    masterBlocks[masterBlocks.indexOf(block)].content =
+                      previousContent;
+                    masterBlocks.splice(
+                      masterBlocks.indexOf(block) + 1,
                       0,
                       ...[newBlock, emptyBlock]
                     );
                   }
-                  propagateChanges(contents, {
+                  propagateChanges(masterBlocks, {
                     nodeId: emptyBlock.id,
                     caretOffset: 0,
                   });
@@ -944,7 +947,7 @@ export default function Editor({
               if (Array.isArray(execute.args)) {
                 if (block.role === "listChild") {
                   const listChildNode = getBlockNode(block.id) as HTMLElement;
-                  for (const contentBlock of contents) {
+                  for (const contentBlock of masterBlocks) {
                     if (
                       (listChildNode.parentElement as HTMLElement).id ===
                         contentBlock.id &&
@@ -963,9 +966,9 @@ export default function Editor({
             }
           }
           if (block.role !== "listChild") {
-            contents.splice(contents.indexOf(block), 1, newBlock);
+            masterBlocks.splice(masterBlocks.indexOf(block), 1, newBlock);
           }
-          propagateChanges(contents, {
+          propagateChanges(masterBlocks, {
             nodeId: newBlock.id,
             caretOffset,
             nodeIndex,
@@ -983,9 +986,9 @@ export default function Editor({
     if (!Array.isArray(parentBlock.content)) {
       return;
     }
-    const parentBlockIndex = contents.indexOf(parentBlock);
-    contents[parentBlockIndex] = parentBlock;
-    propagateChanges(contents, {
+    const parentBlockIndex = masterBlocks.indexOf(parentBlock);
+    masterBlocks[parentBlockIndex] = parentBlock;
+    propagateChanges(masterBlocks, {
       nodeId: newChildBlock.id,
       caretOffset: 0,
       nodeIndex: 0,
@@ -1001,9 +1004,9 @@ export default function Editor({
     if (!Array.isArray(parentBlock.content)) {
       return;
     }
-    const parentBlockIndex = contents.indexOf(parentBlock);
-    contents[parentBlockIndex] = parentBlock;
-    propagateChanges(contents, {
+    const parentBlockIndex = masterBlocks.indexOf(parentBlock);
+    masterBlocks[parentBlockIndex] = parentBlock;
+    propagateChanges(masterBlocks, {
       nodeId: parentBlock.content[childBlockIndex].id,
       caretOffset,
       nodeIndex: childNodeIndex,
@@ -1015,14 +1018,14 @@ export default function Editor({
       return;
     }
 
-    const blockIndex = contents.indexOf(block);
+    const blockIndex = masterBlocks.indexOf(block);
     void onImageSelected(file).then((str) => {
       (block.content as ImageContent).url = str;
       (block.content as ImageContent).height = 300;
       (block.content as ImageContent).width = 500;
       block.id = generateBlockId();
-      contents[blockIndex] = block;
-      propagateChanges(contents, {
+      masterBlocks[blockIndex] = block;
+      propagateChanges(masterBlocks, {
         nodeId: block.id,
         caretOffset: 0,
       });
@@ -1112,10 +1115,10 @@ export default function Editor({
               onComplete(blocks, newBlock.id);
               return;
             }
-            const targetBlockIndex = contents.indexOf(block);
+            const targetBlockIndex = masterBlocks.indexOf(block);
             blocks.splice(targetBlockIndex, 1);
             onComplete(
-              contents,
+              masterBlocks,
               blocks.length === 1
                 ? blocks[0].id
                 : targetBlockIndex - 1 < 0
@@ -1153,15 +1156,16 @@ export default function Editor({
                 if (Array.isArray(updatedBlock)) {
                   updatedContents = updatedBlock;
                 } else {
-                  contents[contents.indexOf(updatedBlock)] = updatedBlock;
-                  updatedContents = contents;
+                  masterBlocks[masterBlocks.indexOf(updatedBlock)] =
+                    updatedBlock;
+                  updatedContents = masterBlocks;
                 }
                 propagateChanges(updatedContents, {
                   nodeId: focusBlockId,
                   caretOffset: caretOffset ?? 0,
                 });
               },
-              contents,
+              masterBlocks,
               coordinates,
               caretOffset
             );
@@ -1182,7 +1186,7 @@ export default function Editor({
   }
 
   function markdownHandler(block: Block, newRole: Role): void {
-    const blockIndex = contents.indexOf(block);
+    const blockIndex = masterBlocks.indexOf(block);
     block.role = newRole;
     if (newRole === "numberedList" || newRole === "bulletList") {
       block.content = [
@@ -1194,10 +1198,10 @@ export default function Editor({
         },
       ];
     } else {
-      contents[blockIndex].content = "";
+      masterBlocks[blockIndex].content = "";
     }
-    contents[blockIndex] = block;
-    updateContents(contents);
+    masterBlocks[blockIndex] = block;
+    updateMasterBlocks(masterBlocks);
     setFocusedNode({
       nodeId: block.id,
       caretOffset: 0,
@@ -1227,15 +1231,17 @@ export default function Editor({
           event.preventDefault();
         }}
       >
-        {contents.map((block, index) => {
+        {masterBlocks.map((block, index) => {
           return (
             <Composer
               key={block.id}
               editable={editable}
-              previousBlock={index !== 0 ? contents[index - 1] : null}
+              previousBlock={index !== 0 ? masterBlocks[index - 1] : null}
               block={block}
               nextBlock={
-                index !== contents.length - 1 ? contents[index + 1] : null
+                index !== masterBlocks.length - 1
+                  ? masterBlocks[index + 1]
+                  : null
               }
               onChange={changeHandler}
               onCreate={createHandler}
