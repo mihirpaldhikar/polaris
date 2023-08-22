@@ -23,10 +23,10 @@
 import { createElement, Fragment, type JSX, useContext } from "react";
 import {
   blockRenderTypeFromRole,
-  createNodeFromRole,
   getBlockNode,
   getEditorRoot,
   getNodeSiblings,
+  nodeTypeFromRole,
   serializeNodeToBlock,
   setNodeStyle,
 } from "../../utils";
@@ -185,7 +185,7 @@ export default function ImageRenderer({
       }}
     >
       <div className={"relative inline-block w-fit"}>
-        {createElement(createNodeFromRole(block.role), {
+        {createElement(nodeTypeFromRole(block.role), {
           "data-type": BLOCK_NODE,
           "data-block-render-type": blockRenderTypeFromRole(block.role),
           id: block.id,
@@ -194,10 +194,8 @@ export default function ImageRenderer({
           draggable: false,
           src: imageData.url,
           alt: imageData.description,
-          style: {
-            height: imageData.height,
-            width: imageData.width,
-          },
+          height: imageData.height,
+          width: imageData.width,
           className: "inline-block rounded-md",
         })}
         <div

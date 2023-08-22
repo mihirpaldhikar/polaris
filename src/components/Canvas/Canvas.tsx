@@ -33,7 +33,6 @@ import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
   conditionalClassName,
-  createNodeFromRole,
   generateBlockId,
   getBlockNode,
   getCaretOffset,
@@ -41,6 +40,7 @@ import {
   getNodeIndex,
   getNodeSiblings,
   nodeOffset,
+  nodeTypeFromRole,
   openLinkInNewTab,
   serializeNodeToBlock,
   setNodeStyle,
@@ -472,7 +472,7 @@ export default function Canvas({
     Array.isArray(block.content)
   ) {
     return createElement(
-      createNodeFromRole(block.role),
+      nodeTypeFromRole(block.role),
       {
         "data-type": BLOCK_NODE,
         "data-block-render-type": blockRenderTypeFromRole(block.role),

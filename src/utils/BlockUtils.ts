@@ -21,14 +21,19 @@
  */
 
 import { type Role } from "../types";
-import { type Block, type Siblings, type Style } from "../interfaces";
+import {
+  type Block,
+  ImageContent,
+  type Siblings,
+  type Style,
+} from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
-import { camelCase } from "lodash";
+import { camelCase, snakeCase } from "lodash";
 
 /**
- * @function createNodeFromRole
+ * @function nodeTypeFromRole
  * @param role
  *
  * @description Returns string name of HTMLElement based on the block role.
@@ -38,7 +43,7 @@ import { camelCase } from "lodash";
  * @author Mihir Paldhikar
  */
 
-export function createNodeFromRole(role: Role): string {
+export function nodeTypeFromRole(role: Role): string {
   switch (role) {
     case "title":
       return "h1";
@@ -371,4 +376,66 @@ export function getEditorRoot(): HTMLElement {
     document.querySelectorAll(`[${NODE_TYPE}="editor-root"]`).values()
   );
   return blockDOM[0] as HTMLElement;
+}
+
+export function serializeBlockToNode(block: Block): HTMLElement | null {
+  if (
+    blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
+    typeof block.content === "object" &&
+    (block.content as ImageContent).url === ""
+  ) {
+    return null;
+  }
+
+  let node = document.createElement(nodeTypeFromRole(block.role));
+  for (const style of block.style) {
+    node.style.setProperty(snakeCase(style.name), snakeCase(style.value));
+  }
+
+  if (
+    blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
+    typeof block.content === "string"
+  ) {
+    node.innerHTML = block.content;
+  }
+
+  if (
+    blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
+    typeof block.content === "object"
+  ) {
+    node = document.createElement("div");
+    const childNode = document.createElement("div");
+    childNode.style.setProperty("display", "inline-block");
+    const imageNode = document.createElement("img");
+    imageNode.style.setProperty("display", "inline-block");
+    imageNode.src = (block.content as ImageContent).url;
+    imageNode.alt = (block.content as ImageContent).description;
+    imageNode.width = (block.content as ImageContent).width;
+    imageNode.height = (block.content as ImageContent).height;
+    childNode.innerHTML = imageNode.outerHTML;
+    node.innerHTML = childNode.outerHTML;
+  }
+
+  if (
+    blockRenderTypeFromRole(block.role) === RenderType.LIST &&
+    Array.isArray(block.content)
+  ) {
+    for (let i = 0; i < block.content.length; i++) {
+      node.style.setProperty("list-style-position", "outside");
+      node.style.setProperty(
+        "list-style-type",
+        block.role === "numberedList" ? "decimal" : "disc"
+      );
+      const listNode = document.createElement("li");
+      listNode.style.setProperty("margin-left", "3px");
+      listNode.style.setProperty("margin-right", "3px");
+      const listChild = serializeBlockToNode(block.content[i]);
+      if (listChild !== null) {
+        listNode.innerHTML = listChild.outerHTML;
+      }
+      node.append(listNode);
+    }
+  }
+
+  return node;
 }

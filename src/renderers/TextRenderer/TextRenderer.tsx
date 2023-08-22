@@ -24,7 +24,7 @@ import { type ChangeEvent, createElement, type JSX } from "react";
 import {
   blockRenderTypeFromRole,
   conditionalClassName,
-  createNodeFromRole,
+  nodeTypeFromRole,
   setNodeStyle,
 } from "../../utils";
 import { BLOCK_NODE } from "../../constants";
@@ -48,7 +48,7 @@ export default function TextRenderer({
   onSelect,
   onKeyPressed,
 }: TextRendererProps): JSX.Element {
-  return createElement(createNodeFromRole(block.role), {
+  return createElement(nodeTypeFromRole(block.role), {
     "data-type": BLOCK_NODE,
     "data-block-render-type": blockRenderTypeFromRole(block.role),
     id: block.id,
