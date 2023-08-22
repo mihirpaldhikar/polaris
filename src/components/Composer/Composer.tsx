@@ -37,19 +37,12 @@ interface ComposerProps {
     targetBlock: Block,
     creationType: "list" | "nonList"
   ) => void;
-  onCreateList: (parentBlock: Block, newChildBlock: Block) => void;
   onDelete: (
     block: Block,
     previousBlock: Block | Block[],
     nodeId: string,
     childNodeIndex: number,
     caretOffset: number
-  ) => void;
-  onListChildDelete: (
-    parentBlock: Block,
-    childBlockIndex: number,
-    caretOffset: number,
-    childNodeIndex: number
   ) => void;
   onPaste: (
     block: Block,

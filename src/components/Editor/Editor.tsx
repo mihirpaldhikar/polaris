@@ -1050,37 +1050,6 @@ export default function Editor({
     });
   }
 
-  function createListHandler(parentBlock: Block, newChildBlock: Block): void {
-    if (!Array.isArray(parentBlock.content)) {
-      return;
-    }
-    const parentBlockIndex = masterBlocks.indexOf(parentBlock);
-    masterBlocks[parentBlockIndex] = parentBlock;
-    propagateChanges(masterBlocks, {
-      nodeId: newChildBlock.id,
-      caretOffset: 0,
-      nodeIndex: 0,
-    });
-  }
-
-  function deleteListChildHandler(
-    parentBlock: Block,
-    childBlockIndex: number,
-    caretOffset: number,
-    childNodeIndex: number
-  ): void {
-    if (!Array.isArray(parentBlock.content)) {
-      return;
-    }
-    const parentBlockIndex = masterBlocks.indexOf(parentBlock);
-    masterBlocks[parentBlockIndex] = parentBlock;
-    propagateChanges(masterBlocks, {
-      nodeId: parentBlock.content[childBlockIndex].id,
-      caretOffset,
-      nodeIndex: childNodeIndex,
-    });
-  }
-
   function imageRequestHandler(block: Block, file: File): void {
     if (block.role !== "image" || typeof block.content !== "object") {
       return;
@@ -1170,8 +1139,6 @@ export default function Editor({
               onPaste={pasteHandler}
               onSelect={selectionHandler}
               onCommandKeyPressed={actionKeyHandler}
-              onCreateList={createListHandler}
-              onListChildDelete={deleteListChildHandler}
               onImageRequest={imageRequestHandler}
               onMarkdown={markdownHandler}
             />
