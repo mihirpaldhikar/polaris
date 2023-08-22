@@ -61,6 +61,7 @@ import {
   BulletListIcon,
   CodeIcon,
   HeadingIcon,
+  ImageIcon,
   ItalicIcon,
   LinkIcon,
   NumberedListIcon,
@@ -674,8 +675,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Title",
-        description: `Change ${block.role} to Title`,
-        icon: <TitleIcon />,
+        description: `Big section Heading`,
+        icon: <TitleIcon size={32} />,
         allowedOn: ["subTitle", "heading", "subHeading", "paragraph", "quote"],
         execute: {
           type: "role",
@@ -685,8 +686,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Sub Title",
-        description: `Change ${block.role} to Sub Title`,
-        icon: <SubTitleIcon />,
+        description: `Big section Subheading`,
+        icon: <SubTitleIcon size={32} />,
         allowedOn: ["title", "heading", "subHeading", "paragraph", "quote"],
         execute: {
           type: "role",
@@ -696,8 +697,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Heading",
-        description: `Change ${block.role} to Heading`,
-        icon: <HeadingIcon />,
+        description: `Small Section heading`,
+        icon: <HeadingIcon size={32} />,
         allowedOn: ["title", "subTitle", "subHeading", "paragraph", "quote"],
         execute: {
           type: "role",
@@ -707,8 +708,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Subheading",
-        description: `Change ${block.role} to Subheading`,
-        icon: <SubHeadingIcon />,
+        description: `Small Section Subheading`,
+        icon: <SubHeadingIcon size={32} />,
         allowedOn: ["title", "subTitle", "heading", "paragraph", "quote"],
         execute: {
           type: "role",
@@ -718,8 +719,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Paragraph",
-        description: `Change ${block.role} to Paragraph`,
-        icon: <ParagraphIcon />,
+        description: `Just start typing`,
+        icon: <ParagraphIcon size={32} />,
         allowedOn: ["title", "subTitle", "heading", "subHeading", "quote"],
         execute: {
           type: "role",
@@ -729,8 +730,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Quote",
-        description: `Change ${block.role} to Quote`,
-        icon: <QuoteIcon />,
+        description: `Capture a quote`,
+        icon: <QuoteIcon size={32} />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
@@ -740,8 +741,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Bullet List",
-        description: `Change ${block.role} to Bullet List`,
-        icon: <BulletListIcon />,
+        description: `Create simple bullet list`,
+        icon: <BulletListIcon size={35} />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
@@ -751,8 +752,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Numbered List",
-        description: `Change ${block.role} to Numbered List`,
-        icon: <NumberedListIcon />,
+        description: `Create list with numbering`,
+        icon: <NumberedListIcon size={35} />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
@@ -762,8 +763,8 @@ export default function Editor({
       {
         id: generateMenuId(),
         name: "Image",
-        description: `Change ${block.role} to Bullet List`,
-        icon: <BulletListIcon />,
+        description: `Add an image`,
+        icon: <ImageIcon size={32} />,
         allowedOn: ["paragraph"],
         execute: {
           type: "role",
@@ -774,7 +775,7 @@ export default function Editor({
         id: generateMenuId(),
         name: "Align Start",
         description: `Align text to start`,
-        icon: <AlignStartIcon />,
+        icon: <AlignStartIcon size={32} />,
         allowedOn: [
           "title",
           "subTitle",
@@ -798,7 +799,7 @@ export default function Editor({
         id: generateMenuId(),
         name: "Align Center",
         description: `Align text at the center`,
-        icon: <AlignCenterIcon />,
+        icon: <AlignCenterIcon size={32} />,
         allowedOn: [
           "title",
           "subTitle",
@@ -822,7 +823,7 @@ export default function Editor({
         id: generateMenuId(),
         name: "Align End",
         description: `Align text at the end`,
-        icon: <AlignEndIcon />,
+        icon: <AlignEndIcon size={32} />,
         allowedOn: [
           "title",
           "subTitle",

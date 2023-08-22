@@ -31,9 +31,30 @@ export default function AlignEndIcon({ size }: { size?: number }): JSX.Element {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="27" y="53" width="145" height="15" rx="7.5" fill="black" />
-      <rect x="72" y="93" width="100" height="15" rx="7.5" fill="black" />
-      <rect x="42" y="133" width="130" height="15" rx="7.5" fill="black" />
+      <line
+        x1="43"
+        y1="66.5"
+        x2="156"
+        y2="66.5"
+        stroke="black"
+        strokeWidth="7"
+      />
+      <line
+        x1="85"
+        y1="96.5"
+        x2="156"
+        y2="96.5"
+        stroke="black"
+        strokeWidth="7"
+      />
+      <line
+        x1="43"
+        y1="126.5"
+        x2="156"
+        y2="126.5"
+        stroke="black"
+        strokeWidth="7"
+      />
     </svg>
   );
 }

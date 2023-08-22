@@ -213,7 +213,7 @@ export default function ImageRenderer({
               onChange(block);
             }}
           >
-            <AlignStartIcon size={25} />
+            <AlignStartIcon size={30} />
           </div>
           <div
             title={"Align Center"}
@@ -225,7 +225,7 @@ export default function ImageRenderer({
               onChange(block);
             }}
           >
-            <AlignCenterIcon size={25} />
+            <AlignCenterIcon size={30} />
           </div>
           <div
             title={"Align Right"}
@@ -237,7 +237,7 @@ export default function ImageRenderer({
               onChange(block);
             }}
           >
-            <AlignEndIcon size={25} />
+            <AlignEndIcon size={30} />
           </div>
           <div
             title={"Resize Image"}

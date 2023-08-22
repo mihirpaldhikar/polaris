@@ -23,14 +23,14 @@
 import { type Role } from "../types";
 import {
   type Block,
-  ImageContent,
+  type ImageContent,
   type Siblings,
   type Style,
 } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
 import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
-import { camelCase, snakeCase } from "lodash";
+import { camelCase, kebabCase } from "lodash";
 
 /**
  * @function nodeTypeFromRole
@@ -389,21 +389,24 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
 
   let node = document.createElement(nodeTypeFromRole(block.role));
   for (const style of block.style) {
-    node.style.setProperty(snakeCase(style.name), snakeCase(style.value));
+    node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
   }
 
   if (
     blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
     typeof block.content === "string"
   ) {
-    node.innerHTML = block.content;
-  }
-
-  if (
+    node.append(block.content);
+  } else if (
     blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
-    typeof block.content === "object"
+    typeof block.content === "object" &&
+    (block.content as ImageContent).url !== ""
   ) {
     node = document.createElement("div");
+    node.style.setProperty("width", "100%");
+    for (const style of block.style) {
+      node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
+    }
     const childNode = document.createElement("div");
     childNode.style.setProperty("display", "inline-block");
     const imageNode = document.createElement("img");
@@ -413,10 +416,8 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     imageNode.width = (block.content as ImageContent).width;
     imageNode.height = (block.content as ImageContent).height;
     childNode.innerHTML = imageNode.outerHTML;
-    node.innerHTML = childNode.outerHTML;
-  }
-
-  if (
+    node.appendChild(childNode);
+  } else if (
     blockRenderTypeFromRole(block.role) === RenderType.LIST &&
     Array.isArray(block.content)
   ) {
@@ -433,7 +434,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       if (listChild !== null) {
         listNode.innerHTML = listChild.outerHTML;
       }
-      node.append(listNode);
+      node.appendChild(listNode);
     }
   }
 
