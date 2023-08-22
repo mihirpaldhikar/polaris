@@ -24,6 +24,7 @@ import { type ChangeEvent, createElement, type JSX } from "react";
 import {
   blockRenderTypeFromRole,
   conditionalClassName,
+  getPlaceholderFromRole,
   nodeTypeFromRole,
   setNodeStyle,
 } from "../../utils";
@@ -57,9 +58,10 @@ export default function TextRenderer({
     contentEditable: editable,
     dangerouslySetInnerHTML: { __html: block.content },
     style: setNodeStyle(block.style),
+    placeholder: getPlaceholderFromRole(block.role),
     spellCheck: true,
     className: conditionalClassName(
-      "focus:outline-none focus:ring-0 outline-none ring-0 w-full cursor-text break-words",
+      "text_renderer focus:outline-none focus:ring-0 outline-none ring-0 w-full cursor-text break-words",
       block.role === "title"
         ? "font-bold text-4xl"
         : block.role === "subTitle"

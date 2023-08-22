@@ -454,3 +454,18 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
 
   return node;
 }
+
+export function getPlaceholderFromRole(role: Role): string {
+  switch (role) {
+    case "title":
+      return "Title...";
+    case "subTitle":
+      return "Subtitle...";
+    case "heading":
+      return "Heading...";
+    case "subHeading":
+      return "Subheading...";
+    default:
+      return "Press '/' for commands...";
+  }
+}
