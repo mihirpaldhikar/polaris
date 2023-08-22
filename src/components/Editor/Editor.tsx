@@ -36,7 +36,6 @@ import {
   blockRenderTypeFromRole,
   elementContainsStyle,
   generateBlockId,
-  generateMenuId,
   getBlockNode,
   getCaretCoordinates,
   inlineSpecifierManager,
@@ -53,34 +52,8 @@ import {
 import { type Content, type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
 import { SelectionMenu } from "../SelectionMenu";
-import {
-  AlignCenterIcon,
-  AlignEndIcon,
-  AlignStartIcon,
-  BoldIcon,
-  BulletListIcon,
-  CodeIcon,
-  HeadingIcon,
-  ImageIcon,
-  ItalicIcon,
-  LinkIcon,
-  NumberedListIcon,
-  ParagraphIcon,
-  QuoteIcon,
-  SubHeadingIcon,
-  SubTitleIcon,
-  TextBackgroundColorIcon,
-  TextColorIcon,
-  TextSizeIcon,
-  TitleIcon,
-  UnderlineIcon,
-} from "../../icons";
-import {
-  LINK_ATTRIBUTE,
-  REMOVE_COLOR,
-  REMOVE_LINK,
-  REMOVE_STYLE,
-} from "../../constants";
+import { MasterActionMenu, MasterSelectionMenu } from "../../assets";
+import { LINK_ATTRIBUTE } from "../../constants";
 import { ActionMenu } from "../ActionMenu";
 import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
 import RenderType from "../../enums/RenderType";
@@ -414,159 +387,13 @@ export default function Editor({
       return;
     }
 
-    const defaultSelectionMenu: Menu[] = [
-      {
-        id: generateMenuId(),
-        name: "Bold",
-        icon: <BoldIcon />,
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "font-weight",
-              value: "bold",
-            },
-          ],
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Italic",
-        icon: <ItalicIcon />,
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "font-style",
-              value: "italic",
-            },
-          ],
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Underline",
-        icon: <UnderlineIcon />,
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "text-decoration",
-              value: "underline",
-            },
-          ],
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Link",
-        separator: true,
-        icon: <LinkIcon />,
-        execute: {
-          type: "input",
-          args: {
-            hint: "Add Link..",
-            type: "text",
-            executionTypeAfterInput: "link",
-            initialPayload: "",
-            payloadIfRemovedClicked: REMOVE_LINK,
-            validStringRegExp:
-              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&/=]*)/,
-          },
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Text Size",
-        separator: true,
-        icon: <TextSizeIcon />,
-        execute: {
-          type: "input",
-          args: {
-            hint: "Text Size..",
-            type: "number",
-            unit: "px",
-            executionTypeAfterInput: "style",
-            initialPayload: {
-              name: "font-size",
-              value: "",
-            },
-            payloadIfRemovedClicked: REMOVE_STYLE,
-            validStringRegExp: /^[0-9]*$/,
-          },
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Text Color",
-        icon: <TextColorIcon />,
-        execute: {
-          type: "input",
-          args: {
-            hint: "HEX Code",
-            type: "color",
-            executionTypeAfterInput: "style",
-            initialPayload: {
-              name: "color",
-              value: "",
-            },
-            payloadIfRemovedClicked: REMOVE_COLOR,
-            validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
-          },
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Text Background Color",
-        icon: <TextBackgroundColorIcon />,
-        execute: {
-          type: "input",
-          args: {
-            hint: "HEX Code",
-            type: "color",
-            executionTypeAfterInput: "style",
-            initialPayload: {
-              name: "background-color",
-              value: "",
-            },
-            payloadIfRemovedClicked: REMOVE_COLOR,
-            validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
-          },
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Code",
-        icon: <CodeIcon />,
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "font-family",
-              value: "monospace",
-            },
-            {
-              name: "background-color",
-              value: "#e8e6e6",
-            },
-            {
-              name: "border-radius",
-              value: "3px",
-            },
-            {
-              name: "padding",
-              value: "2px",
-            },
-          ],
-        },
-      },
-    ];
+    const masterSelectionMenu = MasterSelectionMenu;
 
     if (selectionMenu !== undefined && selectionMenu.length !== 0) {
-      defaultSelectionMenu.push(...selectionMenu);
+      masterSelectionMenu.push(...selectionMenu);
     }
 
-    for (const menu of defaultSelectionMenu) {
+    for (const menu of masterSelectionMenu) {
       if (menu.execute.type === "style" && Array.isArray(menu.execute.args)) {
         if (
           elementContainsStyle(startNodeParent, menu.execute.args) &&
@@ -614,7 +441,7 @@ export default function Editor({
       <SelectionMenu
         dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
-        menus={defaultSelectionMenu}
+        menus={masterSelectionMenu}
         onClose={() => {
           popUpRoot.render(<Fragment />);
         }}
@@ -671,180 +498,7 @@ export default function Editor({
     previousContent: Content,
     caretOffset: number
   ): void {
-    let actionMenus: Menu[] = [
-      {
-        id: generateMenuId(),
-        name: "Title",
-        description: `Big section Heading`,
-        icon: <TitleIcon size={32} />,
-        allowedOn: ["subTitle", "heading", "subHeading", "paragraph", "quote"],
-        execute: {
-          type: "role",
-          args: "title",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Sub Title",
-        description: `Big section Subheading`,
-        icon: <SubTitleIcon size={32} />,
-        allowedOn: ["title", "heading", "subHeading", "paragraph", "quote"],
-        execute: {
-          type: "role",
-          args: "subTitle",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Heading",
-        description: `Small Section heading`,
-        icon: <HeadingIcon size={32} />,
-        allowedOn: ["title", "subTitle", "subHeading", "paragraph", "quote"],
-        execute: {
-          type: "role",
-          args: "heading",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Subheading",
-        description: `Small Section Subheading`,
-        icon: <SubHeadingIcon size={32} />,
-        allowedOn: ["title", "subTitle", "heading", "paragraph", "quote"],
-        execute: {
-          type: "role",
-          args: "subHeading",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Paragraph",
-        description: `Just start typing`,
-        icon: <ParagraphIcon size={32} />,
-        allowedOn: ["title", "subTitle", "heading", "subHeading", "quote"],
-        execute: {
-          type: "role",
-          args: "paragraph",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Quote",
-        description: `Capture a quote`,
-        icon: <QuoteIcon size={32} />,
-        allowedOn: ["paragraph"],
-        execute: {
-          type: "role",
-          args: "quote",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Bullet List",
-        description: `Create simple bullet list`,
-        icon: <BulletListIcon size={35} />,
-        allowedOn: ["paragraph"],
-        execute: {
-          type: "role",
-          args: "bulletList",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Numbered List",
-        description: `Create list with numbering`,
-        icon: <NumberedListIcon size={35} />,
-        allowedOn: ["paragraph"],
-        execute: {
-          type: "role",
-          args: "numberedList",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Image",
-        description: `Add an image`,
-        icon: <ImageIcon size={32} />,
-        allowedOn: ["paragraph"],
-        execute: {
-          type: "role",
-          args: "image",
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Align Start",
-        description: `Align text to start`,
-        icon: <AlignStartIcon size={32} />,
-        allowedOn: [
-          "title",
-          "subTitle",
-          "heading",
-          "subHeading",
-          "paragraph",
-          "numberedList",
-          "bulletList",
-        ],
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "textAlign",
-              value: "start",
-            },
-          ],
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Align Center",
-        description: `Align text at the center`,
-        icon: <AlignCenterIcon size={32} />,
-        allowedOn: [
-          "title",
-          "subTitle",
-          "heading",
-          "subHeading",
-          "paragraph",
-          "numberedList",
-          "bulletList",
-        ],
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "textAlign",
-              value: "center",
-            },
-          ],
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Align End",
-        description: `Align text at the end`,
-        icon: <AlignEndIcon size={32} />,
-        allowedOn: [
-          "title",
-          "subTitle",
-          "heading",
-          "subHeading",
-          "paragraph",
-          "numberedList",
-          "bulletList",
-        ],
-        execute: {
-          type: "style",
-          args: [
-            {
-              name: "textAlign",
-              value: "end",
-            },
-          ],
-        },
-      },
-    ];
-
+    let actionMenus = MasterActionMenu;
     actionMenus = actionMenus.filter((menu) => {
       if (menu.allowedOn !== undefined) {
         return menu.allowedOn?.includes(block.role);

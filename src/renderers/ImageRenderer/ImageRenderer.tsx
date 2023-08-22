@@ -45,7 +45,7 @@ import {
   ChangeIcon,
   DeleteIcon,
   ResizeIcon,
-} from "../../icons";
+} from "../../assets/icons";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { SizeDialog } from "../../components/SizeDialog";
 
