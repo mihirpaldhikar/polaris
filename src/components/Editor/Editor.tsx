@@ -918,9 +918,9 @@ export default function Editor({
                   width: 300,
                   height: 200,
                 } satisfies ImageContent;
-              }
-
-              if (blockRenderTypeFromRole(newBlock.role) === RenderType.LIST) {
+              } else if (
+                blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
+              ) {
                 newBlock.content = [
                   {
                     id: generateBlockId(),
@@ -931,13 +931,9 @@ export default function Editor({
                 ];
               }
 
-              if (
-                blockRenderTypeFromNode(currentNode) === RenderType.LIST &&
-                currentNode.parentElement !== null &&
-                currentNode.parentElement.parentElement !== null
-              ) {
+              if (blockRenderTypeFromNode(currentNode) === RenderType.LIST) {
                 const currentBlockParent = serializeNodeToBlock(
-                  currentNode.parentElement?.parentElement
+                  currentNode.parentElement?.parentElement as HTMLElement
                 );
 
                 if (Array.isArray(currentBlockParent.content)) {
@@ -970,6 +966,13 @@ export default function Editor({
                       1,
                       ...[block, newBlock]
                     );
+                  } else if (
+                    blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
+                  ) {
+                    block.content = newBlock.content;
+                    block.role = newBlock.role;
+                    block.style = newBlock.style;
+                    traverseAndUpdate(currentBlockParent.content, block);
                   } else {
                     currentBlockParent.content.splice(
                       currentBlockIndex,
@@ -1001,12 +1004,6 @@ export default function Editor({
                     };
                     traverseAndUpdateBelow(masterBlocks, newBlock, emptyBlock);
                   }
-                } else if (
-                  blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
-                ) {
-                  block.content = newBlock.content;
-                  block.role = newBlock.role;
-                  traverseAndUpdate(masterBlocks, block);
                 } else {
                   newBlock.id = block.id;
                   traverseAndUpdate(masterBlocks, newBlock);
