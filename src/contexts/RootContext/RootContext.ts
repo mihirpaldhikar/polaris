@@ -19,5 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import { createContext } from "react";
+import { type Root } from "react-dom/client";
 
-export { default as ContextMenu } from "./ContextMenu";
+interface RootInterface {
+  dialogRoot: Root | undefined;
+  popUpRoot: Root | undefined;
+}
+
+const RootContext = createContext<RootInterface>({
+  dialogRoot: undefined,
+  popUpRoot: undefined,
+});
+
+export default RootContext;

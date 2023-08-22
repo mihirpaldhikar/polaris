@@ -59,16 +59,13 @@ import {
   AlignStartIcon,
   BoldIcon,
   BulletListIcon,
-  ChangeIcon,
   CodeIcon,
-  DeleteIcon,
   HeadingIcon,
   ItalicIcon,
   LinkIcon,
   NumberedListIcon,
   ParagraphIcon,
   QuoteIcon,
-  ResizeIcon,
   SubHeadingIcon,
   SubTitleIcon,
   TextBackgroundColorIcon,
@@ -85,9 +82,8 @@ import {
 } from "../../constants";
 import { ActionMenu } from "../ActionMenu";
 import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
-import { ContextMenu } from "../ContextMenu";
-import { SizeDialog } from "../SizeDialog";
 import RenderType from "../../enums/RenderType";
+import RootContext from "../../contexts/RootContext/RootContext";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -133,21 +129,19 @@ export default function Editor({
     | undefined
   >(undefined);
 
-  const [popupRoot, setPopupRoot] = useState<Root>();
+  const [popUpRoot, setPopUpRoot] = useState<Root>();
   const [dialogRoot, setDialogRoot] = useState<Root>();
-  const [editorNode, setEditorNode] = useState<HTMLElement>();
 
   useEffect(() => {
-    setPopupRoot(
+    setPopUpRoot(
       createRoot(document.getElementById(`popup-${blob.id}`) as HTMLElement)
     );
     setDialogRoot(
       createRoot(document.getElementById(`dialog-${blob.id}`) as HTMLElement)
     );
-    setEditorNode(document.getElementById(`editor-${blob.id}`) as HTMLElement);
     return () => {
-      setPopupRoot(undefined);
-      setEditorNode(undefined);
+      setPopUpRoot(undefined);
+      setDialogRoot(undefined);
     };
   }, [blob.id]);
 
@@ -216,18 +210,25 @@ export default function Editor({
             ? (computedNode.firstChild as Node) ?? node
             : computedNode;
 
-        setTimeout(() => {
-          setCaretOffset(jumpNode, caretOffset);
-        }, 0.001);
+        setCaretOffset(jumpNode, caretOffset);
         removeEmptyInlineSpecifiers(node);
       }
     }
   }, [focusedNode]);
 
   function changeHandler(block: Block): void {
-    const blockIndex: number = masterBlocks.indexOf(block);
+    const blockIndex: number = masterBlocks
+      .map((blk) => blk.id)
+      .indexOf(block.id);
     masterBlocks[blockIndex] = block;
     updateMasterBlocks(masterBlocks);
+    if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
+      setFocusedNode({
+        nodeId: block.id,
+        nodeIndex: 0,
+        caretOffset: 0,
+      });
+    }
     if (onChange !== undefined) {
       onChange(blob);
     }
@@ -407,7 +408,7 @@ export default function Editor({
     if (
       startNodeParent == null ||
       endNodeParent == null ||
-      popupRoot === undefined
+      popUpRoot === undefined
     ) {
       return;
     }
@@ -608,14 +609,13 @@ export default function Editor({
       }
     }
 
-    popupRoot.render(
+    popUpRoot.render(
       <SelectionMenu
-        blobId={blob.id}
         dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
         menus={defaultSelectionMenu}
         onClose={() => {
-          popupRoot.render(<Fragment />);
+          popUpRoot.render(<Fragment />);
         }}
         onMenuSelected={(executable) => {
           selection.removeAllRanges();
@@ -642,10 +642,10 @@ export default function Editor({
       "keydown",
       (event) => {
         if (event.ctrlKey) {
-          popupRoot.render(<Fragment />);
+          popUpRoot.render(<Fragment />);
         } else {
           selection.removeAllRanges();
-          popupRoot.render(<Fragment />);
+          popUpRoot.render(<Fragment />);
         }
       },
       {
@@ -656,7 +656,7 @@ export default function Editor({
       "mousedown",
       () => {
         selection.removeAllRanges();
-        popupRoot.render(<Fragment />);
+        popUpRoot.render(<Fragment />);
       },
       {
         once: true,
@@ -858,14 +858,14 @@ export default function Editor({
       popupNode == null ||
       editorNode == null ||
       currentNode == null ||
-      popupRoot === undefined ||
+      popUpRoot === undefined ||
       typeof block.content !== "string"
     ) {
       return;
     }
 
     if (popupNode.childElementCount !== 0) {
-      popupRoot.render(<Fragment />);
+      popUpRoot.render(<Fragment />);
       window.dispatchEvent(actionMenuClosedEvent);
       return;
     }
@@ -891,13 +891,13 @@ export default function Editor({
 
     window.dispatchEvent(actionMenuOpenedEvent);
 
-    popupRoot.render(
+    popUpRoot.render(
       <ActionMenu
         coordinates={actionMenuCoordinates}
         menu={actionMenus}
         onClose={() => {
           window.dispatchEvent(actionMenuClosedEvent);
-          popupRoot.render(<Fragment />);
+          popUpRoot.render(<Fragment />);
         }}
         onEscape={(query) => {
           setFocusedNode({
@@ -1001,6 +1001,12 @@ export default function Editor({
                     };
                     traverseAndUpdateBelow(masterBlocks, newBlock, emptyBlock);
                   }
+                } else if (
+                  blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
+                ) {
+                  block.content = newBlock.content;
+                  block.role = newBlock.role;
+                  traverseAndUpdate(masterBlocks, block);
                 } else {
                   newBlock.id = block.id;
                   traverseAndUpdate(masterBlocks, newBlock);
@@ -1043,7 +1049,7 @@ export default function Editor({
     );
 
     editorNode.addEventListener("mousedown", () => {
-      popupRoot.render(<Fragment />);
+      popUpRoot.render(<Fragment />);
     });
   }
 
@@ -1097,159 +1103,6 @@ export default function Editor({
     });
   }
 
-  function contextMenuHandler(
-    block: Block,
-    coordinates: Coordinates,
-    caretOffset: number
-  ): void {
-    if (popupRoot === undefined || editorNode === undefined) return;
-
-    const contextMenu: Menu[] = [
-      {
-        id: generateMenuId(),
-        name: "Resize Image",
-        icon: <ResizeIcon />,
-        allowedOn: ["image"],
-        execute: {
-          type: "blockFunction",
-          args: (block, onComplete, blocks, coordinates) => {
-            if (
-              (block.role !== "image" && typeof block.content !== "object") ||
-              blocks === undefined ||
-              coordinates === undefined
-            ) {
-              return;
-            }
-
-            const imageContent = block.content as ImageContent;
-
-            dialogRoot?.render(
-              <SizeDialog
-                initialSize={{
-                  width: imageContent.width,
-                  height: imageContent.height,
-                }}
-                coordinates={coordinates}
-                onConfirm={(width, height) => {
-                  imageContent.width = width;
-                  imageContent.height = height;
-                  onComplete(block, block.id);
-                }}
-                onClose={() => {
-                  dialogRoot?.render(<Fragment />);
-                }}
-              />
-            );
-          },
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Change Image",
-        icon: <ChangeIcon />,
-        allowedOn: ["image"],
-        execute: {
-          type: "blockFunction",
-          args: (block, onComplete) => {
-            if (block.role !== "image" && typeof block.content !== "object") {
-              return;
-            }
-
-            const imageContent = block.content as ImageContent;
-            imageContent.url = "";
-            onComplete(block, block.id);
-          },
-        },
-      },
-      {
-        id: generateMenuId(),
-        name: "Delete",
-        icon: <DeleteIcon />,
-        execute: {
-          type: "blockFunction",
-          args: (block, onComplete, blocks) => {
-            if (blocks === undefined) return;
-            if (blocks.length === 1 && blocks.indexOf(block) === 0) {
-              const newBlock: Block = {
-                id: generateBlockId(),
-                role: "paragraph",
-                content: "",
-                style: [],
-              };
-              blocks.splice(0, 1, newBlock);
-              onComplete(blocks, newBlock.id);
-              return;
-            }
-            const targetBlockIndex = masterBlocks.indexOf(block);
-            blocks.splice(targetBlockIndex, 1);
-            onComplete(
-              masterBlocks,
-              blocks.length === 1
-                ? blocks[0].id
-                : targetBlockIndex - 1 < 0
-                ? blocks[targetBlockIndex + 1].id
-                : blocks[targetBlockIndex - 1].id
-            );
-          },
-        },
-      },
-    ];
-
-    const filteredContextMenu = contextMenu.filter((menu) => {
-      if (menu.allowedOn === undefined) return true;
-      return menu.allowedOn.includes(block.role);
-    });
-
-    if (filteredContextMenu.length === 0) return;
-
-    popupRoot.render(
-      <ContextMenu
-        coordinates={coordinates}
-        menu={filteredContextMenu}
-        onClose={() => {
-          popupRoot.render(<Fragment />);
-        }}
-        onClick={(execute) => {
-          if (
-            execute.type === "blockFunction" &&
-            typeof execute.args === "function"
-          ) {
-            execute.args(
-              block,
-              (updatedBlock, focusBlockId, caretOffset) => {
-                let updatedContents: Block[];
-                if (Array.isArray(updatedBlock)) {
-                  updatedContents = updatedBlock;
-                } else {
-                  masterBlocks[masterBlocks.indexOf(updatedBlock)] =
-                    updatedBlock;
-                  updatedContents = masterBlocks;
-                }
-                propagateChanges(updatedContents, {
-                  nodeId: focusBlockId,
-                  caretOffset: caretOffset ?? 0,
-                });
-              },
-              masterBlocks,
-              coordinates,
-              caretOffset
-            );
-          }
-        }}
-      />
-    );
-
-    editorNode.addEventListener(
-      "click",
-      () => {
-        popupRoot.render(<Fragment />);
-      },
-      {
-        once: true,
-      }
-    );
-  }
-
   function markdownHandler(block: Block, newRole: Role): void {
     const blockIndex = masterBlocks.indexOf(block);
     block.role = newRole;
@@ -1274,7 +1127,12 @@ export default function Editor({
   }
 
   return (
-    <Fragment>
+    <RootContext.Provider
+      value={{
+        dialogRoot,
+        popUpRoot,
+      }}
+    >
       <div
         id={`popup-${blob.id}`}
         className={"select-none"}
@@ -1290,6 +1148,7 @@ export default function Editor({
         }}
       ></div>
       <div
+        data-type={"editor-root"}
         id={`editor-${blob.id}`}
         className={"min-h-screen w-full px-2 pb-60"}
         onContextMenu={(event) => {
@@ -1317,12 +1176,11 @@ export default function Editor({
               onCreateList={createListHandler}
               onListChildDelete={deleteListChildHandler}
               onImageRequest={imageRequestHandler}
-              onContextMenu={contextMenuHandler}
               onMarkdown={markdownHandler}
             />
           );
         })}
       </div>
-    </Fragment>
+    </RootContext.Provider>
   );
 }

@@ -25,23 +25,16 @@ import {
   blockRenderTypeFromRole,
   conditionalClassName,
   createNodeFromRole,
-  getBlockNode,
-  getCaretOffset,
   setNodeStyle,
 } from "../../utils";
 import { BLOCK_NODE } from "../../constants";
-import { type Block, type Coordinates } from "../../interfaces";
+import { type Block } from "../../interfaces";
 import type RenderType from "../../enums/RenderType";
 
 interface TextRendererProps {
   block: Block;
   editable: boolean;
   onUpdate: (event: ChangeEvent<HTMLElement>, renderType: RenderType) => void;
-  onContextMenu: (
-    block: Block,
-    coordinates: Coordinates,
-    caretOffset: number
-  ) => void;
   onClick: (event: MouseEvent) => void;
   onSelect: (block: Block) => void;
   onKeyPressed: (event: KeyboardEvent, index: number) => void;
@@ -51,7 +44,6 @@ export default function TextRenderer({
   block,
   editable,
   onUpdate,
-  onContextMenu,
   onClick,
   onSelect,
   onKeyPressed,
@@ -89,14 +81,6 @@ export default function TextRenderer({
     onClick,
     onMouseUp: () => {
       onSelect(block);
-    },
-    onContextMenu: (event: MouseEvent) => {
-      event.preventDefault();
-      onContextMenu(
-        block,
-        { x: event.clientX, y: event.clientY },
-        getCaretOffset(getBlockNode(block.id))
-      );
     },
   });
 }

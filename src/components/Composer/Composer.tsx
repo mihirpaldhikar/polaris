@@ -22,7 +22,7 @@
 
 import { type JSX } from "react";
 import { Canvas } from "../Canvas";
-import { type Block, type Coordinates } from "../../interfaces";
+import { type Block } from "../../interfaces";
 import { getBlockNode, setCaretOffset } from "../../utils";
 import { type Content, type Role } from "../../types";
 
@@ -64,11 +64,6 @@ interface ComposerProps {
     caretOffset: number
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
-  onContextMenu: (
-    block: Block,
-    coordinates: Coordinates,
-    caretOffset: number
-  ) => void;
   onMarkdown: (block: Block, newRole: Role) => void;
 }
 
@@ -104,7 +99,6 @@ export default function Composer({
   onSelect,
   onCommandKeyPressed,
   onImageRequest,
-  onContextMenu,
   onMarkdown,
 }: ComposerProps): JSX.Element {
   function navigationHandler(
@@ -172,7 +166,6 @@ export default function Composer({
       onSelect={onSelect}
       onActionKeyPressed={onCommandKeyPressed}
       onImageRequest={onImageRequest}
-      onContextMenu={onContextMenu}
       onMarkdown={onMarkdown}
     />
   );

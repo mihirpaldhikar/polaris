@@ -28,17 +28,16 @@ import {
   type Menu,
   type Style,
 } from "../../interfaces";
-import { conditionalClassName } from "../../utils";
-import { type Root } from "react-dom/client";
+import { conditionalClassName, getEditorRoot } from "../../utils";
 import { InputDialog } from "../InputDialog";
 import { ColorPickerDialog } from "../ColorPickerDialog";
 import { REMOVE_COLOR } from "../../constants";
+import { Root } from "react-dom/client";
 
 const ACTION_BUTTON_WIDTH: number = 28;
 const ACTION_MENU_PADDING: number = 42;
 
 interface SelectionMenuProps {
-  blobId: string;
   dialogRoot: Root | undefined;
   coordinates: Coordinates;
   menus: Menu[];
@@ -47,7 +46,6 @@ interface SelectionMenuProps {
 }
 
 export default function SelectionMenu({
-  blobId,
   dialogRoot,
   coordinates,
   menus,
@@ -96,11 +94,9 @@ export default function SelectionMenu({
                   onMenuSelected(menu.execute);
                 } else {
                   const inputArgs = menu.execute.args as InputArgs;
-                  const editorNode = window.document.getElementById(
-                    `editor-${blobId}`
-                  );
+                  const editorNode = getEditorRoot();
 
-                  if (dialogRoot === undefined || editorNode == null) return;
+                  if (dialogRoot === undefined) return;
 
                   if (inputArgs.type === "color") {
                     dialogRoot.render(

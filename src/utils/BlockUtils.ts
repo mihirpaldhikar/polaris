@@ -78,7 +78,7 @@ export function setNodeStyle(style: Style[]): Record<string, string> {
   return style.reduce(
     (previousStyle, { name, value }) => ({
       ...previousStyle,
-      [name]: value,
+      [camelCase(name)]: camelCase(value),
     }),
     {}
   );
@@ -126,7 +126,7 @@ export function getNodeSiblings(blockId: string): Siblings {
   const blockDOM = Array.from(
     document.querySelectorAll(`[${NODE_TYPE}="${BLOCK_NODE}"]`).values()
   );
-  const blockDOMIndex = blockDOM.findIndex((block) => block.id === blockId);
+  const blockDOMIndex = blockDOM.map((blk) => blk.id).indexOf(blockId);
   return {
     previous:
       blockDOMIndex !== 0 ? getBlockNode(blockDOM[blockDOMIndex - 1].id) : null,
@@ -364,4 +364,11 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
     role: getBlockRoleFromNode(node),
     style,
   };
+}
+
+export function getEditorRoot(): HTMLElement {
+  const blockDOM = Array.from(
+    document.querySelectorAll(`[${NODE_TYPE}="editor-root"]`).values()
+  );
+  return blockDOM[0] as HTMLElement;
 }

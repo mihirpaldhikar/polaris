@@ -28,7 +28,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { type Block, type Coordinates } from "../../interfaces";
+import { type Block } from "../../interfaces";
 import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
@@ -83,11 +83,6 @@ interface CanvasProps {
     caretOffset: number
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
-  onContextMenu: (
-    block: Block,
-    coordinates: Coordinates,
-    caretOffset: number
-  ) => void;
   onMarkdown: (block: Block, newRole: Role) => void;
 }
 
@@ -122,13 +117,9 @@ export default function Canvas({
   onSelect,
   onImageRequest,
   onActionKeyPressed,
-  onContextMenu,
   onMarkdown,
 }: CanvasProps): JSX.Element {
   const isActionMenuOpen = useRef(false);
-
-  const initialRole = useRef(block.role);
-  const roleChangeByMarkdown = useRef(false);
 
   useEffect(() => {
     window.addEventListener("actionMenuOpened", () => {
@@ -217,7 +208,10 @@ export default function Canvas({
             .map((blk) => blk.id)
             .indexOf(block.id);
 
-          if (currentBlockNode.innerText.length === 0) {
+          if (
+            currentBlockNode.innerText.length === 0 &&
+            currentChildBlockIndex === parentBlock.content.length - 1
+          ) {
             const parentSiblings = getNodeSiblings(parentBlock.id);
 
             if (
@@ -453,7 +447,6 @@ export default function Canvas({
         block={block}
         editable={editable}
         onUpdate={notifyChange}
-        onContextMenu={onContextMenu}
         onClick={openLinkInNewTab}
         onSelect={onSelect}
         onKeyPressed={keyHandler}
@@ -464,9 +457,10 @@ export default function Canvas({
   if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
     return (
       <ImageRenderer
+        parentBlock={parentBlock}
         block={block}
+        onChange={onChange}
         editable={editable}
-        onContextMenu={onContextMenu}
         onImageRequest={onImageRequest}
         onDelete={onDelete}
       />
@@ -491,14 +485,6 @@ export default function Canvas({
           "px-4 space-y-2 text-[17px] my-2 mx-2",
           block.role === "numberedList" ? "list-decimal" : "list-disc"
         ),
-        onContextMenu: (event: MouseEvent) => {
-          event.preventDefault();
-          onContextMenu(
-            block,
-            { x: event.clientX, y: event.clientY },
-            getCaretOffset(getBlockNode(block.id))
-          );
-        },
       },
       block.content.map((childBlock) => {
         return (
@@ -515,7 +501,6 @@ export default function Canvas({
               onSelect={onSelect}
               onActionKeyPressed={onActionKeyPressed}
               onImageRequest={onImageRequest}
-              onContextMenu={onContextMenu}
               onMarkdown={onMarkdown}
             />
           </li>
