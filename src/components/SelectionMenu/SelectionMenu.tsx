@@ -73,19 +73,19 @@ export default function SelectionMenu({
         left: xAxis,
       }}
       className={
-        "fixed z-10 flex flex-row items-center rounded-xl border border-black/10 bg-white py-1 shadow-md"
+        "fixed z-10 flex flex-row items-center rounded-lg border border-black/10 bg-white py-0.5 shadow-md"
       }
     >
       {menus.map((menu) => {
         return (
           <div key={menu.id} className={"flex flex-row items-center"}>
             <span
-              className={"mx-1 h-[23px] w-[1.5px] bg-gray-300 "}
+              className={"mx-0.5 h-[23px] w-[1.5px] bg-gray-300 "}
               hidden={!(menu.separator ?? false)}
             />
             <div
               className={conditionalClassName(
-                "mx-[6px] cursor-pointer rounded-lg p-1 hover:bg-gray-200",
+                "mx-[3px] cursor-pointer rounded-md p-1 hover:bg-gray-200",
                 menu.active ?? false ? "bg-blue-200 fill-blue-800" : null
               )}
               title={menu.name}

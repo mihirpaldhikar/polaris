@@ -28,9 +28,10 @@ import {
   type Style,
 } from "../interfaces";
 import { generateRandomString } from "./SharedUtils";
-import { BLOCK_NODE, NODE_TYPE } from "../constants";
+import { BLOCK_NODE, LINK_ATTRIBUTE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase, kebabCase } from "lodash";
+import { isInlineSpecifierNode } from "./DOMUtils";
 
 /**
  * @function nodeTypeFromRole
@@ -396,7 +397,20 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
     typeof block.content === "string"
   ) {
-    node.append(block.content);
+    node.innerHTML = block.content;
+    for (const childNode of node.childNodes) {
+      if (isInlineSpecifierNode(childNode)) {
+        const element = childNode as HTMLElement;
+        if (element.getAttribute(LINK_ATTRIBUTE) !== null) {
+          const anchorNode = document.createElement("a");
+          anchorNode.href = element.getAttribute(LINK_ATTRIBUTE) as string;
+          anchorNode.target = "_blank";
+          anchorNode.innerText = element.innerText;
+          anchorNode.style.cssText = element.style.cssText;
+          node.replaceChild(anchorNode, element);
+        }
+      }
+    }
   } else if (
     blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
     typeof block.content === "object" &&
