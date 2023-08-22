@@ -21,7 +21,7 @@
  */
 
 import { generateRandomString } from "./SharedUtils";
-import { Block, type Coordinates, type Style } from "../interfaces";
+import { type Block, type Coordinates, type Style } from "../interfaces";
 import {
   INLINE_SPECIFIER_NODE,
   LINK_ATTRIBUTE,
