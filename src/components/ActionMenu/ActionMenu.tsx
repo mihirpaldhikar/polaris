@@ -68,6 +68,7 @@ export default function ActionMenu({
           break;
         }
         case "enter": {
+          event.preventDefault();
           onSelect(
             currentMenuIndex.current === -1
               ? matchedMenu[0].execute
