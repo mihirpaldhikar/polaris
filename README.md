@@ -92,14 +92,12 @@ const blob: Blob = {
   contents: [
     {
       id: generateBlockId(),
-      type: "text",
       role: "title",
       content: "Introducing Polaris",
       style: [],
     },
     {
       id: generateBlockId(),
-      type: "text",
       role: "paragraph",
       content: "Polaris is a rich semantic content editor.",
       style: [],
