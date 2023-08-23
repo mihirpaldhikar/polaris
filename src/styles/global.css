@@ -24,6 +24,10 @@
 @tailwind components;
 @tailwind utilities;
 
+::selection {
+    background-color: #e5e7eb;
+}
+
 .filePicker::-webkit-file-upload-button {
     visibility: hidden;
 }
