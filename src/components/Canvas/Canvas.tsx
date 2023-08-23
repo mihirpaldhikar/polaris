@@ -47,7 +47,7 @@ import {
   splitBlocksAtCaretOffset,
   traverseAndUpdate,
 } from "../../utils";
-import { type Content, type Role } from "../../types";
+import { type Content } from "../../types";
 import RenderType from "../../enums/RenderType";
 import { ImageRenderer, TextRenderer } from "../../renderers";
 import { BLOCK_NODE } from "../../constants";
@@ -83,7 +83,7 @@ interface CanvasProps {
     caretOffset: number
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
-  onMarkdown: (block: Block, newRole: Role) => void;
+  onMarkdown: (block: Block) => void;
 }
 
 /**
@@ -120,6 +120,9 @@ export default function Canvas({
   onMarkdown,
 }: CanvasProps): JSX.Element {
   const isActionMenuOpen = useRef(false);
+
+  const originalBlock = useRef<Block>({ ...block });
+  const roleChangeByMarkdown = useRef(false);
 
   useEffect(() => {
     window.addEventListener("actionMenuOpened", () => {
@@ -256,6 +259,13 @@ export default function Canvas({
         break;
       }
       case "backspace": {
+        if (roleChangeByMarkdown.current) {
+          event.preventDefault();
+          onMarkdown(originalBlock.current);
+          roleChangeByMarkdown.current = false;
+          break;
+        }
+
         if (
           parentBlock !== undefined &&
           blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
@@ -436,6 +446,81 @@ export default function Canvas({
               )
           );
         }
+        break;
+      }
+      case " ": {
+        if (typeof block.content === "string") {
+          switch (block.content) {
+            case "#": {
+              event.preventDefault();
+              block.role = "title";
+              block.content = "";
+              break;
+            }
+            case "##": {
+              event.preventDefault();
+              block.role = "subTitle";
+              block.content = "";
+              break;
+            }
+            case "###": {
+              event.preventDefault();
+              block.role = "heading";
+              block.content = "";
+              break;
+            }
+            case "####": {
+              event.preventDefault();
+              block.role = "subHeading";
+              block.content = "";
+              break;
+            }
+            case "&gt;":
+            case ">": {
+              event.preventDefault();
+              block.role = "quote";
+              block.content = "";
+              break;
+            }
+            case "+":
+            case "-": {
+              event.preventDefault();
+              block.role = "bulletList";
+              block.content = [
+                {
+                  id: generateBlockId(),
+                  content: "",
+                  role: "paragraph",
+                  style: [],
+                },
+              ];
+              break;
+            }
+            default: {
+              if (/^\d+\.$/.test(block.content)) {
+                event.preventDefault();
+                block.role = "numberedList";
+                block.content = [
+                  {
+                    id: generateBlockId(),
+                    content: "",
+                    role: "paragraph",
+                    style: [],
+                  },
+                ];
+                break;
+              } else {
+                return;
+              }
+            }
+          }
+          roleChangeByMarkdown.current = true;
+          onMarkdown(block);
+        }
+        break;
+      }
+      default: {
+        roleChangeByMarkdown.current = false;
         break;
       }
     }

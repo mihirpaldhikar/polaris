@@ -724,25 +724,13 @@ export default function Editor({
     });
   }
 
-  function markdownHandler(block: Block, newRole: Role): void {
-    const blockIndex = masterBlocks.indexOf(block);
-    block.role = newRole;
-    if (newRole === "numberedList" || newRole === "bulletList") {
-      block.content = [
-        {
-          id: generateBlockId(),
-          content: "",
-          role: "paragraph",
-          style: [],
-        },
-      ];
-    } else {
-      masterBlocks[blockIndex].content = "";
-    }
-    masterBlocks[blockIndex] = block;
-    updateMasterBlocks(masterBlocks);
-    setFocusedNode({
-      nodeId: block.id,
+  function markdownHandler(block: Block): void {
+    traverseAndUpdate(masterBlocks, block);
+    propagateChanges(masterBlocks, {
+      nodeId:
+        blockRenderTypeFromRole(block.role) === RenderType.LIST
+          ? (block.content as Block[])[0].id
+          : block.id,
       caretOffset: 0,
     });
   }

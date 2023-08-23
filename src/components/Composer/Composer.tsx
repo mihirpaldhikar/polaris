@@ -24,7 +24,7 @@ import { type JSX } from "react";
 import { Canvas } from "../Canvas";
 import { type Block } from "../../interfaces";
 import { getBlockNode, setCaretOffset } from "../../utils";
-import { type Content, type Role } from "../../types";
+import { type Content } from "../../types";
 
 interface ComposerProps {
   editable: boolean;
@@ -57,7 +57,7 @@ interface ComposerProps {
     caretOffset: number
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
-  onMarkdown: (block: Block, newRole: Role) => void;
+  onMarkdown: (block: Block) => void;
 }
 
 /**
