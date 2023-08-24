@@ -64,7 +64,7 @@ interface CanvasProps {
   ) => void;
   onDelete: (
     block: Block,
-    previousBlock: Block | Block[],
+    previousBlock: Block,
     nodeId: string,
     nodeIndex: number,
     caretOffset: number
@@ -356,14 +356,27 @@ export default function Canvas({
                   parentSiblings.previous
                 );
                 const parentFirstChild = parentBlock.content[0];
-                parentBlock.content.splice(0, 1);
-                onDelete(
-                  previousParentBlock,
-                  [parentFirstChild],
-                  parentFirstChild.id,
-                  0,
-                  0
-                );
+                onCreate(previousParentBlock, parentFirstChild, "nonList");
+                if (parentBlock.content.length === 1) {
+                  parentBlock.role = "paragraph";
+                  parentBlock.content = "";
+                  onDelete(
+                    parentBlock,
+                    parentFirstChild,
+                    parentFirstChild.id,
+                    0,
+                    0
+                  );
+                } else {
+                  parentBlock.content.splice(0, 1);
+                  onDelete(
+                    parentBlock,
+                    parentFirstChild,
+                    parentFirstChild.id,
+                    0,
+                    0
+                  );
+                }
               }
             }
           }

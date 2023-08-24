@@ -39,7 +39,7 @@ interface ComposerProps {
   ) => void;
   onDelete: (
     block: Block,
-    previousBlock: Block | Block[],
+    previousBlock: Block,
     nodeId: string,
     childNodeIndex: number,
     caretOffset: number

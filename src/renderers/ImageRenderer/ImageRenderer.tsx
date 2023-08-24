@@ -56,7 +56,7 @@ interface ImageRendererProps {
   onImageRequest: (block: Block, file: File) => void;
   onDelete: (
     block: Block,
-    previousBlock: Block | Block[],
+    previousBlock: Block,
     nodeId: string,
     nodeIndex: number,
     caretOffset: number

@@ -195,8 +195,12 @@ export default function Editor({
     const blockIndex: number = masterBlocks
       .map((blk) => blk.id)
       .indexOf(block.id);
-    masterBlocks[blockIndex] = block;
-    updateMasterBlocks(masterBlocks);
+    if (blockIndex === -1) {
+      traverseAndUpdate(masterBlocks, block);
+    } else {
+      masterBlocks[blockIndex] = block;
+      updateMasterBlocks(masterBlocks);
+    }
     if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
       setFocusedNode({
         nodeId: block.id,
@@ -247,7 +251,7 @@ export default function Editor({
 
   function deletionHandler(
     block: Block,
-    previousBlock: Block | Block[],
+    previousBlock: Block,
     nodeId: string,
     nodeIndex: number,
     caretOffset: number
@@ -255,21 +259,11 @@ export default function Editor({
     if (blockRenderTypeFromRole(block.role) === RenderType.LIST) {
       traverseAndUpdate(masterBlocks, block);
     } else {
-      if (Array.isArray(previousBlock)) {
-        traverseAndUpdateBelow(masterBlocks, block, previousBlock[0]);
-        for (let i = 1; i < previousBlock.length; i++) {
-          traverseAndUpdateBelow(
-            masterBlocks,
-            previousBlock[i - 1],
-            previousBlock[i]
-          );
-        }
-      } else {
-        const blockIndex = masterBlocks.map((blk) => blk.id).indexOf(block.id);
-        masterBlocks[blockIndex - 1] = previousBlock;
-        masterBlocks.splice(blockIndex, 1);
-      }
+      const blockIndex = masterBlocks.map((blk) => blk.id).indexOf(block.id);
+      masterBlocks[blockIndex - 1] = previousBlock;
+      masterBlocks.splice(blockIndex, 1);
     }
+
     propagateChanges(masterBlocks, {
       nodeId,
       caretOffset,
