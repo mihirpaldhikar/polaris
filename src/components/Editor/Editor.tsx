@@ -238,8 +238,7 @@ export default function Editor({
       masterBlocks[blockIndex] = parentBlock;
       masterBlocks.splice(blockIndex + 1, 0, targetBlock);
     }
-    updateMasterBlocks(masterBlocks);
-    setFocusedNode({
+    propagateChanges(masterBlocks, {
       nodeId: targetBlock.id,
       caretOffset: 0,
       nodeIndex: 0,
@@ -771,7 +770,9 @@ export default function Editor({
                   ? masterBlocks[index + 1]
                   : null
               }
-              onChange={changeHandler}
+              onChange={debounce((block) => {
+                changeHandler(block);
+              }, 360)}
               onCreate={createHandler}
               onDelete={deletionHandler}
               onPaste={pasteHandler}
