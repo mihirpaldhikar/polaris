@@ -32,7 +32,7 @@ import { conditionalClassName, getEditorRoot } from "../../utils";
 import { InputDialog } from "../InputDialog";
 import { ColorPickerDialog } from "../ColorPickerDialog";
 import { REMOVE_COLOR } from "../../constants";
-import { Root } from "react-dom/client";
+import { type Root } from "react-dom/client";
 
 const ACTION_BUTTON_WIDTH: number = 28;
 const ACTION_MENU_PADDING: number = 42;
@@ -57,9 +57,11 @@ export default function SelectionMenu({
   const ACTION_MENU_HEIGHT = 38;
 
   const xAxis =
-    window.innerWidth - (ACTION_MENU_WIDTH + coordinates.x) <= 1
-      ? coordinates.x - ACTION_MENU_WIDTH - 30
-      : coordinates.x;
+    window.innerWidth > 500
+      ? window.innerWidth - (ACTION_MENU_WIDTH + coordinates.x) <= 1
+        ? coordinates.x - ACTION_MENU_WIDTH - 30
+        : coordinates.x
+      : (window.innerWidth - ACTION_MENU_WIDTH) / 2;
 
   const yAxis =
     coordinates.y <= 30
@@ -102,7 +104,10 @@ export default function SelectionMenu({
                     dialogRoot.render(
                       <ColorPickerDialog
                         active={menu.active ?? false}
-                        coordinates={coordinates}
+                        coordinates={{
+                          x: xAxis,
+                          y: yAxis,
+                        }}
                         inputArgs={inputArgs}
                         onColorSelected={(colorHexCode) => {
                           const style: Style[] = [
@@ -125,7 +130,10 @@ export default function SelectionMenu({
                   } else {
                     dialogRoot.render(
                       <InputDialog
-                        coordinates={coordinates}
+                        coordinates={{
+                          x: xAxis,
+                          y: yAxis,
+                        }}
                         active={menu.active ?? false}
                         inputArgs={menu.execute.args as InputArgs}
                         onClose={() => {

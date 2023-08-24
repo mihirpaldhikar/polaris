@@ -45,9 +45,11 @@ export default function ActionMenu({
   onEscape,
 }: ActionMenuProps): JSX.Element {
   const xAxis =
-    window.innerWidth - (coordinates.x + ACTION_MENU_WIDTH) <= 0
-      ? coordinates.x - ACTION_MENU_WIDTH
-      : coordinates.x;
+    window.innerWidth > 500
+      ? window.innerWidth - (coordinates.x + ACTION_MENU_WIDTH) <= 0
+        ? coordinates.x - ACTION_MENU_WIDTH
+        : coordinates.x
+      : (window.innerWidth - ACTION_MENU_WIDTH) / 2;
 
   const [yAxis, setYAxis] = useState(
     window.innerHeight - (coordinates.y + ACTION_MENU_HEIGHT) <= 0
