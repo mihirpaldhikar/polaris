@@ -409,28 +409,6 @@ export default function Canvas({
         break;
       }
       case "/": {
-        if (
-          parentBlock !== undefined &&
-          blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-          Array.isArray(parentBlock.content) &&
-          typeof block.content === "string"
-        ) {
-          onActionKeyPressed(
-            getNodeIndex(
-              currentBlockNode,
-              getNodeAt(currentBlockNode, caretOffset)
-            ),
-            block,
-            block.content,
-            caretOffset -
-              nodeOffset(
-                currentBlockNode,
-                getNodeAt(currentBlockNode, caretOffset)
-              )
-          );
-          break;
-        }
-
         if (typeof block.content === "string") {
           onActionKeyPressed(
             getNodeIndex(
