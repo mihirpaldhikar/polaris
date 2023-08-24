@@ -58,6 +58,7 @@ import { ActionMenu } from "../ActionMenu";
 import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
 import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
+import { debounce } from "debounce";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -354,6 +355,7 @@ export default function Editor({
   function selectionHandler(block: Block): void {
     const selection = window.getSelection();
 
+    const popupNode = window.document.getElementById(`popup-${blob.id}`);
     const blockNode = getBlockNode(block.id);
     const editorNode = window.document.getElementById(`editor-${blob.id}`);
 
@@ -362,7 +364,8 @@ export default function Editor({
       selection == null ||
       blockNode == null ||
       editorNode == null ||
-      selection.toString() === ""
+      popupNode == null ||
+      popUpRoot === undefined
     ) {
       return;
     }
@@ -379,11 +382,7 @@ export default function Editor({
     const startNodeParent = range.startContainer.parentElement;
     const endNodeParent = range.endContainer.parentElement;
 
-    if (
-      startNodeParent == null ||
-      endNodeParent == null ||
-      popUpRoot === undefined
-    ) {
+    if (startNodeParent == null || endNodeParent == null) {
       return;
     }
 
@@ -469,10 +468,7 @@ export default function Editor({
     editorNode.addEventListener(
       "keydown",
       (event) => {
-        if (event.ctrlKey) {
-          popUpRoot.render(<Fragment />);
-        } else {
-          selection.removeAllRanges();
+        if (!event.ctrlKey || !event.shiftKey) {
           popUpRoot.render(<Fragment />);
         }
       },
@@ -483,7 +479,6 @@ export default function Editor({
     editorNode.addEventListener(
       "mousedown",
       () => {
-        selection.removeAllRanges();
         popUpRoot.render(<Fragment />);
       },
       {
@@ -780,7 +775,9 @@ export default function Editor({
               onCreate={createHandler}
               onDelete={deletionHandler}
               onPaste={pasteHandler}
-              onSelect={selectionHandler}
+              onSelect={debounce((block) => {
+                selectionHandler(block);
+              }, 360)}
               onCommandKeyPressed={actionKeyHandler}
               onImageRequest={imageRequestHandler}
               onMarkdown={markdownHandler}

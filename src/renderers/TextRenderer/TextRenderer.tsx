@@ -81,8 +81,10 @@ export default function TextRenderer({
       onKeyPressed(event, -1);
     },
     onClick,
-    onMouseUp: () => {
-      onSelect(block);
+    onSelect: () => {
+      if (window.getSelection()?.toString().length !== 0) {
+        onSelect(block);
+      }
     },
   });
 }
