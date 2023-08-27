@@ -59,6 +59,7 @@ import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
 import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
+import { cloneDeep } from "lodash";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -93,8 +94,12 @@ export default function Editor({
   onImageSelected,
   onChange,
 }: WorkspaceProps): JSX.Element {
-  const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.contents);
+  let masterSelectionMenu: readonly Menu[] = cloneDeep(
+    MasterSelectionMenu
+  ).concat(...(selectionMenu ?? []));
+  let masterActionMenu: readonly Menu[] = cloneDeep(MasterActionMenu);
 
+  const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.contents);
   const [focusedNode, setFocusedNode] = useState<
     | {
         nodeId: string;
@@ -379,12 +384,6 @@ export default function Editor({
       return;
     }
 
-    const masterSelectionMenu = MasterSelectionMenu;
-
-    if (selectionMenu !== undefined && selectionMenu.length !== 0) {
-      masterSelectionMenu.push(...selectionMenu);
-    }
-
     for (const menu of masterSelectionMenu) {
       if (menu.execute.type === "style" && Array.isArray(menu.execute.args)) {
         if (
@@ -436,6 +435,9 @@ export default function Editor({
         menus={masterSelectionMenu}
         onClose={() => {
           popUpRoot.render(<Fragment />);
+          masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
+            ...(selectionMenu ?? [])
+          );
         }}
         onMenuSelected={(executable) => {
           selection.removeAllRanges();
@@ -463,6 +465,9 @@ export default function Editor({
       (event) => {
         if (!event.ctrlKey || !event.shiftKey) {
           popUpRoot.render(<Fragment />);
+          masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
+            ...(selectionMenu ?? [])
+          );
         }
       },
       {
@@ -473,6 +478,9 @@ export default function Editor({
       "mousedown",
       () => {
         popUpRoot.render(<Fragment />);
+        masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
+          ...(selectionMenu ?? [])
+        );
       },
       {
         once: true,
@@ -486,8 +494,7 @@ export default function Editor({
     previousContent: Content,
     caretOffset: number
   ): void {
-    let actionMenus = MasterActionMenu;
-    actionMenus = actionMenus.filter((menu) => {
+    masterActionMenu = masterActionMenu.filter((menu) => {
       if (menu.allowedOn !== undefined) {
         return menu.allowedOn?.includes(block.role);
       }
@@ -537,7 +544,7 @@ export default function Editor({
     popUpRoot.render(
       <ActionMenu
         coordinates={actionMenuCoordinates}
-        menu={actionMenus}
+        menu={masterActionMenu}
         onClose={() => {
           window.dispatchEvent(actionMenuClosedEvent);
           popUpRoot.render(<Fragment />);

@@ -40,7 +40,7 @@ const ACTION_MENU_PADDING: number = 42;
 interface SelectionMenuProps {
   dialogRoot: Root | undefined;
   coordinates: Coordinates;
-  menus: Menu[];
+  menus: readonly Menu[];
   onMenuSelected: (executable: Executable) => void;
   onClose: () => void;
 }

@@ -31,7 +31,7 @@ const ACTION_MENU_OPTION_HEIGHT: number = 60;
 
 interface ActionMenuProps {
   coordinates: Coordinates;
-  menu: Menu[];
+  menu: readonly Menu[];
   onSelect: (execute: Executable) => void;
   onClose: () => void;
   onEscape: (query: string) => void;
@@ -59,7 +59,7 @@ export default function ActionMenu({
 
   const currentMenuIndex = useRef(-1);
   const query = useRef("");
-  const [matchedMenu, setMatchedMenu] = useState([...menu]);
+  const [matchedMenu, setMatchedMenu] = useState<readonly Menu[]>([...menu]);
 
   useEffect(() => {
     function keyManager(event: KeyboardEvent): void {

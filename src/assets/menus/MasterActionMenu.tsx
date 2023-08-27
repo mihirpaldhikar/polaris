@@ -37,7 +37,7 @@ import {
   TitleIcon,
 } from "../icons";
 
-const MasterActionMenu: Menu[] = [
+const MasterActionMenu: readonly Menu[] = [
   {
     id: generateMenuId(),
     name: "Title",

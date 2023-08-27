@@ -34,7 +34,7 @@ import {
 } from "../icons";
 import { REMOVE_COLOR, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
-const MasterSelectionMenu: Menu[] = [
+const MasterSelectionMenu: readonly Menu[] = [
   {
     id: generateMenuId(),
     name: "Bold",
