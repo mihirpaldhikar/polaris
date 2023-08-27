@@ -45,6 +45,7 @@ import {
   rgbStringToHex,
   serializeNodeToBlock,
   setCaretOffset,
+  traverseAndDelete,
   traverseAndFindBlockPosition,
   traverseAndUpdate,
   traverseAndUpdateBelow,
@@ -257,22 +258,43 @@ export default function Editor({
   function deletionHandler(
     block: Block,
     previousBlock: Block,
-    nodeId: string,
-    nodeIndex: number,
-    caretOffset: number
+    nodeId: string
   ): void {
+    const previousNode = getBlockNode(nodeId) as HTMLElement;
+
+    const previousBlockChildNodeIndex =
+      blockRenderTypeFromRole(block.role) === RenderType.LIST &&
+      blockRenderTypeFromRole(previousBlock.role) === RenderType.LIST
+        ? 0
+        : previousNode?.lastChild?.textContent === ""
+        ? previousNode.childNodes.length - 2
+        : previousNode.childNodes.length - 1;
+
+    const computedCaretOffset =
+      blockRenderTypeFromRole(block.role) === RenderType.LIST &&
+      blockRenderTypeFromRole(previousBlock.role) === RenderType.LIST
+        ? 0
+        : previousNode.childNodes[previousBlockChildNodeIndex] != null
+        ? previousNode.childNodes[previousBlockChildNodeIndex].nodeType ===
+          Node.ELEMENT_NODE
+          ? (
+              previousNode.childNodes[previousBlockChildNodeIndex]
+                .textContent as string
+            ).length
+          : previousNode.childNodes[previousBlockChildNodeIndex].textContent
+              ?.length ?? previousNode.innerText.length
+        : previousNode.innerText.length;
+
     if (blockRenderTypeFromRole(block.role) === RenderType.LIST) {
       traverseAndUpdate(masterBlocks, block);
     } else {
-      const blockIndex = masterBlocks.map((blk) => blk.id).indexOf(block.id);
-      masterBlocks[blockIndex - 1] = previousBlock;
-      masterBlocks.splice(blockIndex, 1);
+      traverseAndUpdate(masterBlocks, previousBlock);
+      traverseAndDelete(masterBlocks, block);
     }
-
     propagateChanges(masterBlocks, {
       nodeId,
-      caretOffset,
-      nodeIndex,
+      caretOffset: computedCaretOffset,
+      nodeIndex: previousBlockChildNodeIndex,
     });
   }
 

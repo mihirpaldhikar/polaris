@@ -62,13 +62,7 @@ interface CanvasProps {
     targetBlock: Block,
     creationType: "list" | "nonList"
   ) => void;
-  onDelete: (
-    block: Block,
-    previousBlock: Block,
-    nodeId: string,
-    nodeIndex: number,
-    caretOffset: number
-  ) => void;
+  onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
   onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
   onPaste: (
     block: Block,
@@ -288,21 +282,6 @@ export default function Canvas({
             if (
               blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
             ) {
-              const previousNode = getBlockNode(
-                previousBlock.id
-              ) as HTMLElement;
-              const computedCaretOffset =
-                previousNode.lastChild != null
-                  ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
-                    ? (previousNode.lastChild.textContent as string).length
-                    : previousNode.lastChild.textContent?.length ??
-                      previousNode.innerText.length
-                  : previousNode.innerText.length;
-
-              const previousBlockLastChildNodeIndex =
-                previousNode.childNodes.length - 1;
-
-              previousBlock.id = generateBlockId();
               previousBlock.content = (previousBlock.content as string).concat(
                 block.content as string
               );
@@ -313,13 +292,7 @@ export default function Canvas({
                 previousBlock
               );
 
-              onDelete(
-                parentBlock,
-                previousBlock,
-                previousBlock.id,
-                previousBlockLastChildNodeIndex,
-                computedCaretOffset
-              );
+              onDelete(parentBlock, previousBlock, previousBlock.id);
             }
           } else {
             const parentSiblings = getNodeSiblings(parentBlock.id);
@@ -345,9 +318,7 @@ export default function Canvas({
                 onDelete(
                   previousParentBlock,
                   previousParentBlock.content[parentBlockIndex],
-                  previousParentBlock.content[parentBlockIndex].id,
-                  0,
-                  0
+                  previousParentBlock.content[parentBlockIndex].id
                 );
               }
             } else {
@@ -360,22 +331,10 @@ export default function Canvas({
                 if (parentBlock.content.length === 1) {
                   parentBlock.role = "paragraph";
                   parentBlock.content = "";
-                  onDelete(
-                    parentBlock,
-                    parentFirstChild,
-                    parentFirstChild.id,
-                    0,
-                    0
-                  );
+                  onDelete(parentBlock, parentFirstChild, parentFirstChild.id);
                 } else {
                   parentBlock.content.splice(0, 1);
-                  onDelete(
-                    parentBlock,
-                    parentFirstChild,
-                    parentFirstChild.id,
-                    0,
-                    0
-                  );
+                  onDelete(parentBlock, parentFirstChild, parentFirstChild.id);
                 }
               }
             }
@@ -392,31 +351,39 @@ export default function Canvas({
               currentNodeSiblings.previous
             );
 
-            const previousNode = getBlockNode(previousBlock.id) as HTMLElement;
-
-            const computedCaretOffset =
-              previousNode.lastChild != null
-                ? previousNode.lastChild.nodeType === Node.ELEMENT_NODE
-                  ? (previousNode.lastChild.textContent as string).length
-                  : previousNode.lastChild.textContent?.length ??
-                    previousNode.innerText.length
-                : previousNode.innerText.length;
-
-            const previousBlockLastChildNodeIndex =
-              previousNode.childNodes.length - 1;
-
-            previousBlock.id = generateBlockId();
             previousBlock.content = (previousBlock.content as string).concat(
               block.content as string
             );
 
-            onDelete(
-              block,
-              previousBlock,
-              previousBlock.id,
-              previousBlockLastChildNodeIndex,
-              computedCaretOffset
+            onDelete(block, previousBlock, previousBlock.id);
+          } else if (
+            currentNodeSiblings.previous !== null &&
+            blockRenderTypeFromNode(currentNodeSiblings.previous) ===
+              RenderType.LIST
+          ) {
+            const previousBlock = serializeNodeToBlock(
+              currentNodeSiblings.previous.parentElement
+                ?.parentElement as HTMLElement
             );
+
+            const previousBlockLastChild = (previousBlock.content as Block[])[
+              (previousBlock.content as Block[]).length - 1
+            ];
+
+            if (
+              blockRenderTypeFromRole(previousBlockLastChild.role) ===
+              RenderType.TEXT
+            ) {
+              previousBlockLastChild.content = (
+                previousBlockLastChild.content as string
+              ).concat(block.content as string);
+
+              (previousBlock.content as Block[])[
+                (previousBlock.content as Block[]).length - 1
+              ] = previousBlockLastChild;
+
+              onDelete(block, previousBlock, previousBlockLastChild.id);
+            }
           }
         }
         break;

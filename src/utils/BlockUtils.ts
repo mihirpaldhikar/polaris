@@ -223,9 +223,27 @@ export function traverseAndUpdate(
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
       masterBlocks[i] = targetBlock;
-    }
-    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+      return;
+    } else if (
+      blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
+    ) {
       traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
+    }
+  }
+}
+
+export function traverseAndDelete(
+  masterBlocks: Block[],
+  targetBlock: Block
+): void {
+  for (let i = 0; i < masterBlocks.length; i++) {
+    if (masterBlocks[i].id === targetBlock.id) {
+      masterBlocks.splice(i, 1);
+      return;
+    } else if (
+      blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
+    ) {
+      traverseAndDelete(masterBlocks[i].content as Block[], targetBlock);
     }
   }
 }
@@ -238,8 +256,10 @@ export function traverseAndUpdateBelow(
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === parentBlock.id) {
       masterBlocks.splice(i + 1, 0, targetBlock);
-    }
-    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+      return;
+    } else if (
+      blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
+    ) {
       traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
     }
   }
