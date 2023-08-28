@@ -569,8 +569,11 @@ export default function Composer({
                     : previousPrevious.childNodes.length - 1;
 
                 const computedCaretOffset =
-                  previousPrevious.childNodes[previousBlockChildNodeIndex] !=
-                  null
+                  previousBlockChildNodeIndex === -1
+                    ? 0
+                    : previousPrevious.childNodes[
+                        previousBlockChildNodeIndex
+                      ] != null
                     ? previousPrevious.childNodes[previousBlockChildNodeIndex]
                         .nodeType === Node.ELEMENT_NODE
                       ? (
@@ -583,8 +586,10 @@ export default function Composer({
                         previousPrevious.innerText.length
                     : previousPrevious.innerText.length;
                 setCaretOffset(
-                  previousPrevious.childNodes[previousBlockChildNodeIndex]
-                    .nodeType === Node.ELEMENT_NODE
+                  previousBlockChildNodeIndex === -1
+                    ? previousPrevious
+                    : previousPrevious.childNodes[previousBlockChildNodeIndex]
+                        .nodeType === Node.ELEMENT_NODE
                     ? previousPrevious.childNodes[previousBlockChildNodeIndex]
                         .firstChild ?? previousPrevious
                     : previousPrevious.childNodes[previousBlockChildNodeIndex],
@@ -598,7 +603,9 @@ export default function Composer({
                   : previous.childNodes.length - 1;
 
               const computedCaretOffset =
-                previous.childNodes[previousBlockChildNodeIndex] != null
+                previousBlockChildNodeIndex === -1
+                  ? 0
+                  : previous.childNodes[previousBlockChildNodeIndex] != null
                   ? previous.childNodes[previousBlockChildNodeIndex]
                       .nodeType === Node.ELEMENT_NODE
                     ? (
@@ -609,8 +616,10 @@ export default function Composer({
                         .textContent?.length ?? previous.innerText.length
                   : previous.innerText.length;
               setCaretOffset(
-                previous.childNodes[previousBlockChildNodeIndex].nodeType ===
-                  Node.ELEMENT_NODE
+                previousBlockChildNodeIndex === -1
+                  ? previous
+                  : previous.childNodes[previousBlockChildNodeIndex]
+                      .nodeType === Node.ELEMENT_NODE
                   ? previous.childNodes[previousBlockChildNodeIndex]
                       .firstChild ?? previous
                   : previous.childNodes[previousBlockChildNodeIndex],
@@ -678,9 +687,13 @@ export default function Composer({
 
               const computedCaretOffset =
                 caretOffset > previousPrevious.innerText.length
-                  ? (previousPrevious.lastChild?.textContent as string).length
+                  ? previous.lastChild?.textContent == null
+                    ? 0
+                    : previous.lastChild.textContent.length
                   : caretOffset > (jumpNode.textContent as string).length
-                  ? (jumpNode.textContent as string).length
+                  ? jumpNode.textContent == null
+                    ? 0
+                    : jumpNode.textContent.length
                   : caretOffset;
 
               setCaretOffset(jumpNode, computedCaretOffset);
@@ -696,9 +709,13 @@ export default function Composer({
 
             const computedCaretOffset =
               caretOffset > previous.innerText.length
-                ? (previous.lastChild?.textContent as string).length
+                ? previous.lastChild?.textContent == null
+                  ? 0
+                  : previous.lastChild.textContent.length
                 : caretOffset > (jumpNode.textContent as string).length
-                ? (jumpNode.textContent as string).length
+                ? jumpNode.textContent == null
+                  ? 0
+                  : jumpNode.textContent.length
                 : caretOffset;
 
             setCaretOffset(jumpNode, computedCaretOffset);
@@ -731,10 +748,14 @@ export default function Composer({
                   : nodeAtCaretOffset;
 
               const computedCaretOffset =
-                caretOffset > nextNext.innerText.length
-                  ? (nextNext.firstChild?.textContent as string).length
+                caretOffset > nextNext.innerText.length ?? 0
+                  ? next.firstChild?.textContent == null
+                    ? 0
+                    : next.firstChild.textContent.length
                   : caretOffset > (jumpNode.textContent as string).length
-                  ? (jumpNode.textContent as string).length
+                  ? jumpNode.textContent == null
+                    ? 0
+                    : jumpNode.textContent.length
                   : caretOffset;
 
               setCaretOffset(jumpNode, computedCaretOffset);
@@ -750,9 +771,13 @@ export default function Composer({
 
             const computedCaretOffset =
               caretOffset > next.innerText.length
-                ? (next.firstChild?.textContent as string).length
+                ? next.firstChild?.textContent == null
+                  ? 0
+                  : next.firstChild.textContent.length
                 : caretOffset > (jumpNode.textContent as string).length
-                ? (jumpNode.textContent as string).length
+                ? jumpNode.textContent == null
+                  ? 0
+                  : jumpNode.textContent.length
                 : caretOffset;
 
             setCaretOffset(jumpNode, computedCaretOffset);
