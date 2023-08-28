@@ -60,7 +60,7 @@ import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
 import { cloneDeep } from "lodash";
-import { Canvas } from "../Canvas";
+import { Composer } from "../Composer";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -782,7 +782,7 @@ export default function Editor({
       >
         {masterBlocks.map((block) => {
           return (
-            <Canvas
+            <Composer
               key={block.id}
               editable={editable}
               block={block}

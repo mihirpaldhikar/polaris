@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as Canvas } from "./Canvas";
+export { default as Composer } from "./Composer";

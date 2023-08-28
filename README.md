@@ -127,7 +127,7 @@ Output
 
 1. `block` - A Block is the smallest unit holding all the necessary information required to render contents.
 2. `blob` - A Blob is a collection of blocks holding all the information and position of the blocks.
-3. `canvas` - Canvas uses block to determine how to render contents.
+3. `composer` - A Composer uses block to determine how to render contents.
 4. `editor` - An Editor is an orchestrator for all the blocks. It uses blob to handle the creation, update, deletion of
    the blocks.
 

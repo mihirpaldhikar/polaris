@@ -54,7 +54,7 @@ import RenderType from "../../enums/RenderType";
 import { ImageRenderer, TextRenderer } from "../../renderers";
 import { BLOCK_NODE } from "../../constants";
 
-interface CanvasProps {
+interface ComposerProps {
   editable: boolean;
   parentBlock?: Block;
   block: Block;
@@ -87,7 +87,7 @@ interface CanvasProps {
 }
 
 /**
- * @function Canvas
+ * @function Composer
  *
  * @param editable
  * @param block
@@ -99,12 +99,12 @@ interface CanvasProps {
  * @param onActionKeyPressed
  * @returns JSX.Element
  *
- * @description Canvas is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
+ * @description Composer is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
  *
  * @author Mihir Paldhikar
  */
 
-export default function Canvas({
+export default function Composer({
   editable,
   parentBlock,
   block,
@@ -116,7 +116,7 @@ export default function Canvas({
   onImageRequest,
   onActionKeyPressed,
   onMarkdown,
-}: CanvasProps): JSX.Element {
+}: ComposerProps): JSX.Element {
   const isActionMenuOpen = useRef(false);
 
   const originalBlock = useRef<Block>({ ...block });
@@ -815,7 +815,7 @@ export default function Canvas({
       block.content.map((childBlock) => {
         return (
           <li key={childBlock.id}>
-            <Canvas
+            <Composer
               parentBlock={block}
               editable={editable}
               block={childBlock}

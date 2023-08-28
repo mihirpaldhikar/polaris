@@ -20,5 +20,5 @@
  * SOFTWARE.
  */
 
-export { Canvas } from "./Canvas";
+export { Composer } from "./Composer";
 export { Editor } from "./Editor";
