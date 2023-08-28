@@ -43,7 +43,7 @@ export default function FilePicker({
       data-type={BLOCK_NODE}
       id={id}
       className={
-        "relative my-4 h-32 w-full cursor-pointer rounded-lg border-2 border-dashed border-black/20 bg-gray-200"
+        "relative my-4 h-32 w-full cursor-pointer rounded-lg border-2 border-dashed border-black/30 bg-gray-100"
       }
     >
       <input
