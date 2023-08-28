@@ -547,7 +547,10 @@ export default function Canvas({
         if (caretOffset === 0) {
           event.preventDefault();
           const { previous } = getNodeSiblings(currentBlockNode.id);
-          if (previous != null) {
+          if (
+            previous != null &&
+            blockRenderTypeFromNode(previous) !== RenderType.IMAGE
+          ) {
             if (
               previous.tagName.toLowerCase() === "ol" ||
               previous.tagName.toLowerCase() === "ul"
@@ -556,7 +559,10 @@ export default function Canvas({
                 previous.id
               );
 
-              if (previousPrevious != null) {
+              if (
+                previousPrevious != null &&
+                blockRenderTypeFromNode(previousPrevious) !== RenderType.IMAGE
+              ) {
                 const previousBlockChildNodeIndex =
                   previousPrevious?.lastChild?.textContent === ""
                     ? previousPrevious.childNodes.length - 2
@@ -620,14 +626,20 @@ export default function Canvas({
           event.preventDefault();
 
           const { next } = getNodeSiblings(currentBlockNode.id);
-          if (next != null) {
+          if (
+            next != null &&
+            blockRenderTypeFromNode(next) !== RenderType.IMAGE
+          ) {
             if (
               next.tagName.toLowerCase() === "ol" ||
               next.tagName.toLowerCase() === "ul"
             ) {
               const { next: nextNext } = getNodeSiblings(next.id);
 
-              if (nextNext != null) {
+              if (
+                nextNext != null &&
+                blockRenderTypeFromNode(nextNext) !== RenderType.IMAGE
+              ) {
                 setCaretOffset(nextNext, 0);
               }
             } else {
@@ -640,13 +652,19 @@ export default function Canvas({
       case "arrowup": {
         event.preventDefault();
         const { previous } = getNodeSiblings(currentBlockNode.id);
-        if (previous != null) {
+        if (
+          previous != null &&
+          blockRenderTypeFromNode(previous) !== RenderType.IMAGE
+        ) {
           if (
             previous.tagName.toLowerCase() === "ol" ||
             previous.tagName.toLowerCase() === "ul"
           ) {
             const { previous: previousPrevious } = getNodeSiblings(previous.id);
-            if (previousPrevious != null) {
+            if (
+              previousPrevious != null &&
+              blockRenderTypeFromNode(previousPrevious) !== RenderType.IMAGE
+            ) {
               const nodeAtCaretOffset = getNodeAt(
                 previousPrevious,
                 caretOffset
@@ -691,13 +709,19 @@ export default function Canvas({
       case "arrowdown": {
         event.preventDefault();
         const { next } = getNodeSiblings(currentBlockNode.id);
-        if (next != null) {
+        if (
+          next != null &&
+          blockRenderTypeFromNode(next) !== RenderType.IMAGE
+        ) {
           if (
             next.tagName.toLowerCase() === "ol" ||
             next.tagName.toLowerCase() === "ul"
           ) {
             const { next: nextNext } = getNodeSiblings(next.id);
-            if (nextNext != null) {
+            if (
+              nextNext != null &&
+              blockRenderTypeFromNode(nextNext) !== RenderType.IMAGE
+            ) {
               const nodeAtCaretOffset = getNodeAt(nextNext, caretOffset);
               const jumpNode =
                 caretOffset > nextNext.innerText.length

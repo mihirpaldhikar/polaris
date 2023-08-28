@@ -177,6 +177,12 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
 }
 
 export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
+  if (
+    node.tagName.toLowerCase() === "div" &&
+    node.firstElementChild?.tagName.toLowerCase() === "input"
+  ) {
+    return RenderType.IMAGE;
+  }
   if (node.parentElement?.tagName.toLowerCase() === "li")
     return RenderType.LIST;
   switch (node.tagName.toLowerCase()) {
