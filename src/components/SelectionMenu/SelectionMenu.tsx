@@ -88,7 +88,7 @@ export default function SelectionMenu({
             <div
               className={conditionalClassName(
                 "mx-[3px] cursor-pointer rounded-md p-1 hover:bg-gray-200",
-                menu.active ?? false ? "bg-blue-200 fill-blue-800" : null
+                menu.active ?? false ? "bg-blue-200 fill-blue-800" : null,
               )}
               title={menu.name}
               onClick={() => {
@@ -125,7 +125,7 @@ export default function SelectionMenu({
                         onClose={() => {
                           dialogRoot.render(<Fragment />);
                         }}
-                      />
+                      />,
                     );
                   } else {
                     dialogRoot.render(
@@ -165,7 +165,7 @@ export default function SelectionMenu({
                             }
                           }
                         }}
-                      />
+                      />,
                     );
                   }
 
@@ -176,7 +176,7 @@ export default function SelectionMenu({
                     },
                     {
                       once: true,
-                    }
+                    },
                   );
                 }
                 onClose();

@@ -27,11 +27,11 @@ type BlockFunction = (
   onComplete: (
     block: Block | Block[],
     focusBlockId: string,
-    caretOffset?: number
+    caretOffset?: number,
   ) => void,
   blocks?: Block[],
   coordinates?: Coordinates,
-  caretOffset?: number
+  caretOffset?: number,
 ) => void;
 
 export default BlockFunction;

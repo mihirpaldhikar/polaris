@@ -39,7 +39,7 @@ export function generateRandomString(length: number): string {
   let counter = 0;
   while (counter < length) {
     randomString += characters.charAt(
-      Math.floor(Math.random() * charactersLength)
+      Math.floor(Math.random() * charactersLength),
     );
     counter += 1;
   }

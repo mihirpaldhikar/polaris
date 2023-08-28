@@ -35,7 +35,7 @@ export function serializeBlobToHTML(blob: Blob): string {
 
   return nodes
     .map((node) =>
-      node.outerHTML.toString().replaceAll('data-type="inline-specifier"', "")
+      node.outerHTML.toString().replaceAll('data-type="inline-specifier"', ""),
     )
     .join("");
 }

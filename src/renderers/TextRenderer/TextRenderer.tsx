@@ -72,7 +72,7 @@ export default function TextRenderer({
         ? "font-medium text-[19px]"
         : block.role === "quote"
         ? "rounded-md border-l-[6px] border-gray-400 bg-gray-200 p-4"
-        : "font-normal text-[17px]"
+        : "font-normal text-[17px]",
     ),
     onInput: (event: ChangeEvent<HTMLElement>) => {
       onUpdate(event, blockRenderTypeFromRole(block.role));

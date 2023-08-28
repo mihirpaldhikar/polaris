@@ -55,7 +55,7 @@ export default function FilePicker({
         accept={accept}
         onChange={() => {
           const filePicker = document.getElementById(
-            `filePicker-${id}`
+            `filePicker-${id}`,
           ) as HTMLInputElement;
           if (filePicker.files !== null) {
             onFilePicked(filePicker.files[0]);

@@ -41,11 +41,11 @@ export default function InputDialog({
   const [data, setData] = useState<string>(
     typeof inputArgs.initialPayload === "string"
       ? inputArgs.initialPayload
-      : inputArgs.initialPayload.value.replaceAll(inputArgs.unit ?? "", "")
+      : inputArgs.initialPayload.value.replaceAll(inputArgs.unit ?? "", ""),
   );
 
   const [disabled, setDisabled] = useState(
-    !inputArgs.validStringRegExp.test(data) || data === ""
+    !inputArgs.validStringRegExp.test(data) || data === "",
   );
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function InputDialog({
           setData(event.target.value);
           setDisabled(
             !inputArgs.validStringRegExp.test(event.target.value) ||
-              event.target.value === ""
+              event.target.value === "",
           );
         }}
       />

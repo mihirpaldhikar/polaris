@@ -86,7 +86,7 @@ export function setNodeStyle(style: Style[]): Record<string, string> {
       ...previousStyle,
       [camelCase(name)]: camelCase(value),
     }),
-    {}
+    {},
   );
 }
 
@@ -130,7 +130,7 @@ export function getBlockNode(blockId: string): HTMLElement | null {
 
 export function getNodeSiblings(blockId: string): Siblings {
   const blockDOM = Array.from(
-    document.querySelectorAll(`[${NODE_TYPE}="${BLOCK_NODE}"]`).values()
+    document.querySelectorAll(`[${NODE_TYPE}="${BLOCK_NODE}"]`).values(),
   );
   const blockDOMIndex = blockDOM.map((blk) => blk.id).indexOf(blockId);
   return {
@@ -224,7 +224,7 @@ export function nodeHierarchy(node: HTMLElement | null): HTMLElement[] {
 
 export function traverseAndUpdate(
   masterBlocks: Block[],
-  targetBlock: Block
+  targetBlock: Block,
 ): void {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
@@ -240,7 +240,7 @@ export function traverseAndUpdate(
 
 export function traverseAndDelete(
   masterBlocks: Block[],
-  targetBlock: Block
+  targetBlock: Block,
 ): void {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
@@ -257,7 +257,7 @@ export function traverseAndDelete(
 export function traverseAndUpdateBelow(
   masterBlocks: Block[],
   parentBlock: Block,
-  targetBlock: Block
+  targetBlock: Block,
 ): void {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === parentBlock.id) {
@@ -273,7 +273,7 @@ export function traverseAndUpdateBelow(
 
 export function traverseAndFindBlockPosition(
   masterBlocks: Block[],
-  targetBlock: Block
+  targetBlock: Block,
 ): number {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
@@ -288,7 +288,7 @@ export function traverseAndFindBlockPosition(
 
 export function getParentBlock(
   masterBlocks: Block[],
-  blockId: string
+  blockId: string,
 ): Block[] {
   const find = (block: Block): any =>
     block.id.includes(blockId) ||
@@ -400,7 +400,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
 
 export function getEditorRoot(): HTMLElement {
   const blockDOM = Array.from(
-    document.querySelectorAll(`[${NODE_TYPE}="editor-root"]`).values()
+    document.querySelectorAll(`[${NODE_TYPE}="editor-root"]`).values(),
   );
   return blockDOM[0] as HTMLElement;
 }
@@ -465,7 +465,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       node.style.setProperty("list-style-position", "outside");
       node.style.setProperty(
         "list-style-type",
-        block.role === "numberedList" ? "decimal" : "disc"
+        block.role === "numberedList" ? "decimal" : "disc",
       );
       const listNode = document.createElement("li");
       listNode.style.setProperty("margin-left", "3px");

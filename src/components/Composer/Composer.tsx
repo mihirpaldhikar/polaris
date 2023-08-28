@@ -62,25 +62,25 @@ interface ComposerProps {
   onCreate: (
     parentBlock: Block,
     targetBlock: Block,
-    creationType: "list" | "nonList"
+    creationType: "list" | "nonList",
   ) => void;
   onDelete: (
     block: Block,
     previousBlock: Block,
     nodeId: string,
-    setCursorToStart?: boolean
+    setCursorToStart?: boolean,
   ) => void;
   onPaste: (
     block: Block,
     content: Content | Content[],
-    caretOffset: number
+    caretOffset: number,
   ) => void;
   onSelect: (block: Block) => void;
   onActionKeyPressed: (
     nodeIndex: number,
     block: Block,
     previousContent: Content,
-    caretOffset: number
+    caretOffset: number,
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
   onMarkdown: (block: Block) => void;
@@ -152,7 +152,7 @@ export default function Composer({
   function notifyChange(
     event: ChangeEvent<HTMLElement>,
     blockRenderType: RenderType,
-    childBlock?: Block
+    childBlock?: Block,
   ): void {
     switch (blockRenderType) {
       case RenderType.TEXT: {
@@ -221,12 +221,12 @@ export default function Composer({
                 RenderType.LIST
             ) {
               const previousParentBlock = serializeNodeToBlock(
-                parentSiblings.previous.parentElement.parentElement
+                parentSiblings.previous.parentElement.parentElement,
               );
               parentBlock.content.splice(currentChildBlockIndex, 1);
               traverseAndUpdate(
                 previousParentBlock.content as Block[],
-                parentBlock
+                parentBlock,
               );
               (previousParentBlock.content as Block[]).push(newBlock);
               onCreate(previousParentBlock, newBlock, "list");
@@ -240,7 +240,7 @@ export default function Composer({
             parentBlock.content.splice(
               currentChildBlockIndex,
               1,
-              ...spiltBlockPair
+              ...spiltBlockPair,
             );
           } else {
             parentBlock.content.splice(currentChildBlockIndex + 1, 0, newBlock);
@@ -287,13 +287,13 @@ export default function Composer({
               blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
             ) {
               previousBlock.content = (previousBlock.content as string).concat(
-                block.content as string
+                block.content as string,
               );
 
               parentBlock.content.splice(
                 currentChildBlockIndex - 1,
                 2,
-                previousBlock
+                previousBlock,
               );
 
               onDelete(parentBlock, previousBlock, previousBlock.id);
@@ -307,7 +307,7 @@ export default function Composer({
                 RenderType.LIST
             ) {
               const previousParentBlock = serializeNodeToBlock(
-                parentSiblings.previous.parentElement.parentElement
+                parentSiblings.previous.parentElement.parentElement,
               );
               if (Array.isArray(previousParentBlock.content)) {
                 const parentBlockIndex = previousParentBlock.content
@@ -317,19 +317,19 @@ export default function Composer({
                 previousParentBlock.content.splice(
                   parentBlockIndex,
                   1,
-                  ...parentBlock.content
+                  ...parentBlock.content,
                 );
                 onDelete(
                   previousParentBlock,
                   previousParentBlock.content[parentBlockIndex],
                   previousParentBlock.content[parentBlockIndex].id,
-                  true
+                  true,
                 );
               }
             } else {
               if (parentSiblings.previous !== null) {
                 const previousParentBlock = serializeNodeToBlock(
-                  parentSiblings.previous
+                  parentSiblings.previous,
                 );
                 const parentFirstChild = parentBlock.content[0];
                 onCreate(previousParentBlock, parentFirstChild, "nonList");
@@ -340,7 +340,7 @@ export default function Composer({
                     parentBlock,
                     parentFirstChild,
                     parentFirstChild.id,
-                    true
+                    true,
                   );
                 } else {
                   parentBlock.content.splice(0, 1);
@@ -348,7 +348,7 @@ export default function Composer({
                     parentBlock,
                     parentFirstChild,
                     parentFirstChild.id,
-                    true
+                    true,
                   );
                 }
               }
@@ -363,11 +363,11 @@ export default function Composer({
               RenderType.TEXT
           ) {
             const previousBlock = serializeNodeToBlock(
-              currentNodeSiblings.previous
+              currentNodeSiblings.previous,
             );
 
             previousBlock.content = (previousBlock.content as string).concat(
-              block.content as string
+              block.content as string,
             );
 
             onDelete(block, previousBlock, previousBlock.id);
@@ -378,7 +378,7 @@ export default function Composer({
           ) {
             const previousBlock = serializeNodeToBlock(
               currentNodeSiblings.previous.parentElement
-                ?.parentElement as HTMLElement
+                ?.parentElement as HTMLElement,
             );
 
             const previousBlockLastChild = (previousBlock.content as Block[])[
@@ -408,15 +408,15 @@ export default function Composer({
           onActionKeyPressed(
             getNodeIndex(
               currentBlockNode,
-              getNodeAt(currentBlockNode, caretOffset)
+              getNodeAt(currentBlockNode, caretOffset),
             ),
             block,
             block.content,
             caretOffset -
               nodeOffset(
                 currentBlockNode,
-                getNodeAt(currentBlockNode, caretOffset)
-              )
+                getNodeAt(currentBlockNode, caretOffset),
+              ),
           );
         }
         break;
@@ -556,7 +556,7 @@ export default function Composer({
               previous.tagName.toLowerCase() === "ul"
             ) {
               const { previous: previousPrevious } = getNodeSiblings(
-                previous.id
+                previous.id,
               );
 
               if (
@@ -593,7 +593,7 @@ export default function Composer({
                     ? previousPrevious.childNodes[previousBlockChildNodeIndex]
                         .firstChild ?? previousPrevious
                     : previousPrevious.childNodes[previousBlockChildNodeIndex],
-                  computedCaretOffset
+                  computedCaretOffset,
                 );
               }
             } else {
@@ -623,7 +623,7 @@ export default function Composer({
                   ? previous.childNodes[previousBlockChildNodeIndex]
                       .firstChild ?? previous
                   : previous.childNodes[previousBlockChildNodeIndex],
-                computedCaretOffset
+                computedCaretOffset,
               );
             }
           }
@@ -676,7 +676,7 @@ export default function Composer({
             ) {
               const nodeAtCaretOffset = getNodeAt(
                 previousPrevious,
-                caretOffset
+                caretOffset,
               );
               const jumpNode =
                 caretOffset > previousPrevious.innerText.length
@@ -834,7 +834,7 @@ export default function Composer({
         spellCheck: true,
         className: conditionalClassName(
           "px-4 space-y-2 text-[17px] my-2 mx-2",
-          block.role === "numberedList" ? "list-decimal" : "list-disc"
+          block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },
       block.content.map((childBlock) => {
@@ -855,7 +855,7 @@ export default function Composer({
             />
           </li>
         );
-      })
+      }),
     );
   }
 

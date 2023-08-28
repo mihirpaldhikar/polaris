@@ -46,11 +46,11 @@ export default function ColorPickerDialog({
         : "#000000"
       : inputArgs.initialPayload !== ""
       ? inputArgs.initialPayload
-      : "#000000"
+      : "#000000",
   );
 
   const [disabled, setDisabled] = useState(
-    !inputArgs.validStringRegExp.test(colorHexCode)
+    !inputArgs.validStringRegExp.test(colorHexCode),
   );
 
   const defaultColors: string[] = [

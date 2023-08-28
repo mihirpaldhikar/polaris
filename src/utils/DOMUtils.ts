@@ -172,7 +172,7 @@ export function nodeInViewPort(node: HTMLElement): boolean {
 export function nodeOffset(
   parentNode: HTMLElement,
   targetNode: Node,
-  options?: { includeInnerHTML?: boolean }
+  options?: { includeInnerHTML?: boolean },
 ): number {
   let offset: number = 0;
   for (let i = 0; i < parentNode.childNodes.length; i++) {
@@ -204,7 +204,7 @@ export function nodeOffset(
 
 export function splitElement(
   targetElement: HTMLElement,
-  offset: number
+  offset: number,
 ): string[] {
   const fragments: string[] = [];
   const tempElement = targetElement.cloneNode(true) as HTMLElement;
@@ -231,7 +231,7 @@ export function splitElement(
 
 export function joinElements(
   parentElement: HTMLElement,
-  targetElement: HTMLElement
+  targetElement: HTMLElement,
 ): string {
   const tempElement = parentElement.cloneNode(true) as HTMLElement;
   tempElement.innerHTML = tempElement.innerHTML.concat(targetElement.innerHTML);
@@ -258,7 +258,7 @@ export function generateHTMLFragment(
   startOffset: number,
   endNode: Node,
   endOffset: number,
-  targetNode: Node
+  targetNode: Node,
 ): string {
   let fragment: string = "";
   let foundStartNode: boolean = false;
@@ -276,11 +276,11 @@ export function generateHTMLFragment(
     }
     if (targetNode.childNodes[i].nodeType === Node.ELEMENT_NODE) {
       fragment = fragment.concat(
-        (targetNode.childNodes[i] as HTMLElement).outerHTML
+        (targetNode.childNodes[i] as HTMLElement).outerHTML,
       );
     } else {
       fragment = fragment.concat(
-        targetNode.childNodes[i].textContent as string
+        targetNode.childNodes[i].textContent as string,
       );
     }
     if (
@@ -301,8 +301,8 @@ export function generateHTMLFragment(
     ? splitElement(startNode as HTMLElement, startOffset)[1].concat(
         fragment.substring(
           (startNode as HTMLElement).outerHTML.length,
-          (startNode as HTMLElement).outerHTML.length + endOffset
-        )
+          (startNode as HTMLElement).outerHTML.length + endOffset,
+        ),
       )
     : startNode.nodeType === Node.TEXT_NODE &&
       endNode.nodeType === Node.ELEMENT_NODE
@@ -349,7 +349,7 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
 export function generateInlineSpecifierString(
   htmlFragment: string,
   style: Style[],
-  link?: string
+  link?: string,
 ): string {
   const nodeFragments = generateNodesFromHTMLFragment(htmlFragment);
   let inlineSpecifierString = "";
@@ -381,7 +381,7 @@ export function generateInlineSpecifierString(
         tempNode.getAttribute("style") === "") &&
         (link === undefined || link === REMOVE_LINK)
         ? tempNode.innerText
-        : tempNode.outerHTML
+        : tempNode.outerHTML,
     );
   }
   return inlineSpecifierString;
@@ -404,7 +404,7 @@ export function generateInlineSpecifiers(
   targetElement: HTMLElement,
   selection: Selection | null,
   style: Style[],
-  link?: string
+  link?: string,
 ): void {
   if (
     selection === null ||
@@ -440,10 +440,10 @@ export function generateInlineSpecifiers(
           range.startOffset,
           range.endContainer,
           range.endOffset,
-          targetElement
+          targetElement,
         ),
         style,
-        link
+        link,
       );
     }
     if (
@@ -453,18 +453,18 @@ export function generateInlineSpecifiers(
         INLINE_SPECIFIER_NODE
     ) {
       const tempNode = generateNodesFromHTMLFragment(
-        splitElement(range.startContainer.parentElement, range.startOffset)[1]
+        splitElement(range.startContainer.parentElement, range.startOffset)[1],
       )[0] as HTMLElement;
 
       tempNode.innerText = selection.toString();
 
       inlineSpecifiers = splitElement(
         range.startContainer.parentElement,
-        range.startOffset
+        range.startOffset,
       )[0]
         .concat(generateInlineSpecifierString(tempNode.outerHTML, style, link))
         .concat(
-          splitElement(range.endContainer.parentElement, range.endOffset)[1]
+          splitElement(range.endContainer.parentElement, range.endOffset)[1],
         );
 
       targetElement.removeChild(range.startContainer.parentElement);
@@ -490,22 +490,22 @@ export function generateInlineSpecifiers(
         range.startOffset,
         range.endContainer.parentElement,
         range.endOffset,
-        targetElement
+        targetElement,
       );
 
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        link
+        link,
       );
 
       inlineSpecifiers = splitElement(
         range.startContainer.parentElement,
-        range.startOffset
+        range.startOffset,
       )[0]
         .concat(generatedInlineStyling)
         .concat(
-          splitElement(range.endContainer.parentElement, range.endOffset)[1]
+          splitElement(range.endContainer.parentElement, range.endOffset)[1],
         );
 
       range.setStart(range.startContainer.parentElement, 0);
@@ -526,18 +526,18 @@ export function generateInlineSpecifiers(
         range.startOffset,
         range.endContainer,
         range.endOffset,
-        targetElement
+        targetElement,
       );
 
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        link
+        link,
       );
 
       inlineSpecifiers = splitElement(
         range.startContainer.parentElement,
-        range.startOffset
+        range.startOffset,
       )[0].concat(generatedInlineStyling);
 
       range.setStart(range.startContainer.parentElement, 0);
@@ -558,17 +558,17 @@ export function generateInlineSpecifiers(
         range.startOffset,
         range.endContainer.parentElement,
         range.endOffset,
-        targetElement
+        targetElement,
       );
 
       const generatedInlineStyling = generateInlineSpecifierString(
         inlineSpecifiers,
         style,
-        link
+        link,
       );
 
       inlineSpecifiers = generatedInlineStyling.concat(
-        splitElement(range.endContainer.parentElement, range.endOffset)[1]
+        splitElement(range.endContainer.parentElement, range.endOffset)[1],
       );
 
       range.setStart(range.startContainer, range.startOffset);
@@ -588,10 +588,10 @@ export function generateInlineSpecifiers(
           }) + range.startOffset,
           nodeOffset(targetElement, range.endContainer, {
             includeInnerHTML: true,
-          }) + range.endOffset
+          }) + range.endOffset,
         ),
         style,
-        link
+        link,
       );
     }
   }
@@ -620,7 +620,7 @@ export function generateInlineSpecifiers(
 
 export function elementContainsStyle(
   element: HTMLElement,
-  style: Style[] | Style
+  style: Style[] | Style,
 ): boolean {
   if (!isInlineSpecifierNode(element)) {
     return false;
@@ -646,7 +646,7 @@ export function elementContainsStyle(
  */
 
 export function inlineSpecifierLink(
-  specifier?: HTMLElement
+  specifier?: HTMLElement,
 ): string | undefined {
   if (specifier !== undefined && isInlineSpecifierNode(specifier)) {
     return specifier.getAttribute(LINK_ATTRIBUTE) ?? undefined;
@@ -694,7 +694,7 @@ export function isInlineSpecifierNode(node: Node): boolean {
 
 export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
   const inlineSpecifierNodes = parentElement.querySelectorAll(
-    `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`
+    `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`,
   );
   for (let i = 0; i < inlineSpecifierNodes.length; i++) {
     if (inlineSpecifierNodes[i].textContent?.length === 0) {
@@ -705,7 +705,7 @@ export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
 
 export function areInlineSpecifierEqual(
   first: HTMLElement,
-  second: HTMLElement
+  second: HTMLElement,
 ): boolean {
   return (
     first.style.cssText === second.style.cssText &&
@@ -728,7 +728,7 @@ export function cssTextToStyle(cssText: string): Style[] {
 export function inlineSpecifierManager(
   targetElement: HTMLElement,
   style: Style[],
-  link?: string
+  link?: string,
 ): void {
   const selection = window.getSelection();
 
@@ -792,7 +792,7 @@ export function inlineSpecifierManager(
           value: "underline",
           enabled: true,
         },
-      ]
+      ],
     );
   }
 
@@ -820,13 +820,13 @@ export function rgbStringToHex(rgb: string): string {
   return RGBToHex(
     parseInt(rgbArr[0]),
     parseInt(rgbArr[1]),
-    parseInt(rgbArr[2])
+    parseInt(rgbArr[2]),
   );
 }
 
 export function getNodeIndex(
   parentElement: HTMLElement,
-  targetNode: Node
+  targetNode: Node,
 ): number {
   const childNodes: Node[] = Array.from(parentElement.childNodes);
   return childNodes.indexOf(targetNode);
@@ -836,7 +836,7 @@ export function openLinkInNewTab(event: MouseEvent): void {
   if (event.ctrlKey) {
     const nodeAtMouseCoordinates = document.elementFromPoint(
       event.clientX,
-      event.clientY
+      event.clientY,
     );
 
     if (nodeAtMouseCoordinates == null) return;
@@ -849,7 +849,7 @@ export function openLinkInNewTab(event: MouseEvent): void {
       setTimeout(() => {
         window.open(
           nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) as string,
-          "_blank"
+          "_blank",
         );
       }, 10);
     }
@@ -858,7 +858,7 @@ export function openLinkInNewTab(event: MouseEvent): void {
 
 export function splitBlocksAtCaretOffset(
   block: Block,
-  caretOffset: number
+  caretOffset: number,
 ): Block[] {
   const blockNode = getBlockNode(block.id) as HTMLElement;
   const nodeAtCaretOffset = getNodeAt(blockNode, caretOffset);
@@ -868,7 +868,7 @@ export function splitBlocksAtCaretOffset(
     nodeAtCaretOffset,
     {
       includeInnerHTML: true,
-    }
+    },
   );
 
   const newBlock: Block = {
@@ -890,27 +890,27 @@ export function splitBlocksAtCaretOffset(
   } else {
     const htmlFragment = blockNode.innerHTML.substring(
       0,
-      caretNodeOffsetWithInnerHTML
+      caretNodeOffsetWithInnerHTML,
     );
 
     if (isInlineSpecifierNode(nodeAtCaretOffset)) {
       const caretNodeFragments = splitElement(
         nodeAtCaretOffset as HTMLElement,
-        caretOffset - caretNodeOffset
+        caretOffset - caretNodeOffset,
       );
       currentBlockContent = htmlFragment.concat(caretNodeFragments[0]);
       newBlockContent = caretNodeFragments[1].concat(
         blockNode.innerHTML.substring(
           htmlFragment.length +
-            (nodeAtCaretOffset as HTMLElement).outerHTML.length
-        )
+            (nodeAtCaretOffset as HTMLElement).outerHTML.length,
+        ),
       );
     } else {
       currentBlockContent = htmlFragment.concat(
         (nodeAtCaretOffset.textContent as string).substring(
           0,
-          caretOffset - caretNodeOffset
-        )
+          caretOffset - caretNodeOffset,
+        ),
       );
 
       newBlockContent = (nodeAtCaretOffset.textContent as string)
@@ -918,8 +918,8 @@ export function splitBlocksAtCaretOffset(
         .concat(
           blockNode.innerHTML.substring(
             htmlFragment.length +
-              (nodeAtCaretOffset.textContent as string).length
-          )
+              (nodeAtCaretOffset.textContent as string).length,
+          ),
         );
     }
   }

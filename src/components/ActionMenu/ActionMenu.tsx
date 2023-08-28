@@ -54,7 +54,7 @@ export default function ActionMenu({
   const [yAxis, setYAxis] = useState(
     window.innerHeight - (coordinates.y + ACTION_MENU_HEIGHT) <= 0
       ? coordinates.y - ACTION_MENU_HEIGHT - 40
-      : coordinates.y
+      : coordinates.y,
   );
 
   const currentMenuIndex = useRef(-1);
@@ -74,7 +74,7 @@ export default function ActionMenu({
           onSelect(
             currentMenuIndex.current === -1
               ? matchedMenu[0].execute
-              : matchedMenu[currentMenuIndex.current].execute
+              : matchedMenu[currentMenuIndex.current].execute,
           );
           onClose();
           break;
@@ -86,7 +86,7 @@ export default function ActionMenu({
             (currentMenuIndex.current + 1) % matchedMenu.length;
 
           const menuNode = document.getElementById(
-            matchedMenu[currentMenuIndex.current].id
+            matchedMenu[currentMenuIndex.current].id,
           ) as HTMLElement;
           menuNode.focus();
 
@@ -100,7 +100,7 @@ export default function ActionMenu({
               : currentMenuIndex.current - 1) % matchedMenu.length;
 
           const menuNode = document.getElementById(
-            matchedMenu[currentMenuIndex.current].id
+            matchedMenu[currentMenuIndex.current].id,
           ) as HTMLElement;
           menuNode.focus();
 
@@ -123,7 +123,7 @@ export default function ActionMenu({
             matchedMenu.length === menu.length &&
               window.innerHeight - (coordinates.y + ACTION_MENU_HEIGHT) <= 0
               ? coordinates.y - ACTION_MENU_HEIGHT - 40
-              : coordinates.y
+              : coordinates.y,
           );
 
           setMatchedMenu(matchedMenu);
@@ -154,7 +154,7 @@ export default function ActionMenu({
                   ? coordinates.y -
                       matchedMenu.length * ACTION_MENU_OPTION_HEIGHT -
                       (matchedMenu.length <= 3 ? matchedMenu.length * 22 : 0)
-                  : coordinates.y
+                  : coordinates.y,
               );
 
               setMatchedMenu(matchedMenu);

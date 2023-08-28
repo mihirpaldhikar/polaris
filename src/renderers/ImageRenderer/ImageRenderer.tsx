@@ -89,7 +89,7 @@ export default function ImageRenderer({
           previousNode = currentNodeSibling.previous;
         } else {
           previousNode = getBlockNode(
-            parentBlock.content[currentBlockIndex - 1].id
+            parentBlock.content[currentBlockIndex - 1].id,
           );
         }
         if (previousNode !== null) {
@@ -102,7 +102,7 @@ export default function ImageRenderer({
         onDelete(
           block,
           serializeNodeToBlock(currentBlockSibling.previous),
-          currentBlockSibling.previous.id
+          currentBlockSibling.previous.id,
         );
       }
     }
@@ -205,7 +205,7 @@ export default function ImageRenderer({
                   },
                   {
                     once: true,
-                  }
+                  },
                 );
 
                 popUpRoot.render(
@@ -223,7 +223,7 @@ export default function ImageRenderer({
                     onClose={() => {
                       popUpRoot.render(<Fragment />);
                     }}
-                  />
+                  />,
                 );
               }
             }}

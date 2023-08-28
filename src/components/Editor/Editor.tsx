@@ -96,7 +96,7 @@ export default function Editor({
   onChange,
 }: WorkspaceProps): JSX.Element {
   let masterSelectionMenu: readonly Menu[] = cloneDeep(
-    MasterSelectionMenu
+    MasterSelectionMenu,
   ).concat(...(selectionMenu ?? []));
   let masterActionMenu: readonly Menu[] = cloneDeep(MasterActionMenu);
 
@@ -115,10 +115,10 @@ export default function Editor({
 
   useEffect(() => {
     setPopUpRoot(
-      createRoot(document.getElementById(`popup-${blob.id}`) as HTMLElement)
+      createRoot(document.getElementById(`popup-${blob.id}`) as HTMLElement),
     );
     setDialogRoot(
-      createRoot(document.getElementById(`dialog-${blob.id}`) as HTMLElement)
+      createRoot(document.getElementById(`dialog-${blob.id}`) as HTMLElement),
     );
     return () => {
       setPopUpRoot(undefined);
@@ -149,7 +149,7 @@ export default function Editor({
         }
       }
     },
-    [masterBlocks, blob, onSave]
+    [masterBlocks, blob, onSave],
   );
 
   useEffect(() => {
@@ -225,7 +225,7 @@ export default function Editor({
       nodeId: string;
       caretOffset: number;
       nodeIndex?: number;
-    }
+    },
   ): void {
     updateMasterBlocks(blocks);
     setFocusedNode(focus);
@@ -237,7 +237,7 @@ export default function Editor({
   function createHandler(
     parentBlock: Block,
     targetBlock: Block,
-    creationType: "list" | "nonList"
+    creationType: "list" | "nonList",
   ): void {
     if (creationType === "list") {
       traverseAndUpdate(masterBlocks, parentBlock);
@@ -259,7 +259,7 @@ export default function Editor({
     block: Block,
     previousBlock: Block,
     nodeId: string,
-    setCursorToStart?: boolean
+    setCursorToStart?: boolean,
   ): void {
     const previousNode = getBlockNode(nodeId) as HTMLElement;
 
@@ -300,7 +300,7 @@ export default function Editor({
   function pasteHandler(
     block: Block,
     content: Content | Content[],
-    caretOffset: number
+    caretOffset: number,
   ): void {
     if (typeof block.content !== "string") return;
     const blockIndex = masterBlocks.indexOf(block);
@@ -324,7 +324,7 @@ export default function Editor({
                   .concat(copiedText)
               : index === content.length - 1
               ? copiedText.concat(
-                  (block.content as string).substring(caretOffset)
+                  (block.content as string).substring(caretOffset),
                 )
               : copiedText,
         };
@@ -332,7 +332,7 @@ export default function Editor({
       masterBlocks.splice(blockIndex, 1, ...pasteBlocks);
 
       const pasteContentLength = normalizeContent(
-        pasteBlocks[pasteBlocks.length - 1].content as string
+        pasteBlocks[pasteBlocks.length - 1].content as string,
       ).length;
 
       const computedCaretOffset: number =
@@ -354,7 +354,7 @@ export default function Editor({
         .substring(0, caretOffset)
         .concat(content)
         .concat(
-          (masterBlocks[blockIndex].content as string).substring(caretOffset)
+          (masterBlocks[blockIndex].content as string).substring(caretOffset),
         );
 
       const pasteContentLength = normalizeContent(block.content).length;
@@ -427,11 +427,11 @@ export default function Editor({
             inputArgs.type === "color"
               ? rgbStringToHex(
                   startNodeParent.style.getPropertyValue(
-                    inputArgs.initialPayload.name
-                  )
+                    inputArgs.initialPayload.name,
+                  ),
                 )
               : startNodeParent.style.getPropertyValue(
-                  inputArgs.initialPayload.name
+                  inputArgs.initialPayload.name,
                 );
           menu.active = true;
         }
@@ -457,7 +457,7 @@ export default function Editor({
         onClose={() => {
           popUpRoot.render(<Fragment />);
           masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
-            ...(selectionMenu ?? [])
+            ...(selectionMenu ?? []),
           );
         }}
         onMenuSelected={(executable) => {
@@ -478,7 +478,7 @@ export default function Editor({
             }
           }
         }}
-      />
+      />,
     );
 
     editorNode.addEventListener(
@@ -487,25 +487,25 @@ export default function Editor({
         if (!event.ctrlKey || !event.shiftKey) {
           popUpRoot.render(<Fragment />);
           masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
-            ...(selectionMenu ?? [])
+            ...(selectionMenu ?? []),
           );
         }
       },
       {
         once: true,
-      }
+      },
     );
     editorNode.addEventListener(
       "mousedown",
       () => {
         popUpRoot.render(<Fragment />);
         masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
-          ...(selectionMenu ?? [])
+          ...(selectionMenu ?? []),
         );
       },
       {
         once: true,
-      }
+      },
     );
   }
 
@@ -513,7 +513,7 @@ export default function Editor({
     nodeIndex: number,
     block: Block,
     previousContent: Content,
-    caretOffset: number
+    caretOffset: number,
   ): void {
     masterActionMenu = masterActionMenu.filter((menu) => {
       if (menu.allowedOn !== undefined) {
@@ -604,7 +604,7 @@ export default function Editor({
 
               if (blockRenderTypeFromNode(currentNode) === RenderType.LIST) {
                 const currentBlockParent = serializeNodeToBlock(
-                  currentNode.parentElement?.parentElement as HTMLElement
+                  currentNode.parentElement?.parentElement as HTMLElement,
                 );
 
                 if (Array.isArray(currentBlockParent.content)) {
@@ -628,14 +628,14 @@ export default function Editor({
                       currentBlockParent.content.splice(
                         currentBlockIndex + 1,
                         0,
-                        emptyBlock
+                        emptyBlock,
                       );
                     }
                     block.content = previousContent;
                     currentBlockParent.content.splice(
                       currentBlockIndex,
                       1,
-                      ...[block, newBlock]
+                      ...[block, newBlock],
                     );
                   } else if (
                     blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
@@ -648,7 +648,7 @@ export default function Editor({
                     currentBlockParent.content.splice(
                       currentBlockIndex,
                       1,
-                      newBlock
+                      newBlock,
                     );
                   }
 
@@ -663,7 +663,7 @@ export default function Editor({
                   traverseAndUpdateBelow(masterBlocks, block, newBlock);
                   const newBlockIndex = traverseAndFindBlockPosition(
                     masterBlocks,
-                    newBlock
+                    newBlock,
                   );
 
                   if (newBlockIndex === masterBlocks.length - 1) {
@@ -695,7 +695,7 @@ export default function Editor({
                   : {
                       nodeId: newBlock.id,
                       caretOffset,
-                    }
+                    },
               );
               break;
             }
@@ -713,7 +713,7 @@ export default function Editor({
             }
           }
         }}
-      />
+      />,
     );
 
     editorNode.addEventListener("mousedown", () => {
