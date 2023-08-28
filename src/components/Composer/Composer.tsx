@@ -37,7 +37,12 @@ interface ComposerProps {
     targetBlock: Block,
     creationType: "list" | "nonList"
   ) => void;
-  onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
+  onDelete: (
+    block: Block,
+    previousBlock: Block,
+    nodeId: string,
+    setCursorToStart?: boolean
+  ) => void;
   onPaste: (
     block: Block,
     content: Content | Content[],

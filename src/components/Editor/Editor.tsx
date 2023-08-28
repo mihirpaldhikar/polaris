@@ -258,21 +258,20 @@ export default function Editor({
   function deletionHandler(
     block: Block,
     previousBlock: Block,
-    nodeId: string
+    nodeId: string,
+    setCursorToStart?: boolean
   ): void {
     const previousNode = getBlockNode(nodeId) as HTMLElement;
 
     const previousBlockChildNodeIndex =
-      blockRenderTypeFromRole(block.role) === RenderType.LIST &&
-      blockRenderTypeFromRole(previousBlock.role) === RenderType.LIST
+      setCursorToStart !== undefined && setCursorToStart
         ? 0
         : previousNode?.lastChild?.textContent === ""
         ? previousNode.childNodes.length - 2
         : previousNode.childNodes.length - 1;
 
     const computedCaretOffset =
-      blockRenderTypeFromRole(block.role) === RenderType.LIST &&
-      blockRenderTypeFromRole(previousBlock.role) === RenderType.LIST
+      setCursorToStart !== undefined && setCursorToStart
         ? 0
         : previousNode.childNodes[previousBlockChildNodeIndex] != null
         ? previousNode.childNodes[previousBlockChildNodeIndex].nodeType ===

@@ -54,13 +54,7 @@ interface ImageRendererProps {
   block: Block;
   editable: boolean;
   onImageRequest: (block: Block, file: File) => void;
-  onDelete: (
-    block: Block,
-    previousBlock: Block,
-    nodeId: string,
-    nodeIndex: number,
-    caretOffset: number
-  ) => void;
+  onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
   onChange: (block: Block) => void;
 }
 
@@ -99,64 +93,16 @@ export default function ImageRenderer({
           );
         }
         if (previousNode !== null) {
-          const previousBlockLastChildNodeIndex =
-            previousNode?.lastChild?.textContent === ""
-              ? previousNode.childNodes.length - 2
-              : previousNode.childNodes.length - 1;
-
-          const computedCaretOffset =
-            previousNode.childNodes[previousBlockLastChildNodeIndex] != null
-              ? previousNode.childNodes[previousBlockLastChildNodeIndex]
-                  .nodeType === Node.ELEMENT_NODE
-                ? (
-                    previousNode.childNodes[previousBlockLastChildNodeIndex]
-                      .textContent as string
-                  ).length
-                : previousNode.childNodes[previousBlockLastChildNodeIndex]
-                    .textContent?.length ?? previousNode.innerText.length
-              : previousNode.innerText.length;
-
-          onDelete(
-            parentBlock,
-            block,
-            previousNode.id,
-            previousBlockLastChildNodeIndex,
-            computedCaretOffset
-          );
+          onDelete(parentBlock, block, previousNode.id);
         }
       }
     } else {
       const currentBlockSibling = getNodeSiblings(block.id);
       if (currentBlockSibling.previous != null) {
-        const previousBlockLastChildNodeIndex =
-          currentBlockSibling.previous?.lastChild?.textContent === ""
-            ? currentBlockSibling.previous.childNodes.length - 2
-            : currentBlockSibling.previous.childNodes.length - 1;
-
-        const computedCaretOffset =
-          currentBlockSibling.previous.childNodes[
-            previousBlockLastChildNodeIndex
-          ] != null
-            ? currentBlockSibling.previous.childNodes[
-                previousBlockLastChildNodeIndex
-              ].nodeType === Node.ELEMENT_NODE
-              ? (
-                  currentBlockSibling.previous.childNodes[
-                    previousBlockLastChildNodeIndex
-                  ].textContent as string
-                ).length
-              : currentBlockSibling.previous.childNodes[
-                  previousBlockLastChildNodeIndex
-                ].textContent?.length ??
-                currentBlockSibling.previous.innerText.length
-            : currentBlockSibling.previous.innerText.length;
-
         onDelete(
           block,
           serializeNodeToBlock(currentBlockSibling.previous),
-          currentBlockSibling.previous.id,
-          previousBlockLastChildNodeIndex,
-          computedCaretOffset
+          currentBlockSibling.previous.id
         );
       }
     }

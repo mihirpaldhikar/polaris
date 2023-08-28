@@ -62,7 +62,12 @@ interface CanvasProps {
     targetBlock: Block,
     creationType: "list" | "nonList"
   ) => void;
-  onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
+  onDelete: (
+    block: Block,
+    previousBlock: Block,
+    nodeId: string,
+    setCursorToStart?: boolean
+  ) => void;
   onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
   onPaste: (
     block: Block,
@@ -318,7 +323,8 @@ export default function Canvas({
                 onDelete(
                   previousParentBlock,
                   previousParentBlock.content[parentBlockIndex],
-                  previousParentBlock.content[parentBlockIndex].id
+                  previousParentBlock.content[parentBlockIndex].id,
+                  true
                 );
               }
             } else {
@@ -331,10 +337,20 @@ export default function Canvas({
                 if (parentBlock.content.length === 1) {
                   parentBlock.role = "paragraph";
                   parentBlock.content = "";
-                  onDelete(parentBlock, parentFirstChild, parentFirstChild.id);
+                  onDelete(
+                    parentBlock,
+                    parentFirstChild,
+                    parentFirstChild.id,
+                    true
+                  );
                 } else {
                   parentBlock.content.splice(0, 1);
-                  onDelete(parentBlock, parentFirstChild, parentFirstChild.id);
+                  onDelete(
+                    parentBlock,
+                    parentFirstChild,
+                    parentFirstChild.id,
+                    true
+                  );
                 }
               }
             }
