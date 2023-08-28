@@ -154,6 +154,18 @@ export default function Composer({
     blockRenderType: RenderType,
     childBlock?: Block,
   ): void {
+    if (
+      window.navigator.userAgent.toLowerCase().includes("android") ||
+      window.navigator.userAgent.toLowerCase().includes("iphone")
+    ) {
+      const key = event.target.innerText
+        .charAt(event.target.innerText.length - 1)
+        .toLowerCase();
+      if (key === "/") {
+        actionMenuTriggerHandler();
+      }
+    }
+
     switch (blockRenderType) {
       case RenderType.TEXT: {
         block.content = event.target.innerHTML;
@@ -404,21 +416,7 @@ export default function Composer({
         break;
       }
       case "/": {
-        if (typeof block.content === "string") {
-          onActionKeyPressed(
-            getNodeIndex(
-              currentBlockNode,
-              getNodeAt(currentBlockNode, caretOffset),
-            ),
-            block,
-            block.content,
-            caretOffset -
-              nodeOffset(
-                currentBlockNode,
-                getNodeAt(currentBlockNode, caretOffset),
-              ),
-          );
-        }
+        actionMenuTriggerHandler();
         break;
       }
       case " ": {
@@ -789,6 +787,38 @@ export default function Composer({
         roleChangeByMarkdown.current = false;
         break;
       }
+    }
+  }
+
+  function actionMenuTriggerHandler(): void {
+    const currentBlockNode = getBlockNode(block.id);
+    if (currentBlockNode === null) return;
+
+    const caretOffset = getCaretOffset(currentBlockNode);
+    if (typeof block.content === "string") {
+      const computedCaretOffset =
+        window.navigator.userAgent.toLowerCase().includes("android") ||
+        window.navigator.userAgent.includes("iphone")
+          ? caretOffset -
+            nodeOffset(
+              currentBlockNode,
+              getNodeAt(currentBlockNode, caretOffset),
+            ) -
+            1
+          : caretOffset -
+            nodeOffset(
+              currentBlockNode,
+              getNodeAt(currentBlockNode, caretOffset),
+            );
+      onActionKeyPressed(
+        getNodeIndex(
+          currentBlockNode,
+          getNodeAt(currentBlockNode, caretOffset),
+        ),
+        block,
+        block.content,
+        computedCaretOffset,
+      );
     }
   }
 
