@@ -21,7 +21,6 @@
  */
 
 import { Fragment, type JSX, useCallback, useEffect, useState } from "react";
-import { Composer } from "../Composer";
 import {
   type Blob,
   type Block,
@@ -61,6 +60,7 @@ import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
 import { cloneDeep } from "lodash";
+import { Canvas } from "../Canvas";
 
 interface WorkspaceProps {
   editable?: boolean;
@@ -782,7 +782,7 @@ export default function Editor({
       >
         {masterBlocks.map((block) => {
           return (
-            <Composer
+            <Canvas
               key={block.id}
               editable={editable}
               block={block}
@@ -795,7 +795,7 @@ export default function Editor({
               onSelect={debounce((block) => {
                 selectionHandler(block);
               }, 360)}
-              onCommandKeyPressed={actionKeyHandler}
+              onActionKeyPressed={actionKeyHandler}
               onImageRequest={imageRequestHandler}
               onMarkdown={markdownHandler}
             />
