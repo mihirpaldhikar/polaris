@@ -44,6 +44,7 @@ import {
   nodeTypeFromRole,
   openLinkInNewTab,
   serializeNodeToBlock,
+  setCaretOffset,
   setNodeStyle,
   splitBlocksAtCaretOffset,
   traverseAndUpdate,
@@ -69,7 +70,6 @@ interface CanvasProps {
     nodeId: string,
     setCursorToStart?: boolean
   ) => void;
-  onNavigate: (navigate: "up" | "down", caretOffset: number) => void;
   onPaste: (
     block: Block,
     content: Content | Content[],
@@ -94,7 +94,6 @@ interface CanvasProps {
  * @param onChange
  * @param onEnter
  * @param onDelete
- * @param onNavigate
  * @param onPaste
  * @param onSelect
  * @param onActionKeyPressed
@@ -112,7 +111,6 @@ export default function Canvas({
   onChange,
   onCreate,
   onDelete,
-  onNavigate,
   onPaste,
   onSelect,
   onImageRequest,
@@ -545,6 +543,199 @@ export default function Canvas({
         }
         break;
       }
+      case "arrowleft": {
+        if (caretOffset === 0) {
+          event.preventDefault();
+          const { previous } = getNodeSiblings(currentBlockNode.id);
+          if (previous != null) {
+            if (
+              previous.tagName.toLowerCase() === "ol" ||
+              previous.tagName.toLowerCase() === "ul"
+            ) {
+              const { previous: previousPrevious } = getNodeSiblings(
+                previous.id
+              );
+
+              if (previousPrevious != null) {
+                const previousBlockChildNodeIndex =
+                  previousPrevious?.lastChild?.textContent === ""
+                    ? previousPrevious.childNodes.length - 2
+                    : previousPrevious.childNodes.length - 1;
+
+                const computedCaretOffset =
+                  previousPrevious.childNodes[previousBlockChildNodeIndex] !=
+                  null
+                    ? previousPrevious.childNodes[previousBlockChildNodeIndex]
+                        .nodeType === Node.ELEMENT_NODE
+                      ? (
+                          previousPrevious.childNodes[
+                            previousBlockChildNodeIndex
+                          ].textContent as string
+                        ).length
+                      : previousPrevious.childNodes[previousBlockChildNodeIndex]
+                          .textContent?.length ??
+                        previousPrevious.innerText.length
+                    : previousPrevious.innerText.length;
+                setCaretOffset(
+                  previousPrevious.childNodes[previousBlockChildNodeIndex]
+                    .nodeType === Node.ELEMENT_NODE
+                    ? previousPrevious.childNodes[previousBlockChildNodeIndex]
+                        .firstChild ?? previousPrevious
+                    : previousPrevious.childNodes[previousBlockChildNodeIndex],
+                  computedCaretOffset
+                );
+              }
+            } else {
+              const previousBlockChildNodeIndex =
+                previous?.lastChild?.textContent === ""
+                  ? previous.childNodes.length - 2
+                  : previous.childNodes.length - 1;
+
+              const computedCaretOffset =
+                previous.childNodes[previousBlockChildNodeIndex] != null
+                  ? previous.childNodes[previousBlockChildNodeIndex]
+                      .nodeType === Node.ELEMENT_NODE
+                    ? (
+                        previous.childNodes[previousBlockChildNodeIndex]
+                          .textContent as string
+                      ).length
+                    : previous.childNodes[previousBlockChildNodeIndex]
+                        .textContent?.length ?? previous.innerText.length
+                  : previous.innerText.length;
+              setCaretOffset(
+                previous.childNodes[previousBlockChildNodeIndex].nodeType ===
+                  Node.ELEMENT_NODE
+                  ? previous.childNodes[previousBlockChildNodeIndex]
+                      .firstChild ?? previous
+                  : previous.childNodes[previousBlockChildNodeIndex],
+                computedCaretOffset
+              );
+            }
+          }
+        }
+        break;
+      }
+      case "arrowright": {
+        if (caretOffset === currentBlockNode.innerText.length) {
+          event.preventDefault();
+
+          const { next } = getNodeSiblings(currentBlockNode.id);
+          if (next != null) {
+            if (
+              next.tagName.toLowerCase() === "ol" ||
+              next.tagName.toLowerCase() === "ul"
+            ) {
+              const { next: nextNext } = getNodeSiblings(next.id);
+
+              if (nextNext != null) {
+                setCaretOffset(nextNext, 0);
+              }
+            } else {
+              setCaretOffset(next, 0);
+            }
+          }
+        }
+        break;
+      }
+      case "arrowup": {
+        event.preventDefault();
+        const { previous } = getNodeSiblings(currentBlockNode.id);
+        if (previous != null) {
+          if (
+            previous.tagName.toLowerCase() === "ol" ||
+            previous.tagName.toLowerCase() === "ul"
+          ) {
+            const { previous: previousPrevious } = getNodeSiblings(previous.id);
+            if (previousPrevious != null) {
+              const nodeAtCaretOffset = getNodeAt(
+                previousPrevious,
+                caretOffset
+              );
+              const jumpNode =
+                caretOffset > previousPrevious.innerText.length
+                  ? previousPrevious.lastChild ?? previous
+                  : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
+                  ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
+                  : nodeAtCaretOffset;
+
+              const computedCaretOffset =
+                caretOffset > previousPrevious.innerText.length
+                  ? (previousPrevious.lastChild?.textContent as string).length
+                  : caretOffset > (jumpNode.textContent as string).length
+                  ? (jumpNode.textContent as string).length
+                  : caretOffset;
+
+              setCaretOffset(jumpNode, computedCaretOffset);
+            }
+          } else {
+            const nodeAtCaretOffset = getNodeAt(previous, caretOffset);
+            const jumpNode =
+              caretOffset > previous.innerText.length
+                ? previous.lastChild ?? previous
+                : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
+                ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
+                : nodeAtCaretOffset;
+
+            const computedCaretOffset =
+              caretOffset > previous.innerText.length
+                ? (previous.lastChild?.textContent as string).length
+                : caretOffset > (jumpNode.textContent as string).length
+                ? (jumpNode.textContent as string).length
+                : caretOffset;
+
+            setCaretOffset(jumpNode, computedCaretOffset);
+          }
+        }
+        break;
+      }
+      case "arrowdown": {
+        event.preventDefault();
+        const { next } = getNodeSiblings(currentBlockNode.id);
+        if (next != null) {
+          if (
+            next.tagName.toLowerCase() === "ol" ||
+            next.tagName.toLowerCase() === "ul"
+          ) {
+            const { next: nextNext } = getNodeSiblings(next.id);
+            if (nextNext != null) {
+              const nodeAtCaretOffset = getNodeAt(nextNext, caretOffset);
+              const jumpNode =
+                caretOffset > nextNext.innerText.length
+                  ? nextNext.firstChild ?? next
+                  : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
+                  ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
+                  : nodeAtCaretOffset;
+
+              const computedCaretOffset =
+                caretOffset > nextNext.innerText.length
+                  ? (nextNext.firstChild?.textContent as string).length
+                  : caretOffset > (jumpNode.textContent as string).length
+                  ? (jumpNode.textContent as string).length
+                  : caretOffset;
+
+              setCaretOffset(jumpNode, computedCaretOffset);
+            }
+          } else {
+            const nodeAtCaretOffset = getNodeAt(next, caretOffset);
+            const jumpNode =
+              caretOffset > next.innerText.length
+                ? next.firstChild ?? next
+                : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
+                ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
+                : nodeAtCaretOffset;
+
+            const computedCaretOffset =
+              caretOffset > next.innerText.length
+                ? (next.firstChild?.textContent as string).length
+                : caretOffset > (jumpNode.textContent as string).length
+                ? (jumpNode.textContent as string).length
+                : caretOffset;
+
+            setCaretOffset(jumpNode, computedCaretOffset);
+          }
+        }
+        break;
+      }
       default: {
         roleChangeByMarkdown.current = false;
         break;
@@ -607,7 +798,6 @@ export default function Canvas({
               onChange={onChange}
               onCreate={onCreate}
               onDelete={onDelete}
-              onNavigate={onNavigate}
               onPaste={onPaste}
               onSelect={onSelect}
               onActionKeyPressed={onActionKeyPressed}

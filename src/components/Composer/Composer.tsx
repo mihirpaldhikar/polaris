@@ -23,14 +23,11 @@
 import { type JSX } from "react";
 import { Canvas } from "../Canvas";
 import { type Block } from "../../interfaces";
-import { getBlockNode, setCaretOffset } from "../../utils";
 import { type Content } from "../../types";
 
 interface ComposerProps {
   editable: boolean;
-  previousBlock: Block | null;
   block: Block;
-  nextBlock: Block | null;
   onChange: (block: Block) => void;
   onCreate: (
     parentBlock: Block,
@@ -64,9 +61,7 @@ interface ComposerProps {
  *
  * @param editable
  * @param actionMenuOpen
- * @param previousBlock
  * @param block
- * @param nextBlock
  * @param onChange
  * @param onCreate
  * @param onDelete
@@ -81,9 +76,7 @@ interface ComposerProps {
 
 export default function Composer({
   editable,
-  previousBlock,
   block,
-  nextBlock,
   onChange,
   onCreate,
   onDelete,
@@ -93,59 +86,6 @@ export default function Composer({
   onImageRequest,
   onMarkdown,
 }: ComposerProps): JSX.Element {
-  function navigationHandler(
-    navigate: "up" | "down",
-    caretOffset: number
-  ): void {
-    switch (navigate) {
-      case "up": {
-        if (previousBlock !== null) {
-          const previousNode = getBlockNode(previousBlock.id) as HTMLElement;
-
-          const jumpNode: Node =
-            previousNode.lastChild?.textContent != null
-              ? previousNode.lastChild.nodeType === Node.TEXT_NODE
-                ? (previousNode.lastChild as Node)
-                : (previousNode.lastChild.firstChild as Node)
-              : previousNode;
-
-          const computedCaretOffset: number =
-            caretOffset === -1 ||
-            caretOffset >= (jumpNode.textContent?.length as number)
-              ? (jumpNode.textContent?.length as number)
-              : caretOffset;
-
-          setCaretOffset(jumpNode, computedCaretOffset);
-        }
-        break;
-      }
-      case "down": {
-        if (nextBlock != null) {
-          const nextNode: HTMLElement = getBlockNode(
-            nextBlock.id
-          ) as HTMLElement;
-
-          const jumpNode: Node =
-            nextNode.firstChild?.textContent != null
-              ? nextNode.firstChild.nodeType === Node.TEXT_NODE
-                ? (nextNode.firstChild as Node)
-                : (nextNode.firstChild.firstChild as Node)
-              : nextNode;
-
-          const computedCaretOffset: number =
-            caretOffset === -1
-              ? 0
-              : caretOffset >= (jumpNode.textContent?.length as number)
-              ? (jumpNode.textContent?.length as number)
-              : caretOffset;
-
-          setCaretOffset(jumpNode, computedCaretOffset);
-        }
-        break;
-      }
-    }
-  }
-
   return (
     <Canvas
       editable={editable}
@@ -153,7 +93,6 @@ export default function Composer({
       onChange={onChange}
       onCreate={onCreate}
       onDelete={onDelete}
-      onNavigate={navigationHandler}
       onPaste={onPaste}
       onSelect={onSelect}
       onActionKeyPressed={onCommandKeyPressed}

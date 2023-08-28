@@ -780,18 +780,12 @@ export default function Editor({
           event.preventDefault();
         }}
       >
-        {masterBlocks.map((block, index) => {
+        {masterBlocks.map((block) => {
           return (
             <Composer
               key={block.id}
               editable={editable}
-              previousBlock={index !== 0 ? masterBlocks[index - 1] : null}
               block={block}
-              nextBlock={
-                index !== masterBlocks.length - 1
-                  ? masterBlocks[index + 1]
-                  : null
-              }
               onChange={debounce((block) => {
                 changeHandler(block);
               }, 360)}
