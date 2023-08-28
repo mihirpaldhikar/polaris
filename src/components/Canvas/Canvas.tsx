@@ -28,7 +28,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { type Block } from "../../interfaces";
+import { type Block, type Style } from "../../interfaces";
 import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
@@ -39,6 +39,7 @@ import {
   getNodeAt,
   getNodeIndex,
   getNodeSiblings,
+  inlineSpecifierManager,
   nodeOffset,
   nodeTypeFromRole,
   openLinkInNewTab,
@@ -490,6 +491,57 @@ export default function Canvas({
           }
           roleChangeByMarkdown.current = true;
           onMarkdown(block);
+        }
+        break;
+      }
+      case "b": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+
+          const style: Style[] = [
+            {
+              name: "font-weight",
+              value: "bold",
+            },
+          ];
+
+          inlineSpecifierManager(currentBlockNode, style);
+
+          block.content = currentBlockNode.innerHTML;
+          onChange(block);
+        }
+        break;
+      }
+      case "i": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+          const style: Style[] = [
+            {
+              name: "font-style",
+              value: "italic",
+            },
+          ];
+
+          inlineSpecifierManager(currentBlockNode, style);
+          block.content = currentBlockNode.innerHTML;
+          onChange(block);
+        }
+        break;
+      }
+      case "u": {
+        if (event.ctrlKey) {
+          event.preventDefault();
+
+          const style: Style[] = [
+            {
+              name: "text-decoration",
+              value: "underline",
+            },
+          ];
+
+          inlineSpecifierManager(currentBlockNode, style);
+          block.content = currentBlockNode.innerHTML;
+          onChange(block);
         }
         break;
       }
