@@ -1,3 +1,10 @@
+## 0.2.1 (August 31, 2023)
+
+### Fix
+
+- Fix Text Sizes.
+- Fix Editor taking up the whole width and height of the screen and not obeying the allocated size.
+
 ## 0.2.0 (August 28, 2023)
 
 ### New
