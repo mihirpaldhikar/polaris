@@ -863,7 +863,7 @@ export default function Composer({
         style: setNodeStyle(block.style),
         spellCheck: true,
         className: conditionalClassName(
-          "px-4 space-y-2 text-[17px] my-2 mx-2",
+          "px-4 space-y-2 text-[17px] my-2 mx-2 block",
           block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },

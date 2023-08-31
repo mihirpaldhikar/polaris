@@ -61,13 +61,13 @@ export default function TextRenderer({
     placeholder: getPlaceholderFromRole(block.role),
     spellCheck: true,
     className: conditionalClassName(
-      "text_renderer focus:outline-none focus:ring-0 outline-none ring-0 w-full cursor-text break-words",
+      "text_renderer block focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",
       block.role === "title"
-        ? "font-bold text-4xl"
+        ? "font-bold text-2xl md:text-3xl"
         : block.role === "subTitle"
-        ? "font-medium text-[24px]"
+        ? "font-medium text-[25px]"
         : block.role === "heading"
-        ? "font-bold text-[22px]"
+        ? "font-bold text-[21px]"
         : block.role === "subHeading"
         ? "font-medium text-[19px]"
         : block.role === "quote"

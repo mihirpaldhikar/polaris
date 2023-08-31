@@ -775,7 +775,7 @@ export default function Editor({
       <div
         data-type={"editor-root"}
         id={`editor-${blob.id}`}
-        className={"min-h-screen w-full px-2 pb-60"}
+        className={"block"}
         onContextMenu={(event) => {
           event.preventDefault();
         }}
