@@ -1,6 +1,12 @@
+## 0.2.2 (September 1, 2023)
+
+### Fixes:
+
+- Fix an issue in which the production build of the consumer was failing due to CustomEvents.
+
 ## 0.2.1 (August 31, 2023)
 
-### Fix
+### Fixes
 
 - Fix Text Sizes.
 - Fix Editor taking up the whole width and height of the screen and not obeying the allocated size.
