@@ -55,14 +55,13 @@ import { SelectionMenu } from "../SelectionMenu";
 import { MasterActionMenu, MasterSelectionMenu } from "../../assets";
 import { LINK_ATTRIBUTE } from "../../constants";
 import { ActionMenu } from "../ActionMenu";
-import { actionMenuClosedEvent, actionMenuOpenedEvent } from "../../events";
 import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
 import { cloneDeep } from "lodash";
 import { Composer } from "../Composer";
 
-interface WorkspaceProps {
+interface EditorProps {
   editable?: boolean;
   blob: Blob;
   onSave?: (blob: Blob) => void;
@@ -94,7 +93,7 @@ export default function Editor({
   onSave,
   onImageSelected,
   onChange,
-}: WorkspaceProps): JSX.Element {
+}: EditorProps): JSX.Element {
   let masterSelectionMenu: readonly Menu[] = cloneDeep(
     MasterSelectionMenu,
   ).concat(...(selectionMenu ?? []));
@@ -537,7 +536,6 @@ export default function Editor({
 
     if (popupNode.childElementCount !== 0) {
       popUpRoot.render(<Fragment />);
-      window.dispatchEvent(actionMenuClosedEvent);
       return;
     }
 
@@ -560,14 +558,11 @@ export default function Editor({
           : y) + 30,
     };
 
-    window.dispatchEvent(actionMenuOpenedEvent);
-
     popUpRoot.render(
       <ActionMenu
         coordinates={actionMenuCoordinates}
         menu={masterActionMenu}
         onClose={() => {
-          window.dispatchEvent(actionMenuClosedEvent);
           popUpRoot.render(<Fragment />);
         }}
         onEscape={(query) => {

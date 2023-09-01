@@ -25,7 +25,6 @@ import {
   createElement,
   Fragment,
   type JSX,
-  useEffect,
   useRef,
 } from "react";
 import { type Block, type Style } from "../../interfaces";
@@ -117,29 +116,8 @@ export default function Composer({
   onActionKeyPressed,
   onMarkdown,
 }: ComposerProps): JSX.Element {
-  const isActionMenuOpen = useRef(false);
-
   const originalBlock = useRef<Block>({ ...block });
   const roleChangeByMarkdown = useRef(false);
-
-  useEffect(() => {
-    window.addEventListener("actionMenuOpened", () => {
-      isActionMenuOpen.current = true;
-    });
-
-    window.addEventListener("actionMenuClosed", () => {
-      isActionMenuOpen.current = false;
-    });
-    return () => {
-      window.removeEventListener("actionMenuOpened", () => {
-        isActionMenuOpen.current = false;
-      });
-
-      window.removeEventListener("actionMenuClosed", () => {
-        isActionMenuOpen.current = false;
-      });
-    };
-  }, []);
 
   /**
    * @function notifyChange
@@ -201,10 +179,6 @@ export default function Composer({
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
-
-        if (isActionMenuOpen.current) {
-          break;
-        }
 
         let newBlock: Block = {
           id: generateBlockId(),
