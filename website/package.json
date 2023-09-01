@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
-    "@mihirpaldhikar/polaris": "^0.2.1",
+    "@mihirpaldhikar/polaris": "^0.2.2",
     "@types/node": "20.5.7",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
