@@ -20,41 +20,13 @@
  * SOFTWARE.
  */
 
-import "./globals.css";
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import { type JSX, type ReactNode } from "react";
-import { Navbar } from "@components/Navbar";
-import { type Menu } from "@interfaces/index";
-import { FaGithub } from "react-icons/fa6";
+import { type JSX } from "react";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Polaris",
-  description:
-    "A Rich Semantic Content Editor for creating rich editing experience built on top of Web APIs and React",
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
+interface Menu {
+  name: string;
+  destination: string;
+  icon?: JSX.Element;
+  isActive?: boolean;
 }
 
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
-  const menus: Menu[] = [
-    {
-      name: "GitHub",
-      destination: "https://github.com/mihirpaldhikar/polaris",
-      icon: <FaGithub />,
-    },
-  ];
-
-  return (
-    <html lang="en">
-      <body className={montserrat.className}>
-        <Navbar menus={menus} />
-        <main className={"pt-20 px-3"}>{children}</main>
-      </body>
-    </html>
-  );
-}
+export default Menu;

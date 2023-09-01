@@ -23,3 +23,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+nav .desktopMenu {
+    display: flex;
+}
+
+nav .mobileMenu {
+    display: none;
+}
+
+@media (max-width: 500px) {
+    nav .desktopMenu {
+        display: none;
+    }
+
+    nav .mobileMenu {
+        display: block;
+    }
+}

@@ -20,41 +20,25 @@
  * SOFTWARE.
  */
 
-import "./globals.css";
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import { type JSX, type ReactNode } from "react";
-import { Navbar } from "@components/Navbar";
+import { type JSX } from "react";
 import { type Menu } from "@interfaces/index";
-import { FaGithub } from "react-icons/fa6";
+import Link from "next/link";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Polaris",
-  description:
-    "A Rich Semantic Content Editor for creating rich editing experience built on top of Web APIs and React",
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
+interface MenuItemProps {
+  menu: Menu;
 }
 
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
-  const menus: Menu[] = [
-    {
-      name: "GitHub",
-      destination: "https://github.com/mihirpaldhikar/polaris",
-      icon: <FaGithub />,
-    },
-  ];
-
+export default function MenuItem({ menu }: MenuItemProps): JSX.Element {
   return (
-    <html lang="en">
-      <body className={montserrat.className}>
-        <Navbar menus={menus} />
-        <main className={"pt-20 px-3"}>{children}</main>
-      </body>
-    </html>
+    <Link
+      href={menu.destination}
+      target={"_blank"}
+      className={
+        "flex space-x-2 px-2 py-1 border-gray-300 hover:bg-gray-200 items-center rounded-md md:border transition-colors duration-300"
+      }
+    >
+      <div hidden={menu.icon === undefined}>{menu.icon}</div>
+      <span className={"font-medium"}>{menu.name}</span>
+    </Link>
   );
 }
