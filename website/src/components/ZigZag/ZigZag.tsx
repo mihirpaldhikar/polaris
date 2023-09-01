@@ -20,43 +20,22 @@
  * SOFTWARE.
  */
 
-import "./globals.css";
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import { type JSX, type ReactNode } from "react";
-import { Navbar } from "@components/Navbar";
-import { type Menu } from "@interfaces/index";
-import { FaGithub } from "react-icons/fa6";
-import { Footer } from "@components/Footer";
+import { type JSX } from "react";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Polaris - Rich Content Editor",
-  description:
-    "A Rich Semantic Content Editor for creating rich editing experience built on top of Web APIs and React.",
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
-  const menus: Menu[] = [
-    {
-      name: "GitHub",
-      destination: "https://github.com/mihirpaldhikar/polaris",
-      icon: <FaGithub />,
-    },
-  ];
-
+export default function ZigZag(): JSX.Element {
   return (
-    <html lang="en">
-      <body className={montserrat.className}>
-        <Navbar menus={menus} />
-        <main className={"pt-20 px-3"}>{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <svg
+      viewBox="0 0 465 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={"block h-[50px] w-[130px] md:w-[200px]"}
+    >
+      <path
+        d="M16 15.0114C363.595 15.0114 451.523 14.1388 449.98 27.6639C448.438 41.1891 49.9368 33.3358 69.4762 53.8416C85.1077 70.2463 148.662 82.7825 178.485 87"
+        stroke="#2563EB"
+        strokeWidth="7"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

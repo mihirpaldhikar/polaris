@@ -20,43 +20,38 @@
  * SOFTWARE.
  */
 
-import "./globals.css";
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import { type JSX, type ReactNode } from "react";
-import { Navbar } from "@components/Navbar";
-import { type Menu } from "@interfaces/index";
-import { FaGithub } from "react-icons/fa6";
-import { Footer } from "@components/Footer";
+import { type JSX } from "react";
+import { IconContext } from "react-icons";
+import { Glow } from "@components/index";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Polaris - Rich Content Editor",
-  description:
-    "A Rich Semantic Content Editor for creating rich editing experience built on top of Web APIs and React.",
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
+interface FeatureCardProps {
+  title: string;
+  icon: JSX.Element;
+  description: string;
 }
 
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
-  const menus: Menu[] = [
-    {
-      name: "GitHub",
-      destination: "https://github.com/mihirpaldhikar/polaris",
-      icon: <FaGithub />,
-    },
-  ];
-
+export default function FeatureCard({
+  title,
+  icon,
+  description,
+}: FeatureCardProps): JSX.Element {
   return (
-    <html lang="en">
-      <body className={montserrat.className}>
-        <Navbar menus={menus} />
-        <main className={"pt-20 px-3"}>{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <div className="max-w-md mx-auto bg-white rounded-md border border-gray-300 overflow-hidden md:max-w-2xl">
+      <div className="flex">
+        <div className="md:shrink-0 flex items-center px-5">
+          <Glow>
+            <IconContext.Provider value={{ size: "25" }}>
+              <div className={"p-3"}>{icon}</div>
+            </IconContext.Provider>
+          </Glow>
+        </div>
+        <div className="p-8">
+          <h2 className="block mt-1 text-lg leading-tight font-bold text-black hover:underline">
+            {title}
+          </h2>
+          <p className="mt-2 text-gray-700">{description}</p>
+        </div>
+      </div>
+    </div>
   );
 }

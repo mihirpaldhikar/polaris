@@ -20,43 +20,19 @@
  * SOFTWARE.
  */
 
-import "./globals.css";
-import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
-import { type JSX, type ReactNode } from "react";
-import { Navbar } from "@components/Navbar";
-import { type Menu } from "@interfaces/index";
-import { FaGithub } from "react-icons/fa6";
-import { Footer } from "@components/Footer";
+import { type JSX } from "react";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Polaris - Rich Content Editor",
-  description:
-    "A Rich Semantic Content Editor for creating rich editing experience built on top of Web APIs and React.",
-};
-
-interface RootLayoutProps {
-  children: ReactNode;
+interface GlowProps {
+  children: JSX.Element;
 }
 
-export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
-  const menus: Menu[] = [
-    {
-      name: "GitHub",
-      destination: "https://github.com/mihirpaldhikar/polaris",
-      icon: <FaGithub />,
-    },
-  ];
-
+export default function Glow({ children }: GlowProps): JSX.Element {
   return (
-    <html lang="en">
-      <body className={montserrat.className}>
-        <Navbar menus={menus} />
-        <main className={"pt-20 px-3"}>{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <div className="relative group">
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+      <div className="relative bg-black text-gray-200 rounded-lg leading-none flex items-center divide-x divide-gray-600">
+        {children}
+      </div>
+    </div>
   );
 }
