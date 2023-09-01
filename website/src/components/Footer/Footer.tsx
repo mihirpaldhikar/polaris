@@ -20,6 +20,29 @@
  * SOFTWARE.
  */
 
-export { Navbar } from "./Navbar";
-export { MenuItem } from "./MenuItem";
-export { Footer } from "./Footer";
+import { type JSX } from "react";
+import Link from "next/link";
+
+export default function Footer(): JSX.Element {
+  return (
+    <footer
+      className={
+        "min-w-full bg-gray-50 px-5 py-3 border-t border-gray-300 flex"
+      }
+    >
+      <div
+        className={
+          "flex flex-col items-center justify-center min-w-full space-y-3"
+        }
+      >
+        <span>
+          Copyright &copy;&nbsp;
+          <Link href={"https://mihirpaldhikar.com"} className={"underline"}>
+            Mihir Paldhikar
+          </Link>
+        </span>
+        <span className={"text-sm"}>Released Under MIT License.</span>
+      </div>
+    </footer>
+  );
+}

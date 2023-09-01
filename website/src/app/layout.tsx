@@ -27,6 +27,7 @@ import { type JSX, type ReactNode } from "react";
 import { Navbar } from "@components/Navbar";
 import { type Menu } from "@interfaces/index";
 import { FaGithub } from "react-icons/fa6";
+import { Footer } from "@components/Footer";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: RootLayoutProps): JSX.Element {
       <body className={montserrat.className}>
         <Navbar menus={menus} />
         <main className={"pt-20 px-3"}>{children}</main>
+        <Footer />
       </body>
     </html>
   );
