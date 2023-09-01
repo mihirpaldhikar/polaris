@@ -25,19 +25,19 @@
 @tailwind utilities;
 
 nav .desktopMenu {
-    display: flex;
+  display: flex;
 }
 
 nav .mobileMenu {
-    display: none;
+  display: none;
 }
 
 @media (max-width: 500px) {
-    nav .desktopMenu {
-        display: none;
-    }
+  nav .desktopMenu {
+    display: none;
+  }
 
-    nav .mobileMenu {
-        display: block;
-    }
+  nav .mobileMenu {
+    display: block;
+  }
 }

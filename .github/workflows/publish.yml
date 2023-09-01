@@ -6,7 +6,7 @@ name: Publish Polaris
 on:
   push:
     tags:
-      - '*polaris-v-*'
+      - "*polaris-v-*"
 
 jobs:
   publish-npm:
