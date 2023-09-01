@@ -11,6 +11,10 @@ env:
   SERVICE: ${{ secrets.POLARIS_CLOUD_RUN_SERVICE_NAME }}
   REGION: ${{ secrets.POLARIS_CLOUD_RUN_SERVICE_LOCATION }}
 
+defaults:
+  run:
+    working-directory: "./website/"
+
 jobs:
   deploy:
     # Add 'id-token' with the intended permissions for workload identity federation
