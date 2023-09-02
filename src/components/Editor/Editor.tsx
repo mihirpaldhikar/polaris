@@ -33,6 +33,7 @@ import {
 import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
+  dispatchEvent,
   elementContainsStyle,
   generateBlockId,
   getBlockNode,
@@ -536,6 +537,9 @@ export default function Editor({
 
     if (popupNode.childElementCount !== 0) {
       popUpRoot.render(<Fragment />);
+      dispatchEvent("onActionMenu", {
+        opened: false,
+      });
       return;
     }
 
@@ -558,11 +562,18 @@ export default function Editor({
           : y) + 30,
     };
 
+    dispatchEvent("onActionMenu", {
+      opened: true,
+    });
+
     popUpRoot.render(
       <ActionMenu
         coordinates={actionMenuCoordinates}
         menu={masterActionMenu}
         onClose={() => {
+          dispatchEvent("onActionMenu", {
+            opened: false,
+          });
           popUpRoot.render(<Fragment />);
         }}
         onEscape={(query) => {

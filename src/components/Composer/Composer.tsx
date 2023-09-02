@@ -25,6 +25,7 @@ import {
   createElement,
   Fragment,
   type JSX,
+  useEffect,
   useRef,
 } from "react";
 import { type Block, type Style } from "../../interfaces";
@@ -46,7 +47,9 @@ import {
   setCaretOffset,
   setNodeStyle,
   splitBlocksAtCaretOffset,
+  subscribeForEvent,
   traverseAndUpdate,
+  unsubscribeFromEvent,
 } from "../../utils";
 import { type Content } from "../../types";
 import RenderType from "../../enums/RenderType";
@@ -116,8 +119,21 @@ export default function Composer({
   onActionKeyPressed,
   onMarkdown,
 }: ComposerProps): JSX.Element {
+  const isActionMenuOpen = useRef(false);
   const originalBlock = useRef<Block>({ ...block });
   const roleChangeByMarkdown = useRef(false);
+
+  useEffect(() => {
+    subscribeForEvent("onActionMenu", (event: any) => {
+      isActionMenuOpen.current = event.detail.opened;
+    });
+
+    return () => {
+      unsubscribeFromEvent("onActionMenu", (event: any) => {
+        isActionMenuOpen.current = event.detail.opened;
+      });
+    };
+  }, []);
 
   /**
    * @function notifyChange
@@ -179,6 +195,10 @@ export default function Composer({
     switch (event.key.toLowerCase()) {
       case "enter": {
         event.preventDefault();
+
+        if (isActionMenuOpen.current) {
+          break;
+        }
 
         let newBlock: Block = {
           id: generateBlockId(),
@@ -516,6 +536,11 @@ export default function Composer({
         break;
       }
       case "arrowleft": {
+        if (isActionMenuOpen.current) {
+          event.preventDefault();
+          break;
+        }
+
         if (caretOffset === 0) {
           event.preventDefault();
           const { previous } = getNodeSiblings(currentBlockNode.id);
@@ -603,6 +628,10 @@ export default function Composer({
         break;
       }
       case "arrowright": {
+        if (isActionMenuOpen.current) {
+          event.preventDefault();
+          break;
+        }
         if (caretOffset === currentBlockNode.innerText.length) {
           event.preventDefault();
 
@@ -632,6 +661,11 @@ export default function Composer({
       }
       case "arrowup": {
         event.preventDefault();
+
+        if (isActionMenuOpen.current) {
+          break;
+        }
+
         const { previous } = getNodeSiblings(currentBlockNode.id);
         if (
           previous != null &&
@@ -697,6 +731,11 @@ export default function Composer({
       }
       case "arrowdown": {
         event.preventDefault();
+
+        if (isActionMenuOpen.current) {
+          break;
+        }
+
         const { next } = getNodeSiblings(currentBlockNode.id);
         if (
           next != null &&

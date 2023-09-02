@@ -20,9 +20,21 @@
  * SOFTWARE.
  */
 
-export * from "./BlockUtils";
-export * from "./ConditionalClassName";
-export * from "./DOMUtils";
-export * from "./SharedUtils";
-export * from "./Serializers";
-export * from "./EventUtils";
+export function subscribeForEvent(
+  eventName: string,
+  listener: EventListenerOrEventListenerObject,
+): void {
+  document.addEventListener(eventName, listener);
+}
+
+export function unsubscribeFromEvent(
+  eventName: string,
+  listener: EventListenerOrEventListenerObject,
+): void {
+  document.removeEventListener(eventName, listener);
+}
+
+export function dispatchEvent(eventName: string, data?: any): void {
+  const event = new CustomEvent(eventName, { detail: data });
+  document.dispatchEvent(event);
+}
