@@ -1,3 +1,9 @@
+## 0.2.3 (September 2, 2023)
+
+### Fixes:
+
+- Fix an issue in which a new block was getting created on Enter key pressed when Action Menu is opened.
+
 ## 0.2.2 (September 1, 2023)
 
 ### Fixes:
