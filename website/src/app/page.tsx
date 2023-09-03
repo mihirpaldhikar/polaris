@@ -39,61 +39,59 @@ export default function Home(): JSX.Element {
       {
         id: "k9AXBBKurgZShm4a7jpE5fDKuFuCeg",
         role: "title",
-        content: "Introducing Polaris",
+        data: "Introducing Polaris",
         style: [],
       },
       {
         id: "TYAXBBKurgZShm4a7jpE5fDKuFuCeg",
         role: "paragraph",
-        content: "",
+        data: "",
         style: [],
       },
       {
         id: "k9ATBBKurgZShm4a7jpE5fDKuFuCeg",
         role: "paragraph",
-        content:
-          "Polaris is a WYSIWYG Editor, built on top of Web APIs and React for creating a rich editing experiences. With powerful editing support, you can write and get exact output in HTML.",
+        data: "Polaris is a WYSIWYG Editor, built on top of Web APIs and React for creating a rich editing experiences. With powerful editing support, you can write and get exact output in HTML.",
         style: [],
       },
       {
         id: "TYAXBBKurgZShm4a7jpE5fDVBFuCeg",
         role: "paragraph",
-        content: "",
+        data: "",
         style: [],
       },
       {
         id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg",
         role: "heading",
-        content: "Features",
+        data: "Features",
         style: [],
       },
       {
         id: "k9A1BBKurgZShZ4a7jpE5fDKuFuCeg",
         role: "numberedList",
-        content: [
+        data: [
           {
             id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg1",
             role: "paragraph",
-            content: "'/' (slash) commands for performing various actions.",
+            data: "'/' (slash) commands for performing various actions.",
             style: [],
           },
           {
             id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg2",
             role: "paragraph",
-            content:
-              'Selection menu for applying inline styling such as <span data-type="inline-specifier" style="font-weight: bold;">bold</span>, <span data-type="inline-specifier" style="font-style: italic;">italic</span>, <span data-type="inline-specifier" style="text-decoration: underline;">underline</span> and <span data-type="inline-specifier" data-link="https://mihirpaldhikar.com" style="text-decoration: underline;">links</span>.',
+            data: 'Selection menu for applying inline styling such as <span data-type="inline-specifier" style="font-weight: bold;">bold</span>, <span data-type="inline-specifier" style="font-style: italic;">italic</span>, <span data-type="inline-specifier" style="text-decoration: underline;">underline</span> and <span data-type="inline-specifier" data-link="https://mihirpaldhikar.com" style="text-decoration: underline;">links</span>.',
             style: [],
           },
           {
             id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg3",
             role: "paragraph",
-            content: "Markdown support",
+            data: "Markdown support",
             style: [],
           },
           {
             id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg4",
             role: "paragraph",
-            content: "Images support",
+            data: "Images support",
             style: [],
           },
         ],
@@ -102,8 +100,7 @@ export default function Home(): JSX.Element {
       {
         id: "k9A1BBKurgZShm4a6JpE5fDKuFuCeg",
         role: "quote",
-        content:
-          "This is an interactive playground. Start writing in the editor to experience the power of Polaris.",
+        data: "This is an interactive playground. Start writing in the editor to experience the power of Polaris.",
         style: [],
       },
     ],
