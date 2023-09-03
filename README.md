@@ -33,13 +33,13 @@ export default function MyApp(): JSX.Element {
       {
         id: generateBlockId(),
         role: "title",
-        content: "Introducing Polaris",
+        data: "Introducing Polaris",
         style: [],
       },
       {
         id: generateBlockId(),
         role: "paragraph",
-        content: "Polaris is a rich semantic content editor.",
+        data: "Polaris is a rich semantic content editor.",
         style: [],
       },
     ],
@@ -93,13 +93,13 @@ const blob: Blob = {
     {
       id: generateBlockId(),
       role: "title",
-      content: "Introducing Polaris",
+      data: "Introducing Polaris",
       style: [],
     },
     {
       id: generateBlockId(),
       role: "paragraph",
-      content: "Polaris is a rich semantic content editor.",
+      data: "Polaris is a rich semantic content editor.",
       style: [],
     },
   ],
