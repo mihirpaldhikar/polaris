@@ -22,10 +22,10 @@
 
 import { Fragment, type JSX, useCallback, useEffect, useState } from "react";
 import {
+  type Attachment,
   type Blob,
   type Block,
   type Coordinates,
-  type ImageContent,
   type InputArgs,
   type Menu,
   type Style,
@@ -50,7 +50,7 @@ import {
   traverseAndUpdate,
   traverseAndUpdateBelow,
 } from "../../utils";
-import { type Content, type Role } from "../../types";
+import { type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
 import { SelectionMenu } from "../SelectionMenu";
 import { MasterActionMenu, MasterSelectionMenu } from "../../assets";
@@ -299,40 +299,38 @@ export default function Editor({
 
   function pasteHandler(
     block: Block,
-    content: Content | Content[],
+    data: string | string[],
     caretOffset: number,
   ): void {
-    if (typeof block.content !== "string") return;
+    if (typeof block.data !== "string") return;
     const blockIndex = masterBlocks.indexOf(block);
-    block.content = normalizeContent(block.content);
+    block.data = normalizeContent(block.data);
     const contentLengthAfterCaretOffset =
-      block.content.substring(caretOffset).length;
+      block.data.substring(caretOffset).length;
 
     if (
       blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-      Array.isArray(content)
+      Array.isArray(data)
     ) {
-      const pasteBlocks: Block[] = content.map((copiedText, index) => {
+      const pasteBlocks: Block[] = data.map((copiedText, index) => {
         return {
           id: generateBlockId(),
           role: block.role,
           style: block.style,
-          content:
+          data:
             index === 0
-              ? (block.content as string)
+              ? (block.data as string)
                   .substring(0, caretOffset)
                   .concat(copiedText)
-              : index === content.length - 1
-              ? copiedText.concat(
-                  (block.content as string).substring(caretOffset),
-                )
+              : index === data.length - 1
+              ? copiedText.concat((block.data as string).substring(caretOffset))
               : copiedText,
         };
       });
       masterBlocks.splice(blockIndex, 1, ...pasteBlocks);
 
       const pasteContentLength = normalizeContent(
-        pasteBlocks[pasteBlocks.length - 1].content as string,
+        pasteBlocks[pasteBlocks.length - 1].data as string,
       ).length;
 
       const computedCaretOffset: number =
@@ -346,18 +344,16 @@ export default function Editor({
       });
     } else if (
       blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-      typeof content === "string"
+      typeof data === "string"
     ) {
-      masterBlocks[blockIndex].content = (
-        masterBlocks[blockIndex].content as string
-      )
+      masterBlocks[blockIndex].data = (masterBlocks[blockIndex].data as string)
         .substring(0, caretOffset)
-        .concat(content)
+        .concat(data)
         .concat(
-          (masterBlocks[blockIndex].content as string).substring(caretOffset),
+          (masterBlocks[blockIndex].data as string).substring(caretOffset),
         );
 
-      const pasteContentLength = normalizeContent(block.content).length;
+      const pasteContentLength = normalizeContent(block.data).length;
 
       const computedCaretOffset: number =
         pasteContentLength - contentLengthAfterCaretOffset < 0
@@ -466,13 +462,13 @@ export default function Editor({
           switch (executable.type) {
             case "style": {
               inlineSpecifierManager(blockNode, executable.args as Style[]);
-              block.content = blockNode.innerHTML;
+              block.data = blockNode.innerHTML;
               changeHandler(block);
               break;
             }
             case "link": {
               inlineSpecifierManager(blockNode, [], executable.args as string);
-              block.content = blockNode.innerHTML;
+              block.data = blockNode.innerHTML;
               changeHandler(block);
               break;
             }
@@ -512,7 +508,7 @@ export default function Editor({
   function actionKeyHandler(
     nodeIndex: number,
     block: Block,
-    previousContent: Content,
+    previousContent: string,
     caretOffset: number,
   ): void {
     masterActionMenu = masterActionMenu.filter((menu) => {
@@ -530,7 +526,7 @@ export default function Editor({
       editorNode == null ||
       currentNode == null ||
       popUpRoot === undefined ||
-      typeof block.content !== "string"
+      typeof block.data !== "string"
     ) {
       return;
     }
@@ -551,15 +547,14 @@ export default function Editor({
       id: generateBlockId(),
       style: block.style,
       role: block.role,
-      content: previousContent,
+      data: previousContent,
     };
     const { x, y } = getCaretCoordinates(true);
     const actionMenuCoordinates: Coordinates = {
-      x: block.content.length === 0 ? currentNode.getBoundingClientRect().x : x,
+      x: block.data.length === 0 ? currentNode.getBoundingClientRect().x : x,
       y:
-        (block.content.length === 0
-          ? currentNode.getBoundingClientRect().y
-          : y) + 30,
+        (block.data.length === 0 ? currentNode.getBoundingClientRect().y : y) +
+        30,
     };
 
     dispatchEvent("onActionMenu", {
@@ -589,19 +584,19 @@ export default function Editor({
               newBlock.role = execute.args as Role;
 
               if (blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE) {
-                newBlock.content = {
+                newBlock.data = {
                   url: "",
                   description: "",
                   width: 300,
                   height: 200,
-                } satisfies ImageContent;
+                } satisfies Attachment;
               } else if (
                 blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
               ) {
-                newBlock.content = [
+                newBlock.data = [
                   {
                     id: generateBlockId(),
-                    content: previousContent,
+                    data: previousContent,
                     role: block.role,
                     style: [],
                   },
@@ -613,8 +608,8 @@ export default function Editor({
                   currentNode.parentElement?.parentElement as HTMLElement,
                 );
 
-                if (Array.isArray(currentBlockParent.content)) {
-                  const currentBlockIndex = currentBlockParent.content
+                if (Array.isArray(currentBlockParent.data)) {
+                  const currentBlockIndex = currentBlockParent.data
                     .map((blk) => blk.id)
                     .indexOf(block.id);
 
@@ -623,22 +618,22 @@ export default function Editor({
                   ) {
                     if (
                       currentBlockIndex ===
-                      currentBlockParent.content.length - 1
+                      currentBlockParent.data.length - 1
                     ) {
                       const emptyBlock: Block = {
                         id: generateBlockId(),
-                        content: "",
+                        data: "",
                         role: "paragraph",
                         style: [],
                       };
-                      currentBlockParent.content.splice(
+                      currentBlockParent.data.splice(
                         currentBlockIndex + 1,
                         0,
                         emptyBlock,
                       );
                     }
-                    block.content = previousContent;
-                    currentBlockParent.content.splice(
+                    block.data = previousContent;
+                    currentBlockParent.data.splice(
                       currentBlockIndex,
                       1,
                       ...[block, newBlock],
@@ -646,12 +641,12 @@ export default function Editor({
                   } else if (
                     blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
                   ) {
-                    block.content = newBlock.content;
+                    block.data = newBlock.data;
                     block.role = newBlock.role;
                     block.style = newBlock.style;
-                    traverseAndUpdate(currentBlockParent.content, block);
+                    traverseAndUpdate(currentBlockParent.data, block);
                   } else {
-                    currentBlockParent.content.splice(
+                    currentBlockParent.data.splice(
                       currentBlockIndex,
                       1,
                       newBlock,
@@ -664,7 +659,7 @@ export default function Editor({
                 if (
                   blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
                 ) {
-                  block.content = previousContent;
+                  block.data = previousContent;
                   traverseAndUpdate(masterBlocks, block);
                   traverseAndUpdateBelow(masterBlocks, block, newBlock);
                   const newBlockIndex = traverseAndFindBlockPosition(
@@ -675,7 +670,7 @@ export default function Editor({
                   if (newBlockIndex === masterBlocks.length - 1) {
                     const emptyBlock: Block = {
                       id: generateBlockId(),
-                      content: "",
+                      data: "",
                       role: "paragraph",
                       style: [],
                     };
@@ -695,7 +690,7 @@ export default function Editor({
                     }
                   : blockRenderTypeFromRole(newBlock.role) === RenderType.LIST
                   ? {
-                      nodeId: (newBlock.content as Block[])[0].id,
+                      nodeId: (newBlock.data as Block[])[0].id,
                       caretOffset,
                     }
                   : {
@@ -707,7 +702,7 @@ export default function Editor({
             }
             case "style": {
               if (Array.isArray(execute.args)) {
-                block.content = previousContent;
+                block.data = previousContent;
                 block.style.push(...execute.args);
                 traverseAndUpdate(masterBlocks, block);
                 propagateChanges(masterBlocks, {
@@ -728,15 +723,15 @@ export default function Editor({
   }
 
   function imageRequestHandler(block: Block, file: File): void {
-    if (block.role !== "image" || typeof block.content !== "object") {
+    if (block.role !== "image" || typeof block.data !== "object") {
       return;
     }
 
     const blockIndex = masterBlocks.indexOf(block);
     void onImageSelected(file).then((str) => {
-      (block.content as ImageContent).url = str;
-      (block.content as ImageContent).height = 300;
-      (block.content as ImageContent).width = 500;
+      (block.data as Attachment).url = str;
+      (block.data as Attachment).height = 300;
+      (block.data as Attachment).width = 500;
       block.id = generateBlockId();
       masterBlocks[blockIndex] = block;
       propagateChanges(masterBlocks, {
@@ -751,7 +746,7 @@ export default function Editor({
     propagateChanges(masterBlocks, {
       nodeId:
         blockRenderTypeFromRole(block.role) === RenderType.LIST
-          ? (block.content as Block[])[0].id
+          ? (block.data as Block[])[0].id
           : block.id,
       caretOffset: 0,
     });

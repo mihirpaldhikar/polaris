@@ -32,9 +32,9 @@ import {
 } from "../../utils";
 import { BLOCK_NODE } from "../../constants";
 import {
+  type Attachment,
   type Block,
   type Coordinates,
-  type ImageContent,
 } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
 import RenderType from "../../enums/RenderType";
@@ -68,19 +68,19 @@ export default function ImageRenderer({
 }: ImageRendererProps): JSX.Element {
   const { popUpRoot } = useContext(RootContext);
 
-  const imageData = block.content as ImageContent;
+  const imageData = block.data as Attachment;
 
   function deleteHandler(): void {
     if (
       parentBlock !== undefined &&
       blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-      Array.isArray(parentBlock.content)
+      Array.isArray(parentBlock.data)
     ) {
-      const currentBlockIndex = parentBlock.content
+      const currentBlockIndex = parentBlock.data
         .map((blk) => blk.id)
         .indexOf(block.id);
       if (currentBlockIndex !== -1) {
-        parentBlock.content.splice(currentBlockIndex, 1);
+        parentBlock.data.splice(currentBlockIndex, 1);
 
         let previousNode: HTMLElement | null = null;
 
@@ -89,7 +89,7 @@ export default function ImageRenderer({
           previousNode = currentNodeSibling.previous;
         } else {
           previousNode = getBlockNode(
-            parentBlock.content[currentBlockIndex - 1].id,
+            parentBlock.data[currentBlockIndex - 1].id,
           );
         }
         if (previousNode !== null) {
@@ -211,13 +211,13 @@ export default function ImageRenderer({
                 popUpRoot.render(
                   <SizeDialog
                     initialSize={{
-                      width: (block.content as ImageContent).width,
-                      height: (block.content as ImageContent).height,
+                      width: (block.data as Attachment).width,
+                      height: (block.data as Attachment).height,
                     }}
                     coordinates={coordinates}
                     onConfirm={(width, height) => {
-                      (block.content as ImageContent).width = width;
-                      (block.content as ImageContent).height = height;
+                      (block.data as Attachment).width = width;
+                      (block.data as Attachment).height = height;
                       onChange(block);
                     }}
                     onClose={() => {
@@ -233,8 +233,8 @@ export default function ImageRenderer({
           <div
             title={"Change Image"}
             onClick={() => {
-              (block.content as ImageContent).url = "";
-              (block.content as ImageContent).description = "";
+              (block.data as Attachment).url = "";
+              (block.data as Attachment).description = "";
               onChange(block);
             }}
           >

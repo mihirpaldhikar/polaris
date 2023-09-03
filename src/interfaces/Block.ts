@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-import { type Content, type Role } from "../types";
+import { type Role } from "../types";
 import type Style from "./Style";
-import { type ImageContent } from "./index";
+import { type Attachment } from "./index";
 
 /**
  * @interface Block
@@ -35,7 +35,7 @@ import { type ImageContent } from "./index";
 interface Block {
   id: string;
   role: Role;
-  content: Content | Block[] | ImageContent;
+  data: string | Attachment | Block[];
   style: Style[];
 }
 

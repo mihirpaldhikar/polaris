@@ -22,8 +22,8 @@
 
 import { type Role } from "../types";
 import {
+  type Attachment,
   type Block,
-  type ImageContent,
   type Siblings,
   type Style,
 } from "../interfaces";
@@ -233,7 +233,7 @@ export function traverseAndUpdate(
     } else if (
       blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
     ) {
-      traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
+      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
     }
   }
 }
@@ -249,7 +249,7 @@ export function traverseAndDelete(
     } else if (
       blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
     ) {
-      traverseAndDelete(masterBlocks[i].content as Block[], targetBlock);
+      traverseAndDelete(masterBlocks[i].data as Block[], targetBlock);
     }
   }
 }
@@ -266,7 +266,7 @@ export function traverseAndUpdateBelow(
     } else if (
       blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
     ) {
-      traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
+      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
     }
   }
 }
@@ -280,7 +280,7 @@ export function traverseAndFindBlockPosition(
       return i;
     }
     if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
-      traverseAndUpdate(masterBlocks[i].content as Block[], targetBlock);
+      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
     }
   }
   return -1;
@@ -292,7 +292,7 @@ export function getParentBlock(
 ): Block[] {
   const find = (block: Block): any =>
     block.id.includes(blockId) ||
-    (Array.isArray(block.content) && block.content.find(find));
+    (Array.isArray(block.data) && block.data.find(find));
   return masterBlocks.filter(find);
 }
 
@@ -352,7 +352,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
     }
     return {
       id: node.id,
-      content: blocks,
+      data: blocks,
       role: getBlockRoleFromNode(node),
       style,
     };
@@ -362,7 +362,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
     const imageNode = node as HTMLImageElement;
     return {
       id: node.id,
-      content: {
+      data: {
         url: imageNode.src,
         description: imageNode.alt,
         width: imageNode.width,
@@ -379,7 +379,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
   ) {
     return {
       id: node.id,
-      content: {
+      data: {
         url: "",
         description: "",
         width: 0,
@@ -392,7 +392,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
 
   return {
     id: node.id,
-    content: node.innerHTML,
+    data: node.innerHTML,
     role: getBlockRoleFromNode(node),
     style,
   };
@@ -408,8 +408,8 @@ export function getEditorRoot(): HTMLElement {
 export function serializeBlockToNode(block: Block): HTMLElement | null {
   if (
     blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
-    typeof block.content === "object" &&
-    (block.content as ImageContent).url === ""
+    typeof block.data === "object" &&
+    (block.data as Attachment).url === ""
   ) {
     return null;
   }
@@ -421,9 +421,9 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
 
   if (
     blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-    typeof block.content === "string"
+    typeof block.data === "string"
   ) {
-    node.innerHTML = block.content;
+    node.innerHTML = block.data;
     for (const childNode of node.childNodes) {
       if (isInlineSpecifierNode(childNode)) {
         const element = childNode as HTMLElement;
@@ -439,8 +439,8 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     }
   } else if (
     blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
-    typeof block.content === "object" &&
-    (block.content as ImageContent).url !== ""
+    typeof block.data === "object" &&
+    (block.data as Attachment).url !== ""
   ) {
     node = document.createElement("div");
     node.style.setProperty("width", "100%");
@@ -451,17 +451,17 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     childNode.style.setProperty("display", "inline-block");
     const imageNode = document.createElement("img");
     imageNode.style.setProperty("display", "inline-block");
-    imageNode.src = (block.content as ImageContent).url;
-    imageNode.alt = (block.content as ImageContent).description;
-    imageNode.width = (block.content as ImageContent).width;
-    imageNode.height = (block.content as ImageContent).height;
+    imageNode.src = (block.data as Attachment).url;
+    imageNode.alt = (block.data as Attachment).description;
+    imageNode.width = (block.data as Attachment).width;
+    imageNode.height = (block.data as Attachment).height;
     childNode.innerHTML = imageNode.outerHTML;
     node.appendChild(childNode);
   } else if (
     blockRenderTypeFromRole(block.role) === RenderType.LIST &&
-    Array.isArray(block.content)
+    Array.isArray(block.data)
   ) {
-    for (let i = 0; i < block.content.length; i++) {
+    for (let i = 0; i < block.data.length; i++) {
       node.style.setProperty("list-style-position", "outside");
       node.style.setProperty(
         "list-style-type",
@@ -470,7 +470,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       const listNode = document.createElement("li");
       listNode.style.setProperty("margin-left", "3px");
       listNode.style.setProperty("margin-right", "3px");
-      const listChild = serializeBlockToNode(block.content[i]);
+      const listChild = serializeBlockToNode(block.data[i]);
       if (listChild !== null) {
         listNode.innerHTML = listChild.outerHTML;
       }

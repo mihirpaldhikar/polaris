@@ -874,7 +874,7 @@ export function splitBlocksAtCaretOffset(
   const newBlock: Block = {
     id: generateBlockId(),
     role: "paragraph",
-    content: "",
+    data: "",
     style: [],
   };
 
@@ -924,8 +924,8 @@ export function splitBlocksAtCaretOffset(
     }
   }
   block.id = generateBlockId();
-  block.content = currentBlockContent;
-  newBlock.content = newBlockContent;
+  block.data = currentBlockContent;
+  newBlock.data = newBlockContent;
   newBlock.role = block.role;
   newBlock.style = block.style;
 

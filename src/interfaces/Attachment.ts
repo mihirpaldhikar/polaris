@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-interface ImageContent {
+interface Attachment {
   url: string;
   description: string;
   height: number;
   width: number;
 }
 
-export default ImageContent;
+export default Attachment;

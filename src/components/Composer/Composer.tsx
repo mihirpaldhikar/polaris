@@ -51,7 +51,6 @@ import {
   traverseAndUpdate,
   unsubscribeFromEvent,
 } from "../../utils";
-import { type Content } from "../../types";
 import RenderType from "../../enums/RenderType";
 import { ImageRenderer, TextRenderer } from "../../renderers";
 import { BLOCK_NODE } from "../../constants";
@@ -72,16 +71,12 @@ interface ComposerProps {
     nodeId: string,
     setCursorToStart?: boolean,
   ) => void;
-  onPaste: (
-    block: Block,
-    content: Content | Content[],
-    caretOffset: number,
-  ) => void;
+  onPaste: (block: Block, data: string | string[], caretOffset: number) => void;
   onSelect: (block: Block) => void;
   onActionKeyPressed: (
     nodeIndex: number,
     block: Block,
-    previousContent: Content,
+    previousContent: string,
     caretOffset: number,
   ) => void;
   onImageRequest: (block: Block, file: File) => void;
@@ -162,13 +157,13 @@ export default function Composer({
 
     switch (blockRenderType) {
       case RenderType.TEXT: {
-        block.content = event.target.innerHTML;
+        block.data = event.target.innerHTML;
         break;
       }
       case RenderType.LIST: {
-        if (childBlock !== undefined && Array.isArray(block.content)) {
-          const blockIndex = block.content.indexOf(childBlock);
-          block.content[blockIndex].content = event.target.innerHTML;
+        if (childBlock !== undefined && Array.isArray(block.data)) {
+          const blockIndex = block.data.indexOf(childBlock);
+          block.data[blockIndex].data = event.target.innerHTML;
           break;
         }
       }
@@ -202,22 +197,22 @@ export default function Composer({
 
         let newBlock: Block = {
           id: generateBlockId(),
-          content: "",
+          data: "",
           role: "paragraph",
           style: [],
         };
         if (
           parentBlock !== undefined &&
           blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-          Array.isArray(parentBlock.content)
+          Array.isArray(parentBlock.data)
         ) {
-          const currentChildBlockIndex = parentBlock.content
+          const currentChildBlockIndex = parentBlock.data
             .map((blk) => blk.id)
             .indexOf(block.id);
 
           if (
             currentBlockNode.innerText.length === 0 &&
-            currentChildBlockIndex === parentBlock.content.length - 1
+            currentChildBlockIndex === parentBlock.data.length - 1
           ) {
             const parentSiblings = getNodeSiblings(parentBlock.id);
 
@@ -229,27 +224,27 @@ export default function Composer({
               const previousParentBlock = serializeNodeToBlock(
                 parentSiblings.previous.parentElement.parentElement,
               );
-              parentBlock.content.splice(currentChildBlockIndex, 1);
+              parentBlock.data.splice(currentChildBlockIndex, 1);
               traverseAndUpdate(
-                previousParentBlock.content as Block[],
+                previousParentBlock.data as Block[],
                 parentBlock,
               );
-              (previousParentBlock.content as Block[]).push(newBlock);
+              (previousParentBlock.data as Block[]).push(newBlock);
               onCreate(previousParentBlock, newBlock, "list");
             } else {
-              parentBlock.content.pop();
+              parentBlock.data.pop();
               onCreate(parentBlock, newBlock, "nonList");
             }
           } else if (caretOffset !== currentBlockNode.innerText.length) {
             const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
             newBlock = spiltBlockPair[1];
-            parentBlock.content.splice(
+            parentBlock.data.splice(
               currentChildBlockIndex,
               1,
               ...spiltBlockPair,
             );
           } else {
-            parentBlock.content.splice(currentChildBlockIndex + 1, 0, newBlock);
+            parentBlock.data.splice(currentChildBlockIndex + 1, 0, newBlock);
           }
           onCreate(parentBlock, newBlock, "list");
         } else {
@@ -273,12 +268,12 @@ export default function Composer({
         if (
           parentBlock !== undefined &&
           blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-          Array.isArray(parentBlock.content) &&
+          Array.isArray(parentBlock.data) &&
           caretOffset === 0
         ) {
           event.preventDefault();
 
-          const currentChildBlockIndex = parentBlock.content
+          const currentChildBlockIndex = parentBlock.data
             .map((blk) => blk.id)
             .indexOf(block.id);
 
@@ -286,17 +281,16 @@ export default function Composer({
             blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
             currentChildBlockIndex !== 0
           ) {
-            const previousBlock =
-              parentBlock.content[currentChildBlockIndex - 1];
+            const previousBlock = parentBlock.data[currentChildBlockIndex - 1];
 
             if (
               blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
             ) {
-              previousBlock.content = (previousBlock.content as string).concat(
-                block.content as string,
+              previousBlock.data = (previousBlock.data as string).concat(
+                block.data as string,
               );
 
-              parentBlock.content.splice(
+              parentBlock.data.splice(
                 currentChildBlockIndex - 1,
                 2,
                 previousBlock,
@@ -315,20 +309,20 @@ export default function Composer({
               const previousParentBlock = serializeNodeToBlock(
                 parentSiblings.previous.parentElement.parentElement,
               );
-              if (Array.isArray(previousParentBlock.content)) {
-                const parentBlockIndex = previousParentBlock.content
+              if (Array.isArray(previousParentBlock.data)) {
+                const parentBlockIndex = previousParentBlock.data
                   .map((blk) => blk.id)
                   .indexOf(parentBlock.id);
 
-                previousParentBlock.content.splice(
+                previousParentBlock.data.splice(
                   parentBlockIndex,
                   1,
-                  ...parentBlock.content,
+                  ...parentBlock.data,
                 );
                 onDelete(
                   previousParentBlock,
-                  previousParentBlock.content[parentBlockIndex],
-                  previousParentBlock.content[parentBlockIndex].id,
+                  previousParentBlock.data[parentBlockIndex],
+                  previousParentBlock.data[parentBlockIndex].id,
                   true,
                 );
               }
@@ -337,11 +331,11 @@ export default function Composer({
                 const previousParentBlock = serializeNodeToBlock(
                   parentSiblings.previous,
                 );
-                const parentFirstChild = parentBlock.content[0];
+                const parentFirstChild = parentBlock.data[0];
                 onCreate(previousParentBlock, parentFirstChild, "nonList");
-                if (parentBlock.content.length === 1) {
+                if (parentBlock.data.length === 1) {
                   parentBlock.role = "paragraph";
-                  parentBlock.content = "";
+                  parentBlock.data = "";
                   onDelete(
                     parentBlock,
                     parentFirstChild,
@@ -349,7 +343,7 @@ export default function Composer({
                     true,
                   );
                 } else {
-                  parentBlock.content.splice(0, 1);
+                  parentBlock.data.splice(0, 1);
                   onDelete(
                     parentBlock,
                     parentFirstChild,
@@ -372,8 +366,8 @@ export default function Composer({
               currentNodeSiblings.previous,
             );
 
-            previousBlock.content = (previousBlock.content as string).concat(
-              block.content as string,
+            previousBlock.data = (previousBlock.data as string).concat(
+              block.data as string,
             );
 
             onDelete(block, previousBlock, previousBlock.id);
@@ -387,20 +381,20 @@ export default function Composer({
                 ?.parentElement as HTMLElement,
             );
 
-            const previousBlockLastChild = (previousBlock.content as Block[])[
-              (previousBlock.content as Block[]).length - 1
+            const previousBlockLastChild = (previousBlock.data as Block[])[
+              (previousBlock.data as Block[]).length - 1
             ];
 
             if (
               blockRenderTypeFromRole(previousBlockLastChild.role) ===
               RenderType.TEXT
             ) {
-              previousBlockLastChild.content = (
-                previousBlockLastChild.content as string
-              ).concat(block.content as string);
+              previousBlockLastChild.data = (
+                previousBlockLastChild.data as string
+              ).concat(block.data as string);
 
-              (previousBlock.content as Block[])[
-                (previousBlock.content as Block[]).length - 1
+              (previousBlock.data as Block[])[
+                (previousBlock.data as Block[]).length - 1
               ] = previousBlockLastChild;
 
               onDelete(block, previousBlock, previousBlockLastChild.id);
@@ -414,47 +408,47 @@ export default function Composer({
         break;
       }
       case " ": {
-        if (typeof block.content === "string") {
-          switch (block.content) {
+        if (typeof block.data === "string") {
+          switch (block.data) {
             case "#": {
               event.preventDefault();
               block.role = "title";
-              block.content = "";
+              block.data = "";
               break;
             }
             case "##": {
               event.preventDefault();
               block.role = "subTitle";
-              block.content = "";
+              block.data = "";
               break;
             }
             case "###": {
               event.preventDefault();
               block.role = "heading";
-              block.content = "";
+              block.data = "";
               break;
             }
             case "####": {
               event.preventDefault();
               block.role = "subHeading";
-              block.content = "";
+              block.data = "";
               break;
             }
             case "&gt;":
             case ">": {
               event.preventDefault();
               block.role = "quote";
-              block.content = "";
+              block.data = "";
               break;
             }
             case "+":
             case "-": {
               event.preventDefault();
               block.role = "bulletList";
-              block.content = [
+              block.data = [
                 {
                   id: generateBlockId(),
-                  content: "",
+                  data: "",
                   role: "paragraph",
                   style: [],
                 },
@@ -462,13 +456,13 @@ export default function Composer({
               break;
             }
             default: {
-              if (/^\d+\.$/.test(block.content)) {
+              if (/^\d+\.$/.test(block.data)) {
                 event.preventDefault();
                 block.role = "numberedList";
-                block.content = [
+                block.data = [
                   {
                     id: generateBlockId(),
-                    content: "",
+                    data: "",
                     role: "paragraph",
                     style: [],
                   },
@@ -497,7 +491,7 @@ export default function Composer({
 
           inlineSpecifierManager(currentBlockNode, style);
 
-          block.content = currentBlockNode.innerHTML;
+          block.data = currentBlockNode.innerHTML;
           onChange(block);
         }
         break;
@@ -513,7 +507,7 @@ export default function Composer({
           ];
 
           inlineSpecifierManager(currentBlockNode, style);
-          block.content = currentBlockNode.innerHTML;
+          block.data = currentBlockNode.innerHTML;
           onChange(block);
         }
         break;
@@ -530,7 +524,7 @@ export default function Composer({
           ];
 
           inlineSpecifierManager(currentBlockNode, style);
-          block.content = currentBlockNode.innerHTML;
+          block.data = currentBlockNode.innerHTML;
           onChange(block);
         }
         break;
@@ -808,7 +802,7 @@ export default function Composer({
     if (currentBlockNode === null) return;
 
     const caretOffset = getCaretOffset(currentBlockNode);
-    if (typeof block.content === "string") {
+    if (typeof block.data === "string") {
       const computedCaretOffset =
         window.navigator.userAgent.toLowerCase().includes("android") ||
         window.navigator.userAgent.includes("iphone")
@@ -829,7 +823,7 @@ export default function Composer({
           getNodeAt(currentBlockNode, caretOffset),
         ),
         block,
-        block.content,
+        block.data,
         computedCaretOffset,
       );
     }
@@ -863,7 +857,7 @@ export default function Composer({
 
   if (
     blockRenderTypeFromRole(block.role) === RenderType.LIST &&
-    Array.isArray(block.content)
+    Array.isArray(block.data)
   ) {
     return createElement(
       nodeTypeFromRole(block.role),
@@ -880,7 +874,7 @@ export default function Composer({
           block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },
-      block.content.map((childBlock) => {
+      block.data.map((childBlock) => {
         return (
           <li key={childBlock.id}>
             <Composer

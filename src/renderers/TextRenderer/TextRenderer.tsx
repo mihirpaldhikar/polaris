@@ -56,7 +56,7 @@ export default function TextRenderer({
     role: block.role,
     disabled: !editable,
     contentEditable: editable,
-    dangerouslySetInnerHTML: { __html: block.content },
+    dangerouslySetInnerHTML: { __html: block.data },
     style: setNodeStyle(block.style),
     placeholder: getPlaceholderFromRole(block.role),
     spellCheck: true,

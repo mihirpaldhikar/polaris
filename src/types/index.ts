@@ -21,5 +21,4 @@
  */
 
 export type { default as Role } from "./Role";
-export type { default as Content } from "./Content";
 export type { default as BlockFunction } from "./BlockFunction";

@@ -28,4 +28,4 @@ export type { default as Siblings } from "./Siblings";
 export type { default as Menu } from "./Menu";
 export type { default as Executable } from "./Executable";
 export type { default as InputArgs } from "./InputArgs";
-export type { default as ImageContent } from "./ImageContent";
+export type { default as Attachment } from "./Attachment";
