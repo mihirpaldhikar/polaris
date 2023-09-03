@@ -1,3 +1,15 @@
+## 0.2.4 (September 3, 2023)
+
+### Breaking Changes:
+
+- `content` field of `Block` is now renamed to `data`.
+- `selectionMenu` prop of `Editor` is now renamed to `inlineTools`.
+
+### Fixes:
+
+- Fix an issue in which the selection color of editor was getting applied to whole document.
+- Fix an issue in which the background color of `quote` was too dark.
+
 ## 0.2.3 (September 2, 2023)
 
 ### Fixes:
