@@ -24,19 +24,19 @@
 @tailwind components;
 @tailwind utilities;
 
-::selection {
-  background-color: #e5e7eb;
+.editor {
+    @apply selection:bg-slate-200;
 }
 
 .filePicker::-webkit-file-upload-button {
-  visibility: hidden;
+    visibility: hidden;
 }
 
 .filePicker {
-  color: transparent;
+    color: transparent;
 }
 
 .text_renderer:focus[placeholder]:empty:before {
-  content: attr(placeholder);
-  color: #c2c1c1;
+    content: attr(placeholder);
+    color: #c2c1c1;
 }

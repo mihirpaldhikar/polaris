@@ -71,7 +71,7 @@ export default function TextRenderer({
         : block.role === "subHeading"
         ? "font-medium text-[19px]"
         : block.role === "quote"
-        ? "rounded-md border-l-[6px] border-gray-400 bg-gray-200 p-4"
+        ? "rounded-md font-medium border-l-[8px] border-gray-300 bg-gray-100 p-4"
         : "font-normal text-[17px]",
     ),
     onInput: (event: ChangeEvent<HTMLElement>) => {
