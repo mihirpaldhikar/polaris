@@ -20,5 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as MasterActionMenu } from "./MasterActionMenu";
-export { default as MasterSelectionMenu } from "./MasterSelectionMenu";
+export { default as InlineTools } from "./InlineTools";

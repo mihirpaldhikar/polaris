@@ -20,4 +20,5 @@
  * SOFTWARE.
  */
 
-export { default as SelectionMenu } from "./SelectionMenu";
+export { default as MasterBlockTools } from "./MasterBlockTools";
+export { default as MasterInlineTools } from "./MasterInlineTools";

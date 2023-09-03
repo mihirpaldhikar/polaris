@@ -29,7 +29,7 @@ const ACTION_MENU_HEIGHT: number = 200;
 const ACTION_MENU_WIDTH: number = 250;
 const ACTION_MENU_OPTION_HEIGHT: number = 60;
 
-interface ActionMenuProps {
+interface BlockToolsProps {
   coordinates: Coordinates;
   menu: readonly Menu[];
   onSelect: (execute: Executable) => void;
@@ -37,13 +37,13 @@ interface ActionMenuProps {
   onEscape: (query: string) => void;
 }
 
-export default function ActionMenu({
+export default function BlockTools({
   coordinates,
   menu,
   onSelect,
   onClose,
   onEscape,
-}: ActionMenuProps): JSX.Element {
+}: BlockToolsProps): JSX.Element {
   const xAxis =
     window.innerWidth > 500
       ? window.innerWidth - (coordinates.x + ACTION_MENU_WIDTH) <= 0

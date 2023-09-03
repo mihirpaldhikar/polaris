@@ -34,7 +34,7 @@ import {
 } from "../icons";
 import { REMOVE_COLOR, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
-const MasterSelectionMenu: readonly Menu[] = [
+const MasterInlineTools: readonly Menu[] = [
   {
     id: generateMenuId(),
     name: "Bold",
@@ -182,4 +182,4 @@ const MasterSelectionMenu: readonly Menu[] = [
   },
 ];
 
-export default MasterSelectionMenu;
+export default MasterInlineTools;

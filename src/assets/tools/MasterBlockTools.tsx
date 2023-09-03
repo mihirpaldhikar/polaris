@@ -37,7 +37,7 @@ import {
   TitleIcon,
 } from "../icons";
 
-const MasterActionMenu: readonly Menu[] = [
+const MasterBlockTools: readonly Menu[] = [
   {
     id: generateMenuId(),
     name: "Title",
@@ -211,4 +211,4 @@ const MasterActionMenu: readonly Menu[] = [
   },
 ];
 
-export default MasterActionMenu;
+export default MasterBlockTools;

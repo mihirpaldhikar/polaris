@@ -52,10 +52,10 @@ import {
 } from "../../utils";
 import { type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
-import { SelectionMenu } from "../SelectionMenu";
-import { MasterActionMenu, MasterSelectionMenu } from "../../assets";
+import { InlineTools } from "../InlineTools";
+import { MasterBlockTools, MasterInlineTools } from "../../assets";
 import { LINK_ATTRIBUTE } from "../../constants";
-import { ActionMenu } from "../ActionMenu";
+import { BlockTools } from "../BlockTools";
 import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
@@ -67,7 +67,7 @@ interface EditorProps {
   blob: Blob;
   onSave?: (blob: Blob) => void;
   autoSaveTimeout?: number;
-  selectionMenu?: Menu[];
+  inlineTools?: Menu[];
   onImageSelected: (file: File) => Promise<string>;
   onChange?: (blob: Blob) => void;
 }
@@ -78,7 +78,7 @@ interface EditorProps {
  * @param editable
  * @param blob
  * @param autoSaveTime
- * @param selectionMenu
+ * @param inlineTools
  * @param onSave
  *
  * @description A Workspace is essentially as Editor which manages all the contents of the blob. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
@@ -90,15 +90,15 @@ export default function Editor({
   editable = true,
   blob,
   autoSaveTimeout,
-  selectionMenu,
+  inlineTools,
   onSave,
   onImageSelected,
   onChange,
 }: EditorProps): JSX.Element {
-  let masterSelectionMenu: readonly Menu[] = cloneDeep(
-    MasterSelectionMenu,
-  ).concat(...(selectionMenu ?? []));
-  let masterActionMenu: readonly Menu[] = cloneDeep(MasterActionMenu);
+  let masterInlineTools: readonly Menu[] = cloneDeep(MasterInlineTools).concat(
+    ...(inlineTools ?? []),
+  );
+  let masterBlockTools: readonly Menu[] = cloneDeep(MasterBlockTools);
 
   const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.contents);
   const [focusedNode, setFocusedNode] = useState<
@@ -401,7 +401,7 @@ export default function Editor({
       return;
     }
 
-    for (const menu of masterSelectionMenu) {
+    for (const menu of masterInlineTools) {
       if (menu.execute.type === "style" && Array.isArray(menu.execute.args)) {
         if (
           elementContainsStyle(startNodeParent, menu.execute.args) &&
@@ -446,14 +446,14 @@ export default function Editor({
     }
 
     popUpRoot.render(
-      <SelectionMenu
+      <InlineTools
         dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
-        menus={masterSelectionMenu}
+        menus={masterInlineTools}
         onClose={() => {
           popUpRoot.render(<Fragment />);
-          masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
-            ...(selectionMenu ?? []),
+          masterInlineTools = cloneDeep(MasterInlineTools).concat(
+            ...(inlineTools ?? []),
           );
         }}
         onMenuSelected={(executable) => {
@@ -482,8 +482,8 @@ export default function Editor({
       (event) => {
         if (!event.ctrlKey || !event.shiftKey) {
           popUpRoot.render(<Fragment />);
-          masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
-            ...(selectionMenu ?? []),
+          masterInlineTools = cloneDeep(MasterInlineTools).concat(
+            ...(inlineTools ?? []),
           );
         }
       },
@@ -495,8 +495,8 @@ export default function Editor({
       "mousedown",
       () => {
         popUpRoot.render(<Fragment />);
-        masterSelectionMenu = cloneDeep(MasterSelectionMenu).concat(
-          ...(selectionMenu ?? []),
+        masterInlineTools = cloneDeep(MasterInlineTools).concat(
+          ...(inlineTools ?? []),
         );
       },
       {
@@ -511,7 +511,7 @@ export default function Editor({
     previousContent: string,
     caretOffset: number,
   ): void {
-    masterActionMenu = masterActionMenu.filter((menu) => {
+    masterBlockTools = masterBlockTools.filter((menu) => {
       if (menu.allowedOn !== undefined) {
         return menu.allowedOn?.includes(block.role);
       }
@@ -562,9 +562,9 @@ export default function Editor({
     });
 
     popUpRoot.render(
-      <ActionMenu
+      <BlockTools
         coordinates={actionMenuCoordinates}
-        menu={masterActionMenu}
+        menu={masterBlockTools}
         onClose={() => {
           dispatchEvent("onActionMenu", {
             opened: false,
