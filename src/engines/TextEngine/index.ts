@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as TextRenderer } from "./TextRenderer";
+export { default as TextEngine } from "./TextEngine";

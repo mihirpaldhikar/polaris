@@ -49,7 +49,7 @@ import {
 import RootContext from "../../contexts/RootContext/RootContext";
 import { SizeDialog } from "../../components/SizeDialog";
 
-interface ImageRendererProps {
+interface ImageEngineProps {
   parentBlock?: Block;
   block: Block;
   editable: boolean;
@@ -58,14 +58,14 @@ interface ImageRendererProps {
   onChange: (block: Block) => void;
 }
 
-export default function ImageRenderer({
+export default function ImageEngine({
   parentBlock,
   block,
   editable,
   onImageRequest,
   onDelete,
   onChange,
-}: ImageRendererProps): JSX.Element {
+}: ImageEngineProps): JSX.Element {
   const { popUpRoot } = useContext(RootContext);
 
   const imageData = block.data as Attachment;

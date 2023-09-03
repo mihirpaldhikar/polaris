@@ -32,7 +32,7 @@ import { BLOCK_NODE } from "../../constants";
 import { type Block } from "../../interfaces";
 import type RenderType from "../../enums/RenderType";
 
-interface TextRendererProps {
+interface TextEngineProps {
   block: Block;
   editable: boolean;
   onUpdate: (event: ChangeEvent<HTMLElement>, renderType: RenderType) => void;
@@ -41,14 +41,14 @@ interface TextRendererProps {
   onKeyPressed: (event: KeyboardEvent, index: number) => void;
 }
 
-export default function TextRenderer({
+export default function TextEngine({
   block,
   editable,
   onUpdate,
   onClick,
   onSelect,
   onKeyPressed,
-}: TextRendererProps): JSX.Element {
+}: TextEngineProps): JSX.Element {
   return createElement(nodeTypeFromRole(block.role), {
     "data-type": BLOCK_NODE,
     "data-block-render-type": blockRenderTypeFromRole(block.role),

@@ -20,5 +20,5 @@
  * SOFTWARE.
  */
 
-export { TextRenderer } from "./TextRenderer";
-export { ImageRenderer } from "./ImageRenderer";
+export { TextEngine } from "./TextEngine";
+export { ImageEngine } from "./ImageEngine";

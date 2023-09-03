@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as ImageRenderer } from "./ImageRenderer";
+export { default as ImageEngine } from "./ImageEngine";

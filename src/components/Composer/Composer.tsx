@@ -52,7 +52,7 @@ import {
   unsubscribeFromEvent,
 } from "../../utils";
 import RenderType from "../../enums/RenderType";
-import { ImageRenderer, TextRenderer } from "../../renderers";
+import { ImageEngine, TextEngine } from "../../engines";
 import { BLOCK_NODE } from "../../constants";
 
 interface ComposerProps {
@@ -831,7 +831,7 @@ export default function Composer({
 
   if (blockRenderTypeFromRole(block.role) === RenderType.TEXT) {
     return (
-      <TextRenderer
+      <TextEngine
         block={block}
         editable={editable}
         onUpdate={notifyChange}
@@ -844,7 +844,7 @@ export default function Composer({
 
   if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
     return (
-      <ImageRenderer
+      <ImageEngine
         parentBlock={parentBlock}
         block={block}
         onChange={onChange}
