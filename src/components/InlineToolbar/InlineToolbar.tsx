@@ -75,7 +75,7 @@ export default function InlineToolbar({
         left: xAxis,
       }}
       className={
-        "fixed z-10 flex flex-row items-center rounded-lg border border-black/10 bg-white py-0.5 shadow-md"
+        "fixed z-10 flex flex-row items-center rounded-lg border border-gray-200 bg-white py-0.5 shadow-md"
       }
     >
       {menus.map((menu) => {

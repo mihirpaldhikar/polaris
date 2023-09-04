@@ -178,7 +178,7 @@ export default function BlockTools({
         left: xAxis,
       }}
       className={
-        "fixed z-10 flex max-h-[200px] w-[250px] scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-black/10 bg-white p-1 shadow-md"
+        "fixed z-10 flex max-h-[200px] w-[250px] scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-md"
       }
     >
       {matchedMenu.map((menu) => {
