@@ -37,7 +37,7 @@ import { type Root } from "react-dom/client";
 const ACTION_BUTTON_WIDTH: number = 28;
 const ACTION_MENU_PADDING: number = 42;
 
-interface InlineToolsProps {
+interface InlineToolbarProps {
   dialogRoot: Root | undefined;
   coordinates: Coordinates;
   menus: readonly Menu[];
@@ -45,13 +45,13 @@ interface InlineToolsProps {
   onClose: () => void;
 }
 
-export default function InlineTools({
+export default function InlineToolbar({
   dialogRoot,
   coordinates,
   menus,
   onMenuSelected,
   onClose,
-}: InlineToolsProps): JSX.Element {
+}: InlineToolbarProps): JSX.Element {
   const ACTION_MENU_WIDTH =
     ACTION_BUTTON_WIDTH * menus.length + ACTION_MENU_PADDING;
   const ACTION_MENU_HEIGHT = 38;

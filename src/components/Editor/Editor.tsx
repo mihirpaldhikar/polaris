@@ -52,7 +52,7 @@ import {
 } from "../../utils";
 import { type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
-import { InlineTools } from "../InlineTools";
+import { InlineToolbar } from "../InlineToolbar";
 import { MasterBlockTools, MasterInlineTools } from "../../assets";
 import { LINK_ATTRIBUTE } from "../../constants";
 import { BlockTools } from "../BlockTools";
@@ -446,7 +446,7 @@ export default function Editor({
     }
 
     popUpRoot.render(
-      <InlineTools
+      <InlineToolbar
         dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
         menus={masterInlineTools}

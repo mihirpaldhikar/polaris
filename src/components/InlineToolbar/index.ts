@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as InlineTools } from "./InlineTools";
+export { default as InlineToolbar } from "./InlineToolbar";
