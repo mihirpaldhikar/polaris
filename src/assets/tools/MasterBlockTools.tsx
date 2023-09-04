@@ -106,8 +106,8 @@ const MasterBlockTools: readonly Menu[] = [
   },
   {
     id: generateMenuId(),
-    name: "Bullet List",
-    description: `Create simple bullet list`,
+    name: "Bullets List",
+    description: `Create simple list`,
     icon: <BulletListIcon size={35} />,
     allowedOn: ["paragraph"],
     execute: {
