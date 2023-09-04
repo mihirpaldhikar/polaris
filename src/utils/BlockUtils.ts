@@ -170,7 +170,7 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
     case "numberedList":
       return RenderType.LIST;
     case "image":
-      return RenderType.IMAGE;
+      return RenderType.ATTACHMENT;
     default:
       return RenderType.UNKNOWN;
   }
@@ -181,7 +181,7 @@ export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
     node.tagName.toLowerCase() === "div" &&
     node.firstElementChild?.tagName.toLowerCase() === "input"
   ) {
-    return RenderType.IMAGE;
+    return RenderType.ATTACHMENT;
   }
   if (node.parentElement?.tagName.toLowerCase() === "li")
     return RenderType.LIST;
@@ -194,7 +194,7 @@ export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
     case "blockquote":
       return RenderType.TEXT;
     case "img":
-      return RenderType.IMAGE;
+      return RenderType.ATTACHMENT;
     default:
       return RenderType.UNKNOWN;
   }
@@ -407,7 +407,7 @@ export function getEditorRoot(): HTMLElement {
 
 export function serializeBlockToNode(block: Block): HTMLElement | null {
   if (
-    blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
+    blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT &&
     typeof block.data === "object" &&
     (block.data as Attachment).url === ""
   ) {
@@ -438,7 +438,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       }
     }
   } else if (
-    blockRenderTypeFromRole(block.role) === RenderType.IMAGE &&
+    blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT &&
     typeof block.data === "object" &&
     (block.data as Attachment).url !== ""
   ) {

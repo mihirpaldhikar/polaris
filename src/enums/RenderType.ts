@@ -22,7 +22,7 @@
 
 enum RenderType {
   TEXT,
-  IMAGE,
+  ATTACHMENT,
   LIST,
   UNKNOWN,
 }

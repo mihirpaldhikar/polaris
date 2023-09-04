@@ -540,7 +540,7 @@ export default function Composer({
           const { previous } = getNodeSiblings(currentBlockNode.id);
           if (
             previous != null &&
-            blockRenderTypeFromNode(previous) !== RenderType.IMAGE
+            blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT
           ) {
             if (
               previous.tagName.toLowerCase() === "ol" ||
@@ -552,7 +552,8 @@ export default function Composer({
 
               if (
                 previousPrevious != null &&
-                blockRenderTypeFromNode(previousPrevious) !== RenderType.IMAGE
+                blockRenderTypeFromNode(previousPrevious) !==
+                  RenderType.ATTACHMENT
               ) {
                 const previousBlockChildNodeIndex =
                   previousPrevious?.lastChild?.textContent === ""
@@ -632,7 +633,7 @@ export default function Composer({
           const { next } = getNodeSiblings(currentBlockNode.id);
           if (
             next != null &&
-            blockRenderTypeFromNode(next) !== RenderType.IMAGE
+            blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT
           ) {
             if (
               next.tagName.toLowerCase() === "ol" ||
@@ -642,7 +643,7 @@ export default function Composer({
 
               if (
                 nextNext != null &&
-                blockRenderTypeFromNode(nextNext) !== RenderType.IMAGE
+                blockRenderTypeFromNode(nextNext) !== RenderType.ATTACHMENT
               ) {
                 setCaretOffset(nextNext, 0);
               }
@@ -663,7 +664,7 @@ export default function Composer({
         const { previous } = getNodeSiblings(currentBlockNode.id);
         if (
           previous != null &&
-          blockRenderTypeFromNode(previous) !== RenderType.IMAGE
+          blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT
         ) {
           if (
             previous.tagName.toLowerCase() === "ol" ||
@@ -672,7 +673,8 @@ export default function Composer({
             const { previous: previousPrevious } = getNodeSiblings(previous.id);
             if (
               previousPrevious != null &&
-              blockRenderTypeFromNode(previousPrevious) !== RenderType.IMAGE
+              blockRenderTypeFromNode(previousPrevious) !==
+                RenderType.ATTACHMENT
             ) {
               const nodeAtCaretOffset = getNodeAt(
                 previousPrevious,
@@ -733,7 +735,7 @@ export default function Composer({
         const { next } = getNodeSiblings(currentBlockNode.id);
         if (
           next != null &&
-          blockRenderTypeFromNode(next) !== RenderType.IMAGE
+          blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT
         ) {
           if (
             next.tagName.toLowerCase() === "ol" ||
@@ -742,7 +744,7 @@ export default function Composer({
             const { next: nextNext } = getNodeSiblings(next.id);
             if (
               nextNext != null &&
-              blockRenderTypeFromNode(nextNext) !== RenderType.IMAGE
+              blockRenderTypeFromNode(nextNext) !== RenderType.ATTACHMENT
             ) {
               const nodeAtCaretOffset = getNodeAt(nextNext, caretOffset);
               const jumpNode =
@@ -842,7 +844,7 @@ export default function Composer({
     );
   }
 
-  if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
+  if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
     return (
       <ImageEngine
         parentBlock={parentBlock}

@@ -207,7 +207,7 @@ export default function Editor({
       masterBlocks[blockIndex] = block;
       updateMasterBlocks(masterBlocks);
     }
-    if (blockRenderTypeFromRole(block.role) === RenderType.IMAGE) {
+    if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
       setFocusedNode({
         nodeId: block.id,
         nodeIndex: 0,
@@ -583,7 +583,9 @@ export default function Editor({
             case "role": {
               newBlock.role = execute.args as Role;
 
-              if (blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE) {
+              if (
+                blockRenderTypeFromRole(newBlock.role) === RenderType.ATTACHMENT
+              ) {
                 newBlock.data = {
                   url: "",
                   description: "",
@@ -614,7 +616,8 @@ export default function Editor({
                     .indexOf(block.id);
 
                   if (
-                    blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
+                    blockRenderTypeFromRole(newBlock.role) ===
+                    RenderType.ATTACHMENT
                   ) {
                     if (
                       currentBlockIndex ===
@@ -657,7 +660,8 @@ export default function Editor({
                 }
               } else {
                 if (
-                  blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
+                  blockRenderTypeFromRole(newBlock.role) ===
+                  RenderType.ATTACHMENT
                 ) {
                   block.data = previousContent;
                   traverseAndUpdate(masterBlocks, block);
@@ -683,7 +687,7 @@ export default function Editor({
               }
               propagateChanges(
                 masterBlocks,
-                blockRenderTypeFromRole(newBlock.role) === RenderType.IMAGE
+                blockRenderTypeFromRole(newBlock.role) === RenderType.ATTACHMENT
                   ? {
                       nodeId: block.id,
                       caretOffset,
