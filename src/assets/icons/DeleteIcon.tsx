@@ -36,7 +36,7 @@ export default function DeleteIcon({ size }: { size?: number }): JSX.Element {
         y1="59"
         x2="138"
         y2="133.929"
-        stroke="black"
+        stroke="red"
         strokeWidth="10"
         strokeLinecap="round"
       />
@@ -45,7 +45,7 @@ export default function DeleteIcon({ size }: { size?: number }): JSX.Element {
         y1="133.929"
         x2="137.887"
         y2="59"
-        stroke="black"
+        stroke="red"
         strokeWidth="10"
         strokeLinecap="round"
       />

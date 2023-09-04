@@ -22,11 +22,13 @@
 
 import { type JSX } from "react";
 import { BLOCK_NODE } from "../../constants";
+import { DeleteIcon } from "../../assets";
 
 interface FilePickerProps {
   id: string;
   message: string;
   accept: string;
+  fileIcon: JSX.Element;
   onFilePicked: (file: File) => void;
   onDelete: () => void;
 }
@@ -34,6 +36,7 @@ interface FilePickerProps {
 export default function FilePicker({
   id,
   message,
+  fileIcon,
   accept,
   onFilePicked,
   onDelete,
@@ -43,13 +46,13 @@ export default function FilePicker({
       data-type={BLOCK_NODE}
       id={id}
       className={
-        "relative my-4 h-32 w-full cursor-pointer rounded-lg border-2 border-dashed border-black/30 bg-gray-100"
+        "relative h-14 block my-2 w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50"
       }
     >
       <input
         id={`filePicker-${id}`}
         className={
-          "filePicker absolute h-full w-full cursor-pointer select-none"
+          "filePicker block absolute h-full w-full cursor-pointer select-none"
         }
         type={"file"}
         accept={accept}
@@ -64,19 +67,18 @@ export default function FilePicker({
       />
       <span
         className={
-          "absolute flex w-fit justify-start px-2 py-1 text-sm text-red-600"
+          "absolute right-0 top-0 flex w-fit justify-start px-2 py-1 text-sm text-red-600"
         }
         onClick={(event) => {
           event.stopPropagation();
           onDelete();
         }}
       >
-        Remove
+        <DeleteIcon size={20} />
       </span>
-      <div
-        className={"flex h-full w-full flex-col items-center justify-center"}
-      >
-        <span>{message}</span>
+      <div className={"flex h-full w-full  items-center justify-center"}>
+        {fileIcon}
+        <span className={"font-medium text-sm"}>{message}</span>
       </div>
     </div>
   );

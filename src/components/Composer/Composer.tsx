@@ -870,13 +870,13 @@ export default function Composer({
         style: setNodeStyle(block.style),
         spellCheck: true,
         className: conditionalClassName(
-          "px-4 space-y-2 text-[17px] my-2 mx-2 block",
+          "space-y-3 my-4 ml-4 pl-4 block",
           block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },
       block.data.map((childBlock) => {
         return (
-          <li key={childBlock.id}>
+          <li key={childBlock.id} className={"pl-2"}>
             <Composer
               parentBlock={block}
               editable={editable}

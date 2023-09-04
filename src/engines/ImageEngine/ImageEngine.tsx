@@ -48,6 +48,7 @@ import {
 } from "../../assets/icons";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { SizeDialog } from "../../components/SizeDialog";
+import { ImageIcon } from "../../assets";
 
 interface ImageEngineProps {
   parentBlock?: Block;
@@ -112,6 +113,7 @@ export default function ImageEngine({
     return (
       <FilePicker
         id={block.id}
+        fileIcon={<ImageIcon />}
         message={"Drag or click here to add an image."}
         accept={"image/png, image/jpg, image/jpeg, image/svg+xml, image/gif"}
         onFilePicked={(file) => {
