@@ -20,18 +20,15 @@
  * SOFTWARE.
  */
 
-import { type Block, type Coordinates } from "../interfaces";
+import { type Block } from "../interfaces";
+import { type Root } from "react-dom/client";
 
 type BlockFunction = (
   block: Block,
-  onComplete: (
-    block: Block | Block[],
-    focusBlockId: string,
-    caretOffset?: number,
-  ) => void,
-  blocks?: Block[],
-  coordinates?: Coordinates,
-  caretOffset?: number,
+  onChange: (block: Block, focusBlockId?: string, caretOffset?: number) => void,
+  onDelete: (block: Block, focusBlockId?: string, caretOffset?: number) => void,
+  popupRoot?: Root,
+  dialogRoot?: Root,
 ) => void;
 
 export default BlockFunction;

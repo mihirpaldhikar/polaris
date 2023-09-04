@@ -22,38 +22,25 @@
 
 import { type JSX } from "react";
 
-export default function DeleteIcon({
-  size,
-  color = "black",
+export default function MoreOptionsIcon({
+  size = 25,
 }: {
   size?: number;
-  color?: string;
 }): JSX.Element {
   return (
     <svg
-      width={size ?? 36}
-      height={size ?? 36}
-      viewBox="0 0 200 200"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      width={size}
+      height={size}
     >
-      <line
-        x1="63.0711"
-        y1="59"
-        x2="138"
-        y2="133.929"
-        stroke={color}
-        strokeWidth="10"
+      <path
         strokeLinecap="round"
-      />
-      <line
-        x1="62.958"
-        y1="133.929"
-        x2="137.887"
-        y2="59"
-        stroke={color}
-        strokeWidth="10"
-        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
       />
     </svg>
   );

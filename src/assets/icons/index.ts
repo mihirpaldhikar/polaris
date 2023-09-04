@@ -43,3 +43,4 @@ export { default as ResizeIcon } from "./ResizeIcon";
 export { default as DeleteIcon } from "./DeleteIcon";
 export { default as ChangeIcon } from "./ChangeIcon";
 export { default as ImageIcon } from "./ImageIcon";
+export { default as MoreOptionsIcon } from "./MoreOptionsIcon";

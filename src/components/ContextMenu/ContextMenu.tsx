@@ -21,40 +21,49 @@
  */
 
 import { type JSX } from "react";
+import { type Coordinates, type Executable, type Menu } from "../../interfaces";
 
-export default function DeleteIcon({
-  size,
-  color = "black",
-}: {
-  size?: number;
-  color?: string;
-}): JSX.Element {
+interface ContextMenuProps {
+  coordinates: Coordinates;
+  menu: Menu[];
+  onClick: (execute: Executable) => void;
+  onClose: () => void;
+}
+
+export default function ContextMenu({
+  coordinates,
+  menu,
+  onClick,
+  onClose,
+}: ContextMenuProps): JSX.Element {
   return (
-    <svg
-      width={size ?? 36}
-      height={size ?? 36}
-      viewBox="0 0 200 200"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      className={
+        "fixed z-40 flex w-60 flex-col space-y-0.5 rounded-lg border border-gray-300 bg-white shadow-md"
+      }
+      style={{
+        top: coordinates.y,
+        left: coordinates.x,
+      }}
     >
-      <line
-        x1="63.0711"
-        y1="59"
-        x2="138"
-        y2="133.929"
-        stroke={color}
-        strokeWidth="10"
-        strokeLinecap="round"
-      />
-      <line
-        x1="62.958"
-        y1="133.929"
-        x2="137.887"
-        y2="59"
-        stroke={color}
-        strokeWidth="10"
-        strokeLinecap="round"
-      />
-    </svg>
+      {menu.map((m) => {
+        return (
+          <span
+            key={m.id}
+            id={m.id}
+            className={
+              "flex w-full cursor-pointer font-medium select-none flex-row items-center space-x-1 rounded-md px-1 text-sm outline-none ring-0 hover:bg-gray-200 focus:bg-gray-200"
+            }
+            onClick={() => {
+              onClick(m.execute);
+              onClose();
+            }}
+          >
+            {m.icon}
+            {m.name}
+          </span>
+        );
+      })}
+    </div>
   );
 }

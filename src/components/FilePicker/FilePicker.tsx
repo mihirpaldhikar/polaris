@@ -74,7 +74,7 @@ export default function FilePicker({
           onDelete();
         }}
       >
-        <DeleteIcon size={20} />
+        <DeleteIcon size={20} color={"red"} />
       </span>
       <div className={"flex h-full w-full  items-center justify-center"}>
         {fileIcon}

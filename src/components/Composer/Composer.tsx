@@ -851,7 +851,7 @@ export default function Composer({
         block={block}
         onChange={onChange}
         editable={editable}
-        onImageRequest={onImageRequest}
+        onAttachmentRequest={onImageRequest}
         onDelete={onDelete}
       />
     );

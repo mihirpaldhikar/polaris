@@ -38,38 +38,31 @@ import {
 } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
 import RenderType from "../../enums/RenderType";
-import {
-  AlignCenterIcon,
-  AlignEndIcon,
-  AlignStartIcon,
-  ChangeIcon,
-  DeleteIcon,
-  ResizeIcon,
-} from "../../assets/icons";
 import RootContext from "../../contexts/RootContext/RootContext";
-import { SizeDialog } from "../../components/SizeDialog";
-import { ImageIcon } from "../../assets";
+import { ImageIcon, MoreOptionsIcon } from "../../assets";
+import { ContextMenu } from "../../components/ContextMenu";
+import { AttachmentTools } from "../../assets/tools/AttachmentTools";
 
-interface ImageEngineProps {
+interface AttachmentEngineProps {
   parentBlock?: Block;
   block: Block;
   editable: boolean;
-  onImageRequest: (block: Block, file: File) => void;
+  onAttachmentRequest: (block: Block, file: File) => void;
   onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
   onChange: (block: Block) => void;
 }
 
-export default function ImageEngine({
+export default function AttachmentEngine({
   parentBlock,
   block,
   editable,
-  onImageRequest,
+  onAttachmentRequest,
   onDelete,
   onChange,
-}: ImageEngineProps): JSX.Element {
-  const { popUpRoot } = useContext(RootContext);
+}: AttachmentEngineProps): JSX.Element {
+  const { popUpRoot, dialogRoot } = useContext(RootContext);
 
-  const imageData = block.data as Attachment;
+  const attachment: Attachment = block.data as Attachment;
 
   function deleteHandler(): void {
     if (
@@ -109,7 +102,7 @@ export default function ImageEngine({
     }
   }
 
-  if (imageData.url === "") {
+  if (attachment.url === "" && block.role === "image") {
     return (
       <FilePicker
         id={block.id}
@@ -117,7 +110,7 @@ export default function ImageEngine({
         message={"Drag or click here to add an image."}
         accept={"image/png, image/jpg, image/jpeg, image/svg+xml, image/gif"}
         onFilePicked={(file) => {
-          onImageRequest(block, file);
+          onAttachmentRequest(block, file);
         }}
         onDelete={() => {
           deleteHandler();
@@ -125,6 +118,7 @@ export default function ImageEngine({
       />
     );
   }
+
   return (
     <div
       className={"m-3 w-full"}
@@ -133,94 +127,65 @@ export default function ImageEngine({
       }}
     >
       <div className={"relative inline-block w-fit"}>
-        {createElement(nodeTypeFromRole(block.role), {
-          "data-type": BLOCK_NODE,
-          "data-block-render-type": blockRenderTypeFromRole(block.role),
-          id: block.id,
-          role: block.role,
-          disabled: !editable,
-          draggable: false,
-          src: imageData.url,
-          alt: imageData.description,
-          height: imageData.height,
-          width: imageData.width,
-          className: "inline-block rounded-md",
-        })}
+        {block.role === "image" ? (
+          createElement(nodeTypeFromRole(block.role), {
+            "data-type": BLOCK_NODE,
+            "data-block-render-type": blockRenderTypeFromRole(block.role),
+            id: block.id,
+            role: block.role,
+            disabled: !editable,
+            draggable: false,
+            src: attachment.url,
+            alt: attachment.description,
+            height: attachment.height,
+            width: attachment.width,
+            className: "block rounded-md",
+          })
+        ) : (
+          <Fragment />
+        )}
         <div
           className={
-            "absolute right-0 top-0 m-1 flex w-fit cursor-pointer items-center justify-end rounded-md border border-gray-300 bg-white/60 p-0.5 backdrop-blur"
+            "absolute right-0 top-0 m-1 flex w-fit cursor-pointer items-center justify-end rounded-md border border-gray-300 bg-white/60 backdrop-blur"
           }
         >
           <div
-            title={"Align Left"}
             onClick={() => {
-              block.style.push({
-                name: "text-align",
-                value: "left",
-              });
-              onChange(block);
-            }}
-          >
-            <AlignStartIcon size={30} />
-          </div>
-          <div
-            title={"Align Center"}
-            onClick={() => {
-              block.style.push({
-                name: "text-align",
-                value: "center",
-              });
-              onChange(block);
-            }}
-          >
-            <AlignCenterIcon size={30} />
-          </div>
-          <div
-            title={"Align Right"}
-            onClick={() => {
-              block.style.push({
-                name: "text-align",
-                value: "right",
-              });
-              onChange(block);
-            }}
-          >
-            <AlignEndIcon size={30} />
-          </div>
-          <div
-            title={"Resize Image"}
-            onClick={() => {
-              if (popUpRoot !== undefined) {
-                const editorRoot = getEditorRoot();
-                const currentNode = getBlockNode(block.id) as HTMLElement;
-                const coordinates: Coordinates = {
-                  x:
-                    currentNode.getBoundingClientRect().x +
-                    currentNode.getBoundingClientRect().width / 2,
-                  y: currentNode.getBoundingClientRect().y + 20,
-                };
+              const currentNode = getBlockNode(block.id) as HTMLElement;
+              const coordinates: Coordinates = {
+                y: currentNode.getBoundingClientRect().y,
+                x:
+                  window.innerWidth > 500
+                    ? currentNode.getBoundingClientRect().right
+                    : 30,
+              };
 
+              if (popUpRoot !== undefined && dialogRoot !== undefined) {
+                const editorRoot = getEditorRoot();
                 editorRoot.addEventListener(
                   "click",
                   () => {
                     popUpRoot.render(<Fragment />);
+                    dialogRoot.render(<Fragment />);
                   },
                   {
                     once: true,
                   },
                 );
-
                 popUpRoot.render(
-                  <SizeDialog
-                    initialSize={{
-                      width: (block.data as Attachment).width,
-                      height: (block.data as Attachment).height,
-                    }}
+                  <ContextMenu
                     coordinates={coordinates}
-                    onConfirm={(width, height) => {
-                      (block.data as Attachment).width = width;
-                      (block.data as Attachment).height = height;
-                      onChange(block);
+                    menu={AttachmentTools}
+                    onClick={(execute) => {
+                      if (typeof execute.args === "function") {
+                        execute.args(
+                          block,
+                          onChange,
+                          deleteHandler,
+                          popUpRoot,
+                          dialogRoot,
+                        );
+                      }
                     }}
                     onClose={() => {
                       popUpRoot.render(<Fragment />);
@@ -230,25 +195,7 @@ export default function ImageEngine({
               }
             }}
           >
-            <ResizeIcon size={30} />
-          </div>
-          <div
-            title={"Change Image"}
-            onClick={() => {
-              (block.data as Attachment).url = "";
-              (block.data as Attachment).description = "";
-              onChange(block);
-            }}
-          >
-            <ChangeIcon size={30} />
-          </div>
-          <div
-            title={"Remove Image"}
-            onClick={() => {
-              deleteHandler();
-            }}
-          >
-            <DeleteIcon size={30} />
+            <MoreOptionsIcon />
           </div>
         </div>
       </div>
