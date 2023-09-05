@@ -60,7 +60,7 @@ export default function TextEngine({
     placeholder: getPlaceholderFromRole(block.role),
     spellCheck: true,
     className: conditionalClassName(
-      "text_renderer block focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",
+      "text_renderer block flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",
       block.role === "title"
         ? "font-bold text-2xl md:text-3xl"
         : block.role === "subTitle"
