@@ -34,15 +34,15 @@ export default function MyApp(): JSX.Element {
         id: generateBlockId(),
         role: "title",
         data: "Introducing Polaris",
-        style: []
+        style: [],
       },
       {
         id: generateBlockId(),
         role: "paragraph",
         data: "Polaris is a rich semantic content editor.",
-        style: []
-      }
-    ]
+        style: [],
+      },
+    ],
   };
 
   function attachmentHandler(data: File | string): string {
