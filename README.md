@@ -24,7 +24,7 @@ npm install @mihirpaldhikar/polaris
 Creating an Editor
 
 ```tsx
-import { Editor, Blob, generateBlockId } from "@mihirpaldhikar/polaris";
+import { Editor, generateBlockId } from "@mihirpaldhikar/polaris";
 
 export default function MyApp(): JSX.Element {
   const blob: Blob = {
@@ -34,18 +34,18 @@ export default function MyApp(): JSX.Element {
         id: generateBlockId(),
         role: "title",
         data: "Introducing Polaris",
-        style: [],
+        style: []
       },
       {
         id: generateBlockId(),
         role: "paragraph",
         data: "Polaris is a rich semantic content editor.",
-        style: [],
-      },
-    ],
+        style: []
+      }
+    ]
   };
 
-  function imageUploader(file: File): string {
+  function attachmentHandler(data: File | string): string {
     /**
      * Logic to handle image.
      * must return a url.
@@ -63,8 +63,8 @@ export default function MyApp(): JSX.Element {
     <Fragment>
       <Editor
         blob={blob}
-        onAttachmentSelected={(file) => {
-          return imageUploader(file);
+        onAttachmentSelected={(data) => {
+          return attachmentHandler(data);
         }}
         onSave={(blob) => {
           saveBlob(blob);
