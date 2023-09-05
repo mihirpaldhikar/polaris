@@ -170,6 +170,7 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
     case "numberedList":
       return RenderType.LIST;
     case "image":
+    case "embed":
       return RenderType.ATTACHMENT;
     default:
       return RenderType.UNKNOWN;

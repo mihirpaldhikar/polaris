@@ -35,6 +35,7 @@ type Role =
   | "quote"
   | "bulletList"
   | "numberedList"
-  | "image";
+  | "image"
+  | "embed";
 
 export default Role;

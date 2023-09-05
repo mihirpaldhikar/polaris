@@ -53,7 +53,6 @@ export default function TextEngine({
     "data-type": BLOCK_NODE,
     "data-block-render-type": blockRenderTypeFromRole(block.role),
     id: block.id,
-    role: block.role,
     disabled: !editable,
     contentEditable: editable,
     dangerouslySetInnerHTML: { __html: block.data },

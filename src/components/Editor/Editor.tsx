@@ -68,7 +68,7 @@ interface EditorProps {
   onSave?: (blob: Blob) => void;
   autoSaveTimeout?: number;
   inlineTools?: Menu[];
-  onImageSelected: (file: File) => Promise<string>;
+  onAttachmentSelected: (data: File | string) => Promise<string>;
   onChange?: (blob: Blob) => void;
 }
 
@@ -92,7 +92,7 @@ export default function Editor({
   autoSaveTimeout,
   inlineTools,
   onSave,
-  onImageSelected,
+  onAttachmentSelected,
   onChange,
 }: EditorProps): JSX.Element {
   let masterInlineTools: readonly Menu[] = cloneDeep(MasterInlineTools).concat(
@@ -726,13 +726,13 @@ export default function Editor({
     });
   }
 
-  function imageRequestHandler(block: Block, file: File): void {
+  function attachmentRequestHandler(block: Block, data: File | string): void {
     if (block.role !== "image" || typeof block.data !== "object") {
       return;
     }
 
     const blockIndex = masterBlocks.indexOf(block);
-    void onImageSelected(file).then((str) => {
+    void onAttachmentSelected(data).then((str) => {
       (block.data as Attachment).url = str;
       (block.data as Attachment).height = 300;
       (block.data as Attachment).width = 500;
@@ -801,7 +801,7 @@ export default function Editor({
                 selectionHandler(block);
               }, 360)}
               onActionKeyPressed={actionKeyHandler}
-              onImageRequest={imageRequestHandler}
+              onAttachmentRequest={attachmentRequestHandler}
               onMarkdown={markdownHandler}
             />
           );

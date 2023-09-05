@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+import { isYouTubeURL } from "./Validators";
+import { YoutubeURLRegex } from "../constants";
+
 /**
  * @function generateRandomString
  * @param length
@@ -92,4 +95,9 @@ export function isAllowedActionMenuKey(key: string): boolean {
     default:
       return false;
   }
+}
+
+export function getYouTubeVideoID(url: string): string {
+  if (!isYouTubeURL(url)) return "";
+  return (url.match(YoutubeURLRegex) as RegExpMatchArray)[1];
 }

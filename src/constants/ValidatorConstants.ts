@@ -20,10 +20,5 @@
  * SOFTWARE.
  */
 
-export * from "./BlockUtils";
-export * from "./ConditionalClassName";
-export * from "./DOMUtils";
-export * from "./SharedUtils";
-export * from "./Serializers";
-export * from "./EventUtils";
-export * from "./Validators";
+export const YoutubeURLRegex =
+  /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?vi?=|\\&vi?=))([^#\\&?]*).*/;

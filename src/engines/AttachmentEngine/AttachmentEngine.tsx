@@ -20,34 +20,29 @@
  * SOFTWARE.
  */
 
-import { createElement, Fragment, type JSX, useContext } from "react";
+import { createElement, Fragment, type JSX } from "react";
 import {
   blockRenderTypeFromRole,
   getBlockNode,
-  getEditorRoot,
   getNodeSiblings,
+  isYouTubeURL,
   nodeTypeFromRole,
   serializeNodeToBlock,
-  setNodeStyle,
 } from "../../utils";
-import { BLOCK_NODE } from "../../constants";
-import {
-  type Attachment,
-  type Block,
-  type Coordinates,
-} from "../../interfaces";
+import { type Attachment, type Block } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
-import RenderType from "../../enums/RenderType";
-import RootContext from "../../contexts/RootContext/RootContext";
-import { ImageIcon, MoreOptionsIcon } from "../../assets";
-import { ContextMenu } from "../../components/ContextMenu";
+import { ImageIcon, LinkIcon } from "../../assets";
+import { EmbedPicker } from "../../components/EmbedPicker";
+import { AttachmentHolder } from "../../components/AttachmentHolder";
+import { YouTubeVideoEmbed } from "../../components/YouTubeVideoEmbed";
 import { AttachmentTools } from "../../assets/tools/AttachmentTools";
+import RenderType from "../../enums/RenderType";
+import { BLOCK_NODE } from "../../constants";
 
 interface AttachmentEngineProps {
   parentBlock?: Block;
   block: Block;
-  editable: boolean;
-  onAttachmentRequest: (block: Block, file: File) => void;
+  onAttachmentRequest: (block: Block, data: File | string) => void;
   onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
   onChange: (block: Block) => void;
 }
@@ -55,13 +50,10 @@ interface AttachmentEngineProps {
 export default function AttachmentEngine({
   parentBlock,
   block,
-  editable,
   onAttachmentRequest,
   onDelete,
   onChange,
 }: AttachmentEngineProps): JSX.Element {
-  const { popUpRoot, dialogRoot } = useContext(RootContext);
-
   const attachment: Attachment = block.data as Attachment;
 
   function deleteHandler(): void {
@@ -119,86 +111,57 @@ export default function AttachmentEngine({
     );
   }
 
-  return (
-    <div
-      className={"m-3 w-full"}
-      style={{
-        ...setNodeStyle(block.style),
-      }}
-    >
-      <div className={"relative inline-block w-fit"}>
-        {block.role === "image" ? (
-          createElement(nodeTypeFromRole(block.role), {
-            "data-type": BLOCK_NODE,
-            "data-block-render-type": blockRenderTypeFromRole(block.role),
-            id: block.id,
-            role: block.role,
-            disabled: !editable,
-            draggable: false,
-            src: attachment.url,
-            alt: attachment.description,
-            height: attachment.height,
-            width: attachment.width,
-            className: "block rounded-md",
-          })
-        ) : (
-          <Fragment />
-        )}
-        <div
-          className={
-            "absolute right-0 top-0 m-1 flex w-fit cursor-pointer items-center justify-end rounded-md border border-gray-300 bg-white/60 backdrop-blur"
-          }
-        >
-          <div
-            onClick={() => {
-              const currentNode = getBlockNode(block.id) as HTMLElement;
-              const coordinates: Coordinates = {
-                y: currentNode.getBoundingClientRect().y,
-                x:
-                  window.innerWidth > 500
-                    ? currentNode.getBoundingClientRect().right
-                    : 30,
-              };
+  if (attachment.url === "" && block.role === "embed") {
+    return (
+      <EmbedPicker
+        id={block.id}
+        icon={<LinkIcon />}
+        message={"Click here to add an Embed."}
+        onEmbedPicked={(url) => {
+          attachment.url = url;
+          block.data = attachment;
+          onChange(block);
+        }}
+        onDelete={() => {
+          deleteHandler();
+        }}
+      />
+    );
+  }
 
-              if (popUpRoot !== undefined && dialogRoot !== undefined) {
-                const editorRoot = getEditorRoot();
-                editorRoot.addEventListener(
-                  "click",
-                  () => {
-                    popUpRoot.render(<Fragment />);
-                    dialogRoot.render(<Fragment />);
-                  },
-                  {
-                    once: true,
-                  },
-                );
-                popUpRoot.render(
-                  <ContextMenu
-                    coordinates={coordinates}
-                    menu={AttachmentTools}
-                    onClick={(execute) => {
-                      if (typeof execute.args === "function") {
-                        execute.args(
-                          block,
-                          onChange,
-                          deleteHandler,
-                          popUpRoot,
-                          dialogRoot,
-                        );
-                      }
-                    }}
-                    onClose={() => {
-                      popUpRoot.render(<Fragment />);
-                    }}
-                  />,
-                );
-              }
-            }}
-          >
-            <MoreOptionsIcon />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  if (isYouTubeURL(attachment.url) && block.role === "embed")
+    return (
+      <AttachmentHolder
+        block={block}
+        attachmentTools={AttachmentTools}
+        onDelete={deleteHandler}
+        onChange={onChange}
+      >
+        <YouTubeVideoEmbed block={block} />
+      </AttachmentHolder>
+    );
+
+  if (block.role === "image")
+    return (
+      <AttachmentHolder
+        block={block}
+        attachmentTools={AttachmentTools}
+        onDelete={deleteHandler}
+        onChange={onChange}
+      >
+        {createElement(nodeTypeFromRole(block.role), {
+          id: block.id,
+          "data-type": BLOCK_NODE,
+          "data-block-render-type": blockRenderTypeFromRole(block.role),
+          draggable: false,
+          src: attachment.url,
+          alt: attachment.description,
+          height: attachment.height,
+          width: attachment.width,
+          className: "inline-block rounded-lg border border-gray-300",
+        })}
+      </AttachmentHolder>
+    );
+
+  return <Fragment />;
 }

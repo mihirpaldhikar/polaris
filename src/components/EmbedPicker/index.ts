@@ -20,10 +20,4 @@
  * SOFTWARE.
  */
 
-export * from "./BlockUtils";
-export * from "./ConditionalClassName";
-export * from "./DOMUtils";
-export * from "./SharedUtils";
-export * from "./Serializers";
-export * from "./EventUtils";
-export * from "./Validators";
+export { default as EmbedPicker } from "./EmbedPicker";

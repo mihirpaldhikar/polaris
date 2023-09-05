@@ -106,6 +106,17 @@ const MasterBlockTools: readonly Menu[] = [
   },
   {
     id: generateMenuId(),
+    name: "Embed",
+    description: `Add embeds like YouTube video.`,
+    icon: <QuoteIcon size={32} />,
+    allowedOn: ["paragraph"],
+    execute: {
+      type: "role",
+      args: "embed",
+    },
+  },
+  {
+    id: generateMenuId(),
     name: "Bullets List",
     description: `Create simple list`,
     icon: <BulletListIcon size={35} />,

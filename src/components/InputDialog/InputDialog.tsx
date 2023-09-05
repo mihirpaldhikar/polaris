@@ -74,7 +74,7 @@ export default function InputDialog({
         left: coordinates.x,
       }}
       className={
-        "fixed flex w-72 flex-col space-y-5 rounded-lg border border-black/10 bg-white px-2 py-3 shadow-md"
+        "fixed flex w-72 flex-col z-50 space-y-5 rounded-lg border border-black/10 bg-white px-2 py-3 shadow-md"
       }
     >
       <input

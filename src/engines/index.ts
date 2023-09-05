@@ -21,4 +21,4 @@
  */
 
 export { TextEngine } from "./TextEngine";
-export { ImageEngine } from "./ImageEngine";
+export { AttachmentEngine } from "./AttachmentEngine";

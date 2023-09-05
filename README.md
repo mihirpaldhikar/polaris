@@ -63,7 +63,7 @@ export default function MyApp(): JSX.Element {
     <Fragment>
       <Editor
         blob={blob}
-        onImageSelected={(file) => {
+        onAttachmentSelected={(file) => {
           return imageUploader(file);
         }}
         onSave={(blob) => {

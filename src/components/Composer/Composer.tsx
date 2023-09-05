@@ -52,7 +52,7 @@ import {
   unsubscribeFromEvent,
 } from "../../utils";
 import RenderType from "../../enums/RenderType";
-import { ImageEngine, TextEngine } from "../../engines";
+import { AttachmentEngine, TextEngine } from "../../engines";
 import { BLOCK_NODE } from "../../constants";
 
 interface ComposerProps {
@@ -79,7 +79,7 @@ interface ComposerProps {
     previousContent: string,
     caretOffset: number,
   ) => void;
-  onImageRequest: (block: Block, file: File) => void;
+  onAttachmentRequest: (block: Block, data: File | string) => void;
   onMarkdown: (block: Block) => void;
 }
 
@@ -110,7 +110,7 @@ export default function Composer({
   onDelete,
   onPaste,
   onSelect,
-  onImageRequest,
+  onAttachmentRequest,
   onActionKeyPressed,
   onMarkdown,
 }: ComposerProps): JSX.Element {
@@ -846,12 +846,11 @@ export default function Composer({
 
   if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
     return (
-      <ImageEngine
+      <AttachmentEngine
         parentBlock={parentBlock}
         block={block}
         onChange={onChange}
-        editable={editable}
-        onAttachmentRequest={onImageRequest}
+        onAttachmentRequest={onAttachmentRequest}
         onDelete={onDelete}
       />
     );
@@ -867,7 +866,6 @@ export default function Composer({
         "data-type": BLOCK_NODE,
         "data-block-render-type": blockRenderTypeFromRole(block.role),
         id: block.id,
-        role: block.role,
         disabled: !editable,
         style: setNodeStyle(block.style),
         spellCheck: true,
@@ -889,7 +887,7 @@ export default function Composer({
               onPaste={onPaste}
               onSelect={onSelect}
               onActionKeyPressed={onActionKeyPressed}
-              onImageRequest={onImageRequest}
+              onAttachmentRequest={onAttachmentRequest}
               onMarkdown={onMarkdown}
             />
           </li>

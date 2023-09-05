@@ -21,3 +21,4 @@
  */
 
 export * from "./BlockConstants";
+export * from "./ValidatorConstants";

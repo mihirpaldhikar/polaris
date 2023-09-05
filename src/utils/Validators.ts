@@ -20,10 +20,8 @@
  * SOFTWARE.
  */
 
-export * from "./BlockUtils";
-export * from "./ConditionalClassName";
-export * from "./DOMUtils";
-export * from "./SharedUtils";
-export * from "./Serializers";
-export * from "./EventUtils";
-export * from "./Validators";
+import { YoutubeURLRegex } from "../constants";
+
+export function isYouTubeURL(url: string): boolean {
+  return url.match(YoutubeURLRegex) != null;
+}
