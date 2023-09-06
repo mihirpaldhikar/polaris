@@ -49,6 +49,7 @@ import {
   traverseAndFindBlockPosition,
   traverseAndUpdate,
   traverseAndUpdateBelow,
+  upsertStyle,
 } from "../../utils";
 import { type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
@@ -681,6 +682,20 @@ export default function Editor({
 
               propagateChanges(masterBlocks, {
                 nodeId: focusNode,
+                caretOffset,
+                nodeIndex,
+              });
+              break;
+            }
+            case "style": {
+              const newStyle = execute.args as Style[];
+              for (let i = 0; i < newStyle.length; i++) {
+                block.style = upsertStyle(block.style, newStyle[i]);
+              }
+              block.data = previousContent;
+              traverseAndUpdate(masterBlocks, block);
+              propagateChanges(masterBlocks, {
+                nodeId: block.id,
                 caretOffset,
                 nodeIndex,
               });

@@ -535,3 +535,7 @@ export function findBlockNodeFromNode(node: HTMLElement): HTMLElement | null {
   }
   return null;
 }
+
+export function upsertStyle(arr: Style[], newObj: Style): Style[] {
+  return [...arr.filter((obj) => obj.name !== newObj.name), { ...newObj }];
+}
