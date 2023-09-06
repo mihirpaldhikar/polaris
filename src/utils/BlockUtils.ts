@@ -317,6 +317,8 @@ export function getBlockRoleFromNode(node: HTMLElement): Role {
       return "numberedList";
     case "ul":
       return "bulletList";
+    case "iframe":
+      return "embed";
     default:
       if (node.parentElement?.parentElement?.tagName.toLowerCase() === "ul")
         return "bulletList";
@@ -327,6 +329,10 @@ export function getBlockRoleFromNode(node: HTMLElement): Role {
 }
 
 export function serializeNodeToBlock(node: HTMLElement): Block {
+  const tempNode = findBlockNodeFromNode(node);
+  if (tempNode != null) {
+    node = tempNode;
+  }
   const style: Style[] = [];
   const cssTextArray: string[] = node.style.cssText.split(";");
 
@@ -368,6 +374,21 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
         description: imageNode.alt,
         width: imageNode.width,
         height: imageNode.height,
+      },
+      role: getBlockRoleFromNode(node),
+      style,
+    };
+  }
+
+  if (node.tagName.toLowerCase() === "iframe") {
+    const embedNode = node as HTMLIFrameElement;
+    return {
+      id: node.id,
+      data: {
+        url: embedNode.src,
+        description: "",
+        width: parseInt(embedNode.width),
+        height: parseInt(embedNode.height),
       },
       role: getBlockRoleFromNode(node),
       style,
@@ -495,4 +516,22 @@ export function getPlaceholderFromRole(role: Role): string {
     default:
       return "Press '/' for commands...";
   }
+}
+
+export function findBlockNodeFromNode(node: HTMLElement): HTMLElement | null {
+  if (node.getAttribute("data-type") === BLOCK_NODE) return node;
+  if (
+    (node.firstElementChild as HTMLElement).getAttribute("data-type") ===
+    BLOCK_NODE
+  )
+    return node.firstElementChild as HTMLElement;
+  const children = node.children;
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].getAttribute("data-type") === BLOCK_NODE)
+      return children[i] as HTMLElement;
+    else if (children[i].childElementCount > 1) {
+      return findBlockNodeFromNode(children[i] as HTMLElement);
+    }
+  }
+  return null;
 }
