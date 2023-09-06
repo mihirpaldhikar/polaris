@@ -24,6 +24,13 @@ import { type Blob } from "../interfaces";
 import { serializeBlockToNode } from "./BlockUtils";
 
 export function serializeBlobToHTML(blob: Blob): string {
+  if (
+    window === undefined ||
+    document === undefined ||
+    window == null ||
+    document == null
+  )
+    return "";
   const nodes: HTMLElement[] = [];
 
   for (const block of blob.contents) {

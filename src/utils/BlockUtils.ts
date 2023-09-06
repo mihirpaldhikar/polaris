@@ -27,11 +27,12 @@ import {
   type Siblings,
   type Style,
 } from "../interfaces";
-import { generateRandomString } from "./SharedUtils";
+import { generateRandomString, getYouTubeVideoID } from "./SharedUtils";
 import { BLOCK_NODE, LINK_ATTRIBUTE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase, kebabCase } from "lodash";
 import { isInlineSpecifierNode } from "./DOMUtils";
+import { isYouTubeURL } from "./Validators";
 
 /**
  * @function nodeTypeFromRole
@@ -429,9 +430,13 @@ export function getEditorRoot(): HTMLElement {
 
 export function serializeBlockToNode(block: Block): HTMLElement | null {
   if (
-    blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT &&
-    typeof block.data === "object" &&
-    (block.data as Attachment).url === ""
+    window === undefined ||
+    document === undefined ||
+    window == null ||
+    document == null ||
+    (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT &&
+      typeof block.data === "object" &&
+      (block.data as Attachment).url === "")
   ) {
     return null;
   }
@@ -471,13 +476,27 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     }
     const childNode = document.createElement("div");
     childNode.style.setProperty("display", "inline-block");
-    const imageNode = document.createElement("img");
-    imageNode.style.setProperty("display", "inline-block");
-    imageNode.src = (block.data as Attachment).url;
-    imageNode.alt = (block.data as Attachment).description;
-    imageNode.width = (block.data as Attachment).width;
-    imageNode.height = (block.data as Attachment).height;
-    childNode.innerHTML = imageNode.outerHTML;
+
+    const attachment = block.data as Attachment;
+
+    if (block.role === "image") {
+      const attachmentNode = document.createElement("img");
+      attachmentNode.style.setProperty("display", "inline-block");
+      attachmentNode.src = attachment.url;
+      attachmentNode.alt = attachment.description;
+      attachmentNode.width = attachment.width;
+      attachmentNode.height = attachment.height;
+      childNode.innerHTML = attachmentNode.outerHTML;
+    } else if (block.role === "embed" && isYouTubeURL(attachment.url)) {
+      const attachmentNode = document.createElement("iframe");
+      attachmentNode.style.setProperty("display", "inline-block");
+      attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(
+        attachment.url,
+      )}`;
+      attachmentNode.width = `${attachment.width}px`;
+      attachmentNode.height = `${attachment.height}px`;
+      childNode.innerHTML = attachmentNode.outerHTML;
+    }
     node.appendChild(childNode);
   } else if (
     blockRenderTypeFromRole(block.role) === RenderType.LIST &&
