@@ -24,6 +24,7 @@ import { type Role } from "../types";
 import {
   type Attachment,
   type Block,
+  type PolarisConfig,
   type Siblings,
   type Style,
 } from "../interfaces";
@@ -37,6 +38,11 @@ import RenderType from "../enums/RenderType";
 import { camelCase, kebabCase } from "lodash";
 import { isInlineSpecifierNode } from "./DOMUtils";
 import { isYouTubeURL } from "./Validators";
+import {
+  type AttachmentBlockConfig,
+  type ListBlockConfig,
+  type TextBlockConfig,
+} from "../interfaces/PolarisConfig";
 
 /**
  * @function nodeTypeFromRole
@@ -71,6 +77,34 @@ export function nodeTypeFromRole(role: Role): string {
       return "img";
     default:
       return "p";
+  }
+}
+
+export function getConfigFromRole(
+  role: Role,
+  config: PolarisConfig,
+): TextBlockConfig | AttachmentBlockConfig | ListBlockConfig | null {
+  switch (role) {
+    case "title":
+      return config.text.title;
+    case "subTitle":
+      return config.text.subTitle;
+    case "heading":
+      return config.text.heading;
+    case "subHeading":
+      return config.text.subHeading;
+    case "paragraph":
+      return config.text.paragraph;
+    case "quote":
+      return config.text.quote;
+    case "bulletList":
+    case "numberedList":
+      return config.list;
+    case "embed":
+    case "image":
+      return config.attachment;
+    default:
+      return null;
   }
 }
 

@@ -20,13 +20,39 @@
  * SOFTWARE.
  */
 
-export type { default as Style } from "./Style";
-export type { default as Block } from "./Block";
-export type { default as Coordinates } from "./Coordinates";
-export type { default as Blob } from "./Blob";
-export type { default as Siblings } from "./Siblings";
-export type { default as Menu } from "./Menu";
-export type { default as Executable } from "./Executable";
-export type { default as InputArgs } from "./InputArgs";
-export type { default as Attachment } from "./Attachment";
-export type { default as PolarisConfig } from "./PolarisConfig";
+import { type PolarisConfig } from "../interfaces";
+
+export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
+  text: {
+    title: {
+      fontSize: 2.25,
+      lineHeight: 2.5,
+    },
+    subTitle: {
+      fontSize: 1.875,
+      lineHeight: 2.25,
+    },
+    heading: {
+      fontSize: 1.5,
+      lineHeight: 2,
+    },
+    subHeading: {
+      fontSize: 1.25,
+      lineHeight: 1.75,
+    },
+    paragraph: {
+      fontSize: 1,
+      lineHeight: 1.5,
+    },
+    quote: {
+      fontSize: 1,
+      lineHeight: 1.5,
+    },
+  },
+  attachment: {
+    spacing: 1,
+  },
+  list: {
+    spacing: 1,
+  },
+};

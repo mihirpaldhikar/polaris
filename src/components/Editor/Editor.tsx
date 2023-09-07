@@ -28,6 +28,7 @@ import {
   type Coordinates,
   type InputArgs,
   type Menu,
+  type PolarisConfig,
   type Style,
 } from "../../interfaces";
 import {
@@ -66,6 +67,7 @@ import { Composer } from "../Composer";
 interface EditorProps {
   editable?: boolean;
   blob: Blob;
+  config: PolarisConfig;
   onSave?: (blob: Blob) => void;
   autoSaveTimeout?: number;
   inlineTools?: Menu[];
@@ -90,6 +92,7 @@ interface EditorProps {
 export default function Editor({
   editable = true,
   blob,
+  config,
   autoSaveTimeout,
   inlineTools,
   onSave,
@@ -756,6 +759,7 @@ export default function Editor({
       value={{
         dialogRoot,
         popUpRoot,
+        config,
       }}
     >
       <div

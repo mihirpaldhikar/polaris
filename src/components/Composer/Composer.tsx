@@ -25,6 +25,7 @@ import {
   createElement,
   Fragment,
   type JSX,
+  useContext,
   useEffect,
   useRef,
 } from "react";
@@ -36,6 +37,7 @@ import {
   generateBlockId,
   getBlockNode,
   getCaretOffset,
+  getConfigFromRole,
   getNodeAt,
   getNodeIndex,
   getNodeSiblings,
@@ -54,6 +56,8 @@ import {
 import RenderType from "../../enums/RenderType";
 import { AttachmentEngine, TextEngine } from "../../engines";
 import { BLOCK_NODE } from "../../constants";
+import RootContext from "../../contexts/RootContext/RootContext";
+import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 
 interface ComposerProps {
   editable: boolean;
@@ -117,7 +121,7 @@ export default function Composer({
   const isActionMenuOpen = useRef(false);
   const originalBlock = useRef<Block>({ ...block });
   const roleChangeByMarkdown = useRef(false);
-
+  const { config } = useContext(RootContext);
   useEffect(() => {
     subscribeForEvent("onActionMenu", (event: any) => {
       isActionMenuOpen.current = event.detail.opened;
@@ -870,13 +874,22 @@ export default function Composer({
         style: setNodeStyle(block.style),
         spellCheck: true,
         className: conditionalClassName(
-          "space-y-3 my-4 ml-4 pl-4 block",
+          `my-4 ml-4 pl-4 block`,
           block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },
       block.data.map((childBlock) => {
         return (
-          <li key={childBlock.id} className={"pl-2"}>
+          <li
+            key={childBlock.id}
+            className={"pl-2"}
+            style={{
+              marginTop: `${
+                (getConfigFromRole(block.role, config) as AttachmentBlockConfig)
+                  .spacing
+              }rem`,
+            }}
+          >
             <Composer
               parentBlock={block}
               editable={editable}

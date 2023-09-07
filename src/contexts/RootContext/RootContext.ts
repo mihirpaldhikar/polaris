@@ -21,15 +21,19 @@
  */
 import { createContext } from "react";
 import { type Root } from "react-dom/client";
+import { type PolarisConfig } from "../../interfaces";
+import { DEFAULT_POLARIS_CONFIG } from "../../constants/GlobalConstants";
 
 interface RootInterface {
   dialogRoot: Root | undefined;
   popUpRoot: Root | undefined;
+  config: PolarisConfig;
 }
 
 const RootContext = createContext<RootInterface>({
   dialogRoot: undefined,
   popUpRoot: undefined,
+  config: DEFAULT_POLARIS_CONFIG,
 });
 
 export default RootContext;

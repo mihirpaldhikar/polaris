@@ -24,6 +24,7 @@ import { Fragment, type JSX, useContext } from "react";
 import {
   conditionalClassName,
   getBlockNode,
+  getConfigFromRole,
   getEditorRoot,
   setNodeStyle,
 } from "../../utils";
@@ -36,6 +37,7 @@ import {
 import RootContext from "../../contexts/RootContext/RootContext";
 import { MoreOptionsIcon } from "../../assets";
 import { ContextMenu } from "../../components/ContextMenu";
+import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 
 interface AttachmentHolderProps {
   children: JSX.Element;
@@ -54,7 +56,7 @@ export default function AttachmentHolder({
   onChange,
 }: AttachmentHolderProps): JSX.Element {
   const { popUpRoot, dialogRoot } = useContext(RootContext);
-
+  const { config } = useContext(RootContext);
   const tools = attachmentTools.filter((tool) => {
     if (tool.allowedOn !== undefined) {
       return tool.allowedOn?.includes(block.role);
@@ -64,8 +66,16 @@ export default function AttachmentHolder({
 
   return (
     <div
-      className={"w-full"}
+      className={`w-full`}
       style={{
+        paddingTop: `${
+          (getConfigFromRole(block.role, config) as AttachmentBlockConfig)
+            .spacing
+        }rem`,
+        paddingBottom: `${
+          (getConfigFromRole(block.role, config) as AttachmentBlockConfig)
+            .spacing
+        }rem`,
         ...setNodeStyle(block.style),
       }}
     >

@@ -22,10 +22,11 @@
 
 import "./styles/global.css";
 
-export type { Block } from "./interfaces";
+export type { Block, PolarisConfig } from "./interfaces";
 export { generateBlockId } from "./utils";
 export { generateMenuId } from "./utils";
 export { serializeBlobToHTML } from "./utils";
 export { serializeFileToBase64 } from "./utils";
 export type { Blob } from "./interfaces";
 export { Editor } from "./components";
+export { DEFAULT_POLARIS_CONFIG } from "./constants";
