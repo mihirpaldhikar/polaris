@@ -38,6 +38,7 @@ import { YouTubeVideoEmbed } from "../../components/YouTubeVideoEmbed";
 import { AttachmentTools } from "../../assets/tools/AttachmentTools";
 import RenderType from "../../enums/RenderType";
 import { BLOCK_NODE } from "../../constants";
+import { GitHubGistEmbed } from "../../components/GitHubGistEmbed";
 
 interface AttachmentEngineProps {
   parentBlock?: Block;
@@ -138,6 +139,21 @@ export default function AttachmentEngine({
         onChange={onChange}
       >
         <YouTubeVideoEmbed block={block} />
+      </AttachmentHolder>
+    );
+
+  if (
+    attachment.url.startsWith("https://gist.github.com/") &&
+    block.role === "embed"
+  )
+    return (
+      <AttachmentHolder
+        block={block}
+        attachmentTools={AttachmentTools}
+        onDelete={deleteHandler}
+        onChange={onChange}
+      >
+        <GitHubGistEmbed block={block} />
       </AttachmentHolder>
     );
 

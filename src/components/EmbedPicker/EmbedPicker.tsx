@@ -48,6 +48,7 @@ export default function EmbedPicker({
     <div
       data-type={BLOCK_NODE}
       id={id}
+      data-block-render-type={"attachment-placeholder"}
       className={
         "relative h-14 block my-2 w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50"
       }

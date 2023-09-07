@@ -47,12 +47,12 @@ export default function AttachmentHolder({
 
   return (
     <div
-      className={"m-3 w-full"}
+      className={"w-full"}
       style={{
         ...setNodeStyle(block.style),
       }}
     >
-      <div className={"relative inline-block w-fit"}>
+      <div className={"relative inline-block w-full"}>
         {children}
         <div
           className={

@@ -101,3 +101,26 @@ export function getYouTubeVideoID(url: string): string {
   if (!isYouTubeURL(url)) return "";
   return (url.match(YoutubeURLRegex) as RegExpMatchArray)[1];
 }
+
+export function generateGitHubGistURL(url: string): string {
+  const githubGistData = url.split("#");
+  const gistURL = githubGistData[0];
+  let file =
+    githubGistData.length === 1
+      ? ""
+      : "?".concat(githubGistData[1].replace("file-", "file="));
+  if (file !== "" && file.includes("-")) {
+    const fileMeta = file.split("-");
+    file = "";
+    for (let i = 0; i < fileMeta.length; i++) {
+      if (i === fileMeta.length - 1) {
+        file = file.concat(".".concat(fileMeta[i]));
+      } else if (i === 0) {
+        file = file.concat(fileMeta[i]);
+      } else {
+        file = file.concat("%20".concat(fileMeta[i]));
+      }
+    }
+  }
+  return `${gistURL}.js${file}`;
+}

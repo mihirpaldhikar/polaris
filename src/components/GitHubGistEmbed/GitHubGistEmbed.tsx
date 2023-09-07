@@ -21,30 +21,68 @@
  */
 
 import { type JSX } from "react";
-import { blockRenderTypeFromRole, getYouTubeVideoID } from "../../utils";
 import { type Attachment, type Block } from "../../interfaces";
 import { BLOCK_NODE } from "../../constants";
+import {
+  blockRenderTypeFromRole,
+  generateGitHubGistURL,
+  getBlockNode,
+} from "../../utils";
 
-interface YouTubeVideoEmbedProps {
+interface GitHubGistEmbedProps {
   block: Block;
 }
 
-export default function YouTubeVideoEmbed({
+export default function GitHubGistEmbed({
   block,
-}: YouTubeVideoEmbedProps): JSX.Element {
-  const attachment = block.data as Attachment;
+}: GitHubGistEmbedProps): JSX.Element {
+  const attachment: Attachment = block.data as Attachment;
+
+  const gistDocument = `
+        data:text/html;charset=utf-8,
+        <head>
+          <base target="_blank" />
+          <title></title>
+        </head>
+        <body onload="adjustFrame()">
+          <style>
+              * {
+                margin: 0;
+                padding: 0;
+              }
+          </style>
+          <script src="${generateGitHubGistURL(attachment.url)}"></script>
+          <script>
+             function adjustFrame() {
+                window.top.postMessage("iframe-height:" +document.body.scrollHeight, "*");
+             }
+          </script>
+        </body>
+      `;
+
   return (
     <iframe
       id={block.id}
       data-type={BLOCK_NODE}
       data-block-render-type={blockRenderTypeFromRole(block.role)}
       data-block-url={attachment.url}
-      width={attachment.width}
-      height={attachment.height}
-      src={`https://www.youtube.com/embed/${getYouTubeVideoID(attachment.url)}`}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen={true}
-      className={"rounded-md inline-block border border-gray-300"}
-    />
+      className={"w-full"}
+      style={{
+        border: 0,
+      }}
+      src={gistDocument}
+      onLoad={() => {
+        window.onmessage = function (messageEvent) {
+          if (
+            typeof messageEvent.data === "string" &&
+            messageEvent.data.includes("iframe-height:")
+          ) {
+            const height = messageEvent.data.replace("iframe-height:", "");
+            const gistFrame = getBlockNode(block.id) as HTMLIFrameElement;
+            gistFrame.style.height = `${height}px`;
+          }
+        };
+      }}
+    ></iframe>
   );
 }

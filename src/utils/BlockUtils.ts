@@ -27,7 +27,11 @@ import {
   type Siblings,
   type Style,
 } from "../interfaces";
-import { generateRandomString, getYouTubeVideoID } from "./SharedUtils";
+import {
+  generateGitHubGistURL,
+  generateRandomString,
+  getYouTubeVideoID,
+} from "./SharedUtils";
 import { BLOCK_NODE, LINK_ATTRIBUTE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase, kebabCase } from "lodash";
@@ -386,7 +390,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
     return {
       id: node.id,
       data: {
-        url: embedNode.src,
+        url: node.getAttribute("data-block-url") as string,
         description: "",
         width: parseInt(embedNode.width),
         height: parseInt(embedNode.height),
@@ -398,7 +402,7 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
 
   if (
     node.tagName.toLowerCase() === "div" &&
-    node.firstElementChild?.tagName.toLowerCase() === "input"
+    node.getAttribute("data-block-render-type") === "attachment-placeholder"
   ) {
     return {
       id: node.id,
@@ -481,20 +485,48 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
 
     if (block.role === "image") {
       const attachmentNode = document.createElement("img");
-      attachmentNode.style.setProperty("display", "inline-block");
+      attachmentNode.style.setProperty("display", "block");
+      attachmentNode.style.setProperty("border", "none");
       attachmentNode.src = attachment.url;
       attachmentNode.alt = attachment.description;
       attachmentNode.width = attachment.width;
       attachmentNode.height = attachment.height;
       childNode.innerHTML = attachmentNode.outerHTML;
-    } else if (block.role === "embed" && isYouTubeURL(attachment.url)) {
+    } else if (block.role === "embed") {
       const attachmentNode = document.createElement("iframe");
-      attachmentNode.style.setProperty("display", "inline-block");
-      attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(
-        attachment.url,
-      )}`;
-      attachmentNode.width = `${attachment.width}px`;
-      attachmentNode.height = `${attachment.height}px`;
+      attachmentNode.style.setProperty("display", "block");
+      attachmentNode.style.setProperty("border", "none");
+      if (isYouTubeURL(attachment.url)) {
+        attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(
+          attachment.url,
+        )}`;
+        attachmentNode.width = `${attachment.width}px`;
+        attachmentNode.height = `${attachment.height}px`;
+      } else if (attachment.url.startsWith("https://gist.github.com")) {
+        attachmentNode.width = "100%";
+        attachmentNode.style.border = "none";
+        attachmentNode.src = `
+        data:text/html;charset=utf-8,
+        <head>
+          <base target="_blank" />
+          <title></title>
+        </head>
+        <body onload="adjustFrame()">
+          <style>
+              * {
+                margin: 0;
+                padding: 0;
+              }
+          </style>
+          <script src="${generateGitHubGistURL(attachment.url)}"></script>
+          <script>
+             function adjustFrame() {
+                window.top.postMessage("iframe-height:" +document.body.scrollHeight, "*");
+             }
+          </script>
+        </body>
+      `;
+      }
       childNode.innerHTML = attachmentNode.outerHTML;
     }
     node.appendChild(childNode);
