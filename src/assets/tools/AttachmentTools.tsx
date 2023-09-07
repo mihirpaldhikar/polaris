@@ -43,6 +43,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Align Left",
     icon: <AlignStartIcon />,
+    allowedOn: ["image"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -64,6 +65,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Align Center",
     icon: <AlignCenterIcon />,
+    allowedOn: ["image"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -85,6 +87,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Align Right",
     icon: <AlignEndIcon />,
+    allowedOn: ["image"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -106,6 +109,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Resize",
     icon: <ResizeIcon />,
+    allowedOn: ["image"],
     execute: {
       type: "blockFunction",
       args: (block, onChange, _onDelete, _popupRoot, dialogRoot) => {
@@ -144,6 +148,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Change",
     icon: <ChangeIcon />,
+    allowedOn: ["image", "embed"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -156,6 +161,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Remove",
     icon: <DeleteIcon />,
+    allowedOn: ["image", "embed"],
     execute: {
       type: "blockFunction",
       args: (block, _onChange, onDelete) => {

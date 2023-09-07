@@ -480,14 +480,14 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
     }
     const childNode = document.createElement("div");
-    childNode.style.setProperty("display", "block");
+    childNode.style.setProperty("display", "inline-block");
     childNode.style.setProperty("width", "100%");
     const attachment = block.data as Attachment;
 
     if (block.role === "image") {
       const attachmentNode = document.createElement("img");
       attachmentNode.id = block.id;
-      attachmentNode.style.setProperty("display", "block");
+      attachmentNode.style.setProperty("display", "inline-block");
       attachmentNode.style.setProperty("border", "none");
       attachmentNode.src = attachment.url;
       attachmentNode.alt = attachment.description;
@@ -497,7 +497,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     } else if (block.role === "embed") {
       const attachmentNode = document.createElement("iframe");
       attachmentNode.id = block.id;
-      attachmentNode.style.setProperty("display", "block");
+      attachmentNode.style.setProperty("display", "inline-block");
       attachmentNode.style.setProperty("border", "none");
       if (isYouTubeURL(attachment.url)) {
         attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(

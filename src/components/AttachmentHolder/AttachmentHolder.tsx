@@ -21,8 +21,18 @@
  */
 
 import { Fragment, type JSX, useContext } from "react";
-import { getBlockNode, getEditorRoot, setNodeStyle } from "../../utils";
-import { type Block, type Coordinates, type Menu } from "../../interfaces";
+import {
+  conditionalClassName,
+  getBlockNode,
+  getEditorRoot,
+  setNodeStyle,
+} from "../../utils";
+import {
+  type Attachment,
+  type Block,
+  type Coordinates,
+  type Menu,
+} from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { MoreOptionsIcon } from "../../assets";
 import { ContextMenu } from "../../components/ContextMenu";
@@ -45,6 +55,13 @@ export default function AttachmentHolder({
 }: AttachmentHolderProps): JSX.Element {
   const { popUpRoot, dialogRoot } = useContext(RootContext);
 
+  const tools = attachmentTools.filter((tool) => {
+    if (tool.allowedOn !== undefined) {
+      return tool.allowedOn?.includes(block.role);
+    }
+    return true;
+  });
+
   return (
     <div
       className={"w-full"}
@@ -52,7 +69,14 @@ export default function AttachmentHolder({
         ...setNodeStyle(block.style),
       }}
     >
-      <div className={"relative inline-block w-full"}>
+      <div
+        className={conditionalClassName(
+          "relative",
+          (block.data as Attachment).url.startsWith("https://gist.github.com/")
+            ? "w-full block"
+            : "w-fit inline-block",
+        )}
+      >
         {children}
         <div
           className={
@@ -85,7 +109,7 @@ export default function AttachmentHolder({
                 popUpRoot.render(
                   <ContextMenu
                     coordinates={coordinates}
-                    menu={attachmentTools}
+                    menu={tools}
                     onClick={(execute) => {
                       if (typeof execute.args === "function") {
                         execute.args(
