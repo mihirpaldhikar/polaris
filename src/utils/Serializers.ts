@@ -31,20 +31,44 @@ export function serializeBlobToHTML(blob: Blob): string {
     document == null
   )
     return "";
-  const nodes: HTMLElement[] = [];
-
+  const master = document.createElement("html");
+  const masterBody = document.createElement("body");
   for (const block of blob.contents) {
     const node = serializeBlockToNode(block);
     if (node !== null) {
-      nodes.push(node);
+      masterBody.appendChild(node);
     }
   }
 
-  return nodes
-    .map((node) =>
-      node.outerHTML.toString().replaceAll('data-type="inline-specifier"', ""),
-    )
-    .join("");
+  masterBody.append(`
+    <script type="text/javascript">
+      window.onmessage = function (messageEvent) {
+         const height = messageEvent.data.height;
+         const gistFrame = document.getElementById(messageEvent.data.id);
+         if (gistFrame != null) {
+            gistFrame.style.height = height + "px";
+         }
+      };
+    </script>
+  `);
+
+  const head = document.createElement("head");
+  head.innerHTML = `
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  `;
+  master.lang = "en";
+  master.appendChild(head);
+  master.appendChild(masterBody);
+  return master.outerHTML.replace(/&[l|g]t;/g, function (c) {
+    if (c === "&lt;") {
+      return "<";
+    } else {
+      return ">";
+    }
+  });
 }
 
 export async function serializeFileToBase64(file: File): Promise<string> {

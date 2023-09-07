@@ -454,6 +454,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
     typeof block.data === "string"
   ) {
+    node.id = block.id;
     node.innerHTML = block.data;
     for (const childNode of node.childNodes) {
       if (isInlineSpecifierNode(childNode)) {
@@ -479,12 +480,13 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
     }
     const childNode = document.createElement("div");
-    childNode.style.setProperty("display", "inline-block");
-
+    childNode.style.setProperty("display", "block");
+    childNode.style.setProperty("width", "100%");
     const attachment = block.data as Attachment;
 
     if (block.role === "image") {
       const attachmentNode = document.createElement("img");
+      attachmentNode.id = block.id;
       attachmentNode.style.setProperty("display", "block");
       attachmentNode.style.setProperty("border", "none");
       attachmentNode.src = attachment.url;
@@ -494,6 +496,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       childNode.innerHTML = attachmentNode.outerHTML;
     } else if (block.role === "embed") {
       const attachmentNode = document.createElement("iframe");
+      attachmentNode.id = block.id;
       attachmentNode.style.setProperty("display", "block");
       attachmentNode.style.setProperty("border", "none");
       if (isYouTubeURL(attachment.url)) {
@@ -503,29 +506,33 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
         attachmentNode.width = `${attachment.width}px`;
         attachmentNode.height = `${attachment.height}px`;
       } else if (attachment.url.startsWith("https://gist.github.com")) {
+        const gistDocument = `
+   data:text/html;charset=utf-8,
+   <head>
+     <base target="_blank" />
+     <title></title>
+   </head>
+   <body id="gist-${block.id}" onload="adjustFrame()">
+     <style>
+       * {
+         margin: 0;
+         padding: 0;
+       }
+     </style>
+     <script src="${generateGitHubGistURL(attachment.url)}"></script>
+     <script>
+       function adjustFrame() {
+         window.top.postMessage({
+           height: document.body.scrollHeight,
+           id: document.body.id.replace("gist-", "") 
+         }, "*");
+       }
+     </script>
+   </body>
+      `;
         attachmentNode.width = "100%";
         attachmentNode.style.border = "none";
-        attachmentNode.src = `
-        data:text/html;charset=utf-8,
-        <head>
-          <base target="_blank" />
-          <title></title>
-        </head>
-        <body onload="adjustFrame()">
-          <style>
-              * {
-                margin: 0;
-                padding: 0;
-              }
-          </style>
-          <script src="${generateGitHubGistURL(attachment.url)}"></script>
-          <script>
-             function adjustFrame() {
-                window.top.postMessage("iframe-height:" +document.body.scrollHeight, "*");
-             }
-          </script>
-        </body>
-      `;
+        attachmentNode.src = gistDocument;
       }
       childNode.innerHTML = attachmentNode.outerHTML;
     }

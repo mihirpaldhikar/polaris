@@ -23,11 +23,7 @@
 import { type JSX } from "react";
 import { type Attachment, type Block } from "../../interfaces";
 import { BLOCK_NODE } from "../../constants";
-import {
-  blockRenderTypeFromRole,
-  generateGitHubGistURL,
-  getBlockNode,
-} from "../../utils";
+import { blockRenderTypeFromRole, generateGitHubGistURL } from "../../utils";
 
 interface GitHubGistEmbedProps {
   block: Block;
@@ -39,25 +35,28 @@ export default function GitHubGistEmbed({
   const attachment: Attachment = block.data as Attachment;
 
   const gistDocument = `
-        data:text/html;charset=utf-8,
-        <head>
-          <base target="_blank" />
-          <title></title>
-        </head>
-        <body onload="adjustFrame()">
-          <style>
-              * {
-                margin: 0;
-                padding: 0;
-              }
-          </style>
-          <script src="${generateGitHubGistURL(attachment.url)}"></script>
-          <script>
-             function adjustFrame() {
-                window.top.postMessage("iframe-height:" +document.body.scrollHeight, "*");
-             }
-          </script>
-        </body>
+   data:text/html;charset=utf-8,
+   <head>
+     <base target="_blank" />
+     <title></title>
+   </head>
+   <body id="gist-${block.id}" onload="adjustFrame()">
+     <style>
+       * {
+         margin: 0;
+         padding: 0;
+       }
+     </style>
+     <script src="${generateGitHubGistURL(attachment.url)}"></script>
+     <script>
+       function adjustFrame() {
+         window.top.postMessage({
+           height: document.body.scrollHeight,
+           id: document.body.id.replace("gist-", "") 
+         }, "*");
+       }
+     </script>
+   </body>
       `;
 
   return (
@@ -73,13 +72,12 @@ export default function GitHubGistEmbed({
       src={gistDocument}
       onLoad={() => {
         window.onmessage = function (messageEvent) {
-          if (
-            typeof messageEvent.data === "string" &&
-            messageEvent.data.includes("iframe-height:")
-          ) {
-            const height = messageEvent.data.replace("iframe-height:", "");
-            const gistFrame = getBlockNode(block.id) as HTMLIFrameElement;
-            gistFrame.style.height = `${height}px`;
+          if (typeof messageEvent.data === "object") {
+            const height = messageEvent.data.height as number;
+            const gistFrame = document.getElementById(messageEvent.data.id);
+            if (gistFrame != null) {
+              gistFrame.style.height = `${height}px`;
+            }
           }
         };
       }}
