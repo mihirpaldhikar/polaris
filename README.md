@@ -12,6 +12,7 @@ content editing experience.
 5. [x] Inline Links
 6. [x] Image
 7. [x] Lists
+8. [x] Embeds (YouTube Video, GitHub Gist)
 
 ## Installation
 
@@ -21,7 +22,7 @@ npm install @mihirpaldhikar/polaris
 
 ## Usage
 
-Creating an Editor
+#### Creating an Editor
 
 ```tsx
 import { Editor, generateBlockId } from "@mihirpaldhikar/polaris";
@@ -29,6 +30,7 @@ import { Editor, generateBlockId } from "@mihirpaldhikar/polaris";
 export default function MyApp(): JSX.Element {
   const blob: Blob = {
     id: "MB1624",
+    name: "Polaris Doc",
     contents: [
       {
         id: generateBlockId(),
@@ -75,34 +77,28 @@ export default function MyApp(): JSX.Element {
 }
 ```
 
-> Note: If you are using React 18 & above or frameworks like NextJS, you need to explicitly specify the page or
-> component consuming the Polaris Editor as a client component.
-
-Exporting Generated Blob to HTML
+#### Exporting Generated Blob to HTML
 
 ```ts
-import {
-  Blob,
-  generateBlockId,
-  serializeBlobToHTML,
-} from "@mihirpaldhikar/polaris";
+import { generateBlockId, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
 
 const blob: Blob = {
   id: "MB1624",
+  name: "Polaris Doc",
   contents: [
     {
       id: generateBlockId(),
       role: "title",
       data: "Introducing Polaris",
-      style: [],
+      style: []
     },
     {
       id: generateBlockId(),
       role: "paragraph",
       data: "Polaris is a rich semantic content editor.",
-      style: [],
-    },
-  ],
+      style: []
+    }
+  ]
 };
 
 function exportBlobToHTML(blob) {
@@ -113,15 +109,43 @@ function exportBlobToHTML(blob) {
 Output
 
 ```html
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Polaris Doc</title>
+</head>
+<body>
 <h1>Introducing Polaris</h1>
 <p>Polaris is a rich semantic content editor.</p>
+<script type="text/javascript">
+  window.onmessage = function(messageEvent) {
+    const height = messageEvent.data.height;
+    const gistFrame = document.getElementById(messageEvent.data.id);
+    if (gistFrame != null) {
+      gistFrame.style.height = height + "px";
+    }
+  };
+</script>
+</body>
+</html>
 ```
+
+### Important Notes:
+
+- If you are using React 18 & above or frameworks like Next.js, you need to explicitly specify the page or component
+  consuming the Polaris Editor as a client component.
+- Serialization from `Blob` to `HTML` only works on the Client Side as it uses `DOM` behind the scene to convert `Blob`
+  to
+  corresponding `HTML`.
 
 ## Upcoming Features
 
-1. [ ] Embeds
-2. [ ] Tables
-3. [ ] Code
+1. [ ] Tables
+2. [ ] Code
 
 #### Terminologies
 
@@ -131,7 +155,7 @@ Output
 4. `editor` - An Editor is an orchestrator for all the blocks. It uses blob to handle the creation, update, deletion of
    the blocks.
 
-#### Block Role
+#### Block Roles
 
 1. `title` - To render text as a Title
 2. `subTitle` - To render text as a SubTitle
@@ -142,3 +166,4 @@ Output
 7. `bulletList` - To render bullet list
 8. `numberedList` - To render numbered list
 9. `image` - To render contents an image
+10. `embed` - To render Embedded content.
