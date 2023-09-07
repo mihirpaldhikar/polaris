@@ -25,7 +25,7 @@ npm install @mihirpaldhikar/polaris
 #### Creating an Editor
 
 ```tsx
-import { Editor, generateBlockId } from "@mihirpaldhikar/polaris";
+import { DEFAULT_POLARIS_CONFIG, Editor, generateBlockId } from "@mihirpaldhikar/polaris";
 
 export default function MyApp(): JSX.Element {
   const blob: Blob = {
@@ -36,15 +36,15 @@ export default function MyApp(): JSX.Element {
         id: generateBlockId(),
         role: "title",
         data: "Introducing Polaris",
-        style: [],
+        style: []
       },
       {
         id: generateBlockId(),
         role: "paragraph",
         data: "Polaris is a rich semantic content editor.",
-        style: [],
-      },
-    ],
+        style: []
+      }
+    ]
   };
 
   function attachmentHandler(data: File | string): string {
@@ -65,6 +65,7 @@ export default function MyApp(): JSX.Element {
     <Fragment>
       <Editor
         blob={blob}
+        config={DEFAULT_POLARIS_CONFIG}
         onAttachmentSelected={(data) => {
           return attachmentHandler(data);
         }}
@@ -132,6 +133,50 @@ Output
 </script>
 </body>
 </html>
+```
+
+#### Configuring The Editor
+
+The Text Size, Line Height, Spacing in Lists and Attachments can be configured using `PolarisConfig` which is passed
+as `config` property to the Editor. For all the values, the default unit is in `rem`.
+
+Default Config:
+
+```typescript
+const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
+  text: {
+    title: {
+      fontSize: 2.25,
+      lineHeight: 2.5,
+    },
+    subTitle: {
+      fontSize: 1.875,
+      lineHeight: 2.25,
+    },
+    heading: {
+      fontSize: 1.5,
+      lineHeight: 2,
+    },
+    subHeading: {
+      fontSize: 1.25,
+      lineHeight: 1.75,
+    },
+    paragraph: {
+      fontSize: 1,
+      lineHeight: 1.5,
+    },
+    quote: {
+      fontSize: 1,
+      lineHeight: 1.5,
+    },
+  },
+  attachment: {
+    spacing: 1,
+  },
+  list: {
+    spacing: 1,
+  },
+};
 ```
 
 ### Important Notes:
