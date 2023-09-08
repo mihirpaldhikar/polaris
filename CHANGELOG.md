@@ -1,4 +1,4 @@
-## 0.4.0 (September 9, 2023)
+## 0.4.0 (September 8, 2023)
 
 ### Breaking Changes:
 
