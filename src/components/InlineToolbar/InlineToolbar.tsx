@@ -28,7 +28,7 @@ import {
   type Menu,
   type Style,
 } from "../../interfaces";
-import { conditionalClassName, getEditorRoot } from "../../utils";
+import { conditionalClassName } from "../../utils";
 import { InputDialog } from "../InputDialog";
 import { ColorPickerDialog } from "../ColorPickerDialog";
 import { REMOVE_COLOR } from "../../constants";
@@ -96,7 +96,6 @@ export default function InlineToolbar({
                   onMenuSelected(menu.execute);
                 } else {
                   const inputArgs = menu.execute.args as InputArgs;
-                  const editorNode = getEditorRoot();
 
                   if (dialogRoot === undefined) return;
 
@@ -168,16 +167,6 @@ export default function InlineToolbar({
                       />,
                     );
                   }
-
-                  editorNode.addEventListener(
-                    "mousedown",
-                    () => {
-                      dialogRoot.render(<Fragment />);
-                    },
-                    {
-                      once: true,
-                    },
-                  );
                 }
                 onClose();
               }}

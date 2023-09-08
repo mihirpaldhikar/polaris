@@ -20,10 +20,11 @@
  * SOFTWARE.
  */
 
-import { type JSX, useEffect, useState } from "react";
+import { Fragment, type JSX, useState } from "react";
 import { type Coordinates, type InputArgs } from "../../interfaces";
 import { REMOVE_COLOR } from "../../constants";
 import { Button } from "../Button";
+import { DialogBox } from "../DialogBox";
 
 interface ColorPickerDialogProps {
   coordinates: Coordinates;
@@ -56,113 +57,98 @@ export default function ColorPickerDialog({
 
   const defaultColors: string[] = ["#304FFE", "#0288D1", "#0097A7", "#E53935"];
 
-  useEffect(() => {
-    function keyManager(event: KeyboardEvent): void {
-      if (event.key.toLowerCase() === "escape") {
-        onClose();
-      }
-      if (event.key.toLowerCase() === "enter") {
+  return (
+    <DialogBox
+      focusElementId={"color-input"}
+      coordinates={coordinates}
+      onClose={onClose}
+      onConfirm={() => {
         if (inputArgs.validStringRegExp.test(colorHexCode)) {
           onColorSelected(colorHexCode);
         }
-        onClose();
-      }
-    }
-
-    window.addEventListener("keydown", keyManager);
-    return () => {
-      window.removeEventListener("keydown", keyManager);
-    };
-  }, [colorHexCode, inputArgs.validStringRegExp, onClose, onColorSelected]);
-
-  return (
-    <div
-      style={{
-        top: coordinates.y + 30,
-        left: coordinates.x,
       }}
-      className={
-        "fixed flex w-72 flex-col space-y-5 z-50 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
-      }
     >
-      <div
-        className={
-          "grid w-full grid-cols-4 place-items-center justify-center gap-7"
-        }
-      >
-        {defaultColors.map((color, index) => {
-          return (
-            <div
-              key={index}
-              className={"h-[28px] w-[28px] cursor-pointer rounded-full"}
-              style={{
-                backgroundColor: color,
-              }}
-              onClick={() => {
-                if (inputArgs.validStringRegExp.test(color)) {
-                  onColorSelected(color);
-                }
-                onClose();
-              }}
-            ></div>
-          );
-        })}
-      </div>
-      <div
-        className={"flex flex-row items-center justify-evenly space-x-2 px-2"}
-      >
+      <Fragment>
         <div
-          className={"min-h-[28px] min-w-[28px] cursor-pointer rounded-full"}
-          style={{
-            backgroundColor: colorHexCode,
-          }}
-          onClick={() => {
-            if (inputArgs.validStringRegExp.test(colorHexCode)) {
-              onColorSelected(colorHexCode);
-            }
-            onClose();
-          }}
-        ></div>
-        <input
-          placeholder={inputArgs.hint}
-          value={colorHexCode}
           className={
-            "w-[90px] rounded-md border text-sm border-gray-300 px-2 py-1 outline-none focus:border-blue-700"
+            "grid w-full grid-cols-4 place-items-center justify-center gap-5"
           }
-          onChange={(e) => {
-            setColorHexCode(e.target.value);
-            setDisabled(!inputArgs.validStringRegExp.test(e.target.value));
-          }}
-        />
-        <Button
-          disabled={disabled}
-          text={"Select"}
-          onClick={() => {
-            if (inputArgs.validStringRegExp.test(colorHexCode)) {
-              onColorSelected(colorHexCode);
+        >
+          {defaultColors.map((color, index) => {
+            return (
+              <div
+                key={index}
+                className={"h-[28px] w-[28px] cursor-pointer rounded-full"}
+                style={{
+                  backgroundColor: color,
+                }}
+                onClick={() => {
+                  if (inputArgs.validStringRegExp.test(color)) {
+                    onColorSelected(color);
+                  }
+                  onClose();
+                }}
+              ></div>
+            );
+          })}
+        </div>
+        <div
+          className={"flex flex-row items-center justify-evenly space-x-2 px-2"}
+        >
+          <div
+            className={"min-h-[28px] min-w-[28px] cursor-pointer rounded-full"}
+            style={{
+              backgroundColor: colorHexCode,
+            }}
+            onClick={() => {
+              if (inputArgs.validStringRegExp.test(colorHexCode)) {
+                onColorSelected(colorHexCode);
+              }
+              onClose();
+            }}
+          ></div>
+          <input
+            id={"color-input"}
+            placeholder={inputArgs.hint}
+            value={colorHexCode}
+            className={
+              "w-[90px] rounded-md border text-sm border-gray-300 px-2 py-1 outline-none focus:border-blue-700"
             }
-            onClose();
-          }}
-        />
-      </div>
-      <div className={"flex flex-row justify-center space-x-2 px-2"}>
-        <Button
-          hidden={!active}
-          text={"Remove Color"}
-          color={"danger"}
-          onClick={() => {
-            onColorSelected(REMOVE_COLOR);
-            onClose();
-          }}
-        />
-        <Button
-          text={"Cancel"}
-          color={"cancel"}
-          onClick={() => {
-            onClose();
-          }}
-        />
-      </div>
-    </div>
+            onChange={(e) => {
+              setColorHexCode(e.target.value);
+              setDisabled(!inputArgs.validStringRegExp.test(e.target.value));
+            }}
+          />
+          <Button
+            disabled={disabled}
+            text={"Select"}
+            onClick={() => {
+              if (inputArgs.validStringRegExp.test(colorHexCode)) {
+                onColorSelected(colorHexCode);
+              }
+              onClose();
+            }}
+          />
+        </div>
+        <div className={"flex flex-row justify-center space-x-2 px-2"}>
+          <Button
+            hidden={!active}
+            text={"Remove Color"}
+            color={"danger"}
+            onClick={() => {
+              onColorSelected(REMOVE_COLOR);
+              onClose();
+            }}
+          />
+          <Button
+            text={"Cancel"}
+            color={"cancel"}
+            onClick={() => {
+              onClose();
+            }}
+          />
+        </div>
+      </Fragment>
+    </DialogBox>
   );
 }

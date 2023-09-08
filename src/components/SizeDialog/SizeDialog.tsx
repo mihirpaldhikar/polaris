@@ -21,8 +21,9 @@
  */
 
 import { type Coordinates } from "../../interfaces";
-import { type JSX, useEffect, useState } from "react";
+import { Fragment, type JSX, useState } from "react";
 import { Button } from "../Button";
+import { DialogBox } from "../DialogBox";
 
 interface SizeDialogProps {
   initialSize: {
@@ -45,78 +46,63 @@ export default function SizeDialog({
 
   const [disabled, setDisabled] = useState(true);
 
-  useEffect(() => {
-    function keyManager(event: KeyboardEvent): void {
-      if (event.key.toLowerCase() === "escape") {
-        onClose();
-      }
-      if (event.key.toLowerCase() === "enter") {
+  return (
+    <DialogBox
+      focusElementId={"width-input"}
+      coordinates={coordinates}
+      onClose={onClose}
+      onConfirm={() => {
         if (width !== "" && height !== "") {
           onConfirm(parseInt(width), parseInt(height));
         }
-        onClose();
-      }
-    }
-
-    window.addEventListener("keydown", keyManager);
-    return () => {
-      window.removeEventListener("keydown", keyManager);
-    };
-  }, [height, onClose, onConfirm, width]);
-
-  return (
-    <div
-      style={{
-        top: coordinates.y + 30,
-        left: coordinates.x,
       }}
-      className={
-        "fixed z-50 flex w-72 flex-col space-y-3 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
-      }
     >
-      <div className={"flex flex-row items-center space-x-2"}>
-        <input
-          type={"number"}
-          placeholder={"width"}
-          min={0}
+      <Fragment>
+        <div className={"flex flex-row items-center space-x-2"}>
+          <input
+            id={"width-input"}
+            type={"number"}
+            placeholder={"width"}
+            min={0}
+            className={
+              "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
+            }
+            value={width}
+            onChange={(event) => {
+              setWidth(event.target.value);
+              setDisabled(event.target.value === "");
+            }}
+          />
+          <span>x</span>
+          <input
+            type={"number"}
+            placeholder={"height"}
+            min={0}
+            className={
+              "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
+            }
+            value={height}
+            onChange={(event) => {
+              setHeight(event.target.value);
+              setDisabled(event.target.value === "");
+            }}
+          />
+        </div>
+        <div
           className={
-            "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
+            "flex w-full flex-row items-center justify-between space-x-2"
           }
-          value={width}
-          onChange={(event) => {
-            setWidth(event.target.value);
-            setDisabled(event.target.value === "");
-          }}
-        />
-        <span>x</span>
-        <input
-          type={"number"}
-          placeholder={"height"}
-          min={0}
-          className={
-            "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
-          }
-          value={height}
-          onChange={(event) => {
-            setHeight(event.target.value);
-            setDisabled(event.target.value === "");
-          }}
-        />
-      </div>
-      <div
-        className={
-          "flex w-full flex-row items-center justify-between space-x-2"
-        }
-      >
-        <Button
-          text={"Confirm"}
-          disabled={disabled}
-          onClick={() => {
-            onConfirm(parseInt(width), parseInt(height));
-            onClose();
-          }}
-        />
-      </div>
-    </div>
+        >
+          <Button
+            text={"Confirm"}
+            disabled={disabled}
+            onClick={() => {
+              onConfirm(parseInt(width), parseInt(height));
+              onClose();
+            }}
+          />
+        </div>
+      </Fragment>
+    </DialogBox>
   );
 }

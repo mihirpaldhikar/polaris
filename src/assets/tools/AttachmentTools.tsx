@@ -117,10 +117,7 @@ export const AttachmentTools: Menu[] = [
           const currentNode = getBlockNode(block.id) as HTMLElement;
           const coordinates: Coordinates = {
             y: currentNode.getBoundingClientRect().y,
-            x:
-              window.innerWidth > 500
-                ? currentNode.getBoundingClientRect().right
-                : 30,
+            x: currentNode.getBoundingClientRect().right,
           };
 
           dialogRoot.render(

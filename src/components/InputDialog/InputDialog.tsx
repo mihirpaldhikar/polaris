@@ -20,9 +20,10 @@
  * SOFTWARE.
  */
 
-import { type JSX, useEffect, useState } from "react";
+import { Fragment, type JSX, useState } from "react";
 import { type Coordinates, type InputArgs } from "../../interfaces";
 import { Button } from "../Button";
+import { DialogBox } from "../DialogBox";
 
 interface InputDialogProps {
   coordinates: Coordinates;
@@ -49,82 +50,67 @@ export default function InputDialog({
     !inputArgs.validStringRegExp.test(data) || data === "",
   );
 
-  useEffect(() => {
-    function keyManager(event: KeyboardEvent): void {
-      if (event.key.toLowerCase() === "escape") {
-        onClose();
-      }
-      if (event.key.toLowerCase() === "enter") {
+  return (
+    <DialogBox
+      focusElementId={"dialog-input"}
+      coordinates={coordinates}
+      onClose={onClose}
+      onConfirm={() => {
         if (inputArgs.validStringRegExp.test(data)) {
           onConfirm(data);
         }
-        onClose();
-      }
-    }
-
-    window.addEventListener("keydown", keyManager);
-    return () => {
-      window.removeEventListener("keydown", keyManager);
-    };
-  }, [data, inputArgs.validStringRegExp, onClose, onConfirm]);
-
-  return (
-    <div
-      style={{
-        top: coordinates.y,
-        left: coordinates.x,
       }}
-      className={
-        "fixed flex w-72 flex-col z-50 space-y-3 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
-      }
     >
-      <input
-        type={inputArgs.type}
-        placeholder={inputArgs.hint}
-        className={
-          "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-700 text-sm"
-        }
-        value={data}
-        onChange={(event) => {
-          setData(event.target.value);
-          setDisabled(
-            !inputArgs.validStringRegExp.test(event.target.value) ||
-              event.target.value === "",
-          );
-        }}
-      />
-      <div>
-        <div
+      <Fragment>
+        <input
+          id={"dialog-input"}
+          type={inputArgs.type}
+          placeholder={inputArgs.hint}
           className={
-            "flex w-full flex-row items-center justify-between space-x-2"
+            "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-700 text-sm"
           }
-        >
-          <Button
-            disabled={disabled}
-            text={"Confirm"}
-            onClick={() => {
-              onConfirm(data);
-              onClose();
-            }}
-          />
-          <Button
-            text={"Cancel"}
-            color={"cancel"}
-            onClick={() => {
-              onClose();
-            }}
-          />
+          value={data}
+          onChange={(event) => {
+            setData(event.target.value);
+            setDisabled(
+              !inputArgs.validStringRegExp.test(event.target.value) ||
+                event.target.value === "",
+            );
+          }}
+        />
+        <div>
+          <div
+            className={
+              "flex w-full flex-row items-center justify-between space-x-2"
+            }
+          >
+            <Button
+              disabled={disabled}
+              text={"Confirm"}
+              onClick={() => {
+                onConfirm(data);
+                onClose();
+              }}
+            />
+            <Button
+              text={"Cancel"}
+              color={"cancel"}
+              onClick={() => {
+                onClose();
+              }}
+            />
+          </div>
         </div>
-      </div>
-      <Button
-        hidden={!active}
-        text={"Remove"}
-        color={"danger"}
-        onClick={() => {
-          onConfirm(inputArgs.payloadIfRemovedClicked ?? "", true);
-          onClose();
-        }}
-      />
-    </div>
+        <Button
+          hidden={!active}
+          text={"Remove"}
+          color={"danger"}
+          onClick={() => {
+            onConfirm(inputArgs.payloadIfRemovedClicked ?? "", true);
+            onClose();
+          }}
+        />
+      </Fragment>
+    </DialogBox>
   );
 }
