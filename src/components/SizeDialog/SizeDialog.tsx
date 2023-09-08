@@ -22,6 +22,7 @@
 
 import { type Coordinates } from "../../interfaces";
 import { type JSX, useEffect, useState } from "react";
+import { Button } from "../Button";
 
 interface SizeDialogProps {
   initialSize: {
@@ -70,7 +71,7 @@ export default function SizeDialog({
         left: coordinates.x,
       }}
       className={
-        "fixed z-20 flex w-72 flex-col space-y-5 rounded-lg border border-black/10 bg-white px-2 py-3 shadow-md"
+        "fixed z-50 flex w-72 flex-col space-y-3 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
       }
     >
       <div className={"flex flex-row items-center space-x-2"}>
@@ -79,7 +80,7 @@ export default function SizeDialog({
           placeholder={"width"}
           min={0}
           className={
-            "w-full rounded-md border-2 px-2 py-1 outline-none focus:border-blue-600"
+            "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
           }
           value={width}
           onChange={(event) => {
@@ -93,7 +94,7 @@ export default function SizeDialog({
           placeholder={"height"}
           min={0}
           className={
-            "w-full rounded-md border-2 px-2 py-1 outline-none focus:border-blue-600"
+            "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
           }
           value={height}
           onChange={(event) => {
@@ -107,18 +108,14 @@ export default function SizeDialog({
           "flex w-full flex-row items-center justify-between space-x-2"
         }
       >
-        <button
+        <Button
+          text={"Confirm"}
           disabled={disabled}
-          className={
-            "w-full rounded-md bg-blue-600 p-1 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-500"
-          }
           onClick={() => {
             onConfirm(parseInt(width), parseInt(height));
             onClose();
           }}
-        >
-          Confirm
-        </button>
+        />
       </div>
     </div>
   );

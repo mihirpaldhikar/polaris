@@ -23,6 +23,7 @@
 import { type JSX, useEffect, useState } from "react";
 import { type Coordinates, type InputArgs } from "../../interfaces";
 import { REMOVE_COLOR } from "../../constants";
+import { Button } from "../Button";
 
 interface ColorPickerDialogProps {
   coordinates: Coordinates;
@@ -90,7 +91,7 @@ export default function ColorPickerDialog({
         left: coordinates.x,
       }}
       className={
-        "fixed flex w-72 flex-col space-y-5 rounded-lg border border-black/10 bg-white px-2 py-3 shadow-md"
+        "fixed flex w-72 flex-col space-y-3 z-50 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
       }
     >
       <div
@@ -102,7 +103,7 @@ export default function ColorPickerDialog({
           return (
             <div
               key={index}
-              className={"h-7 w-7 cursor-pointer rounded-full"}
+              className={"h-[28px] w-[28px] cursor-pointer rounded-full"}
               style={{
                 backgroundColor: color,
               }}
@@ -120,7 +121,7 @@ export default function ColorPickerDialog({
         className={"flex flex-row items-center justify-evenly space-x-4 px-2"}
       >
         <div
-          className={"h-7 w-7 cursor-pointer rounded-full"}
+          className={"min-h-[28px] min-w-[28px] cursor-pointer rounded-full"}
           style={{
             backgroundColor: colorHexCode,
           }}
@@ -135,51 +136,41 @@ export default function ColorPickerDialog({
           placeholder={inputArgs.hint}
           value={colorHexCode}
           className={
-            "w-[90px] rounded-md border-2 px-2 py-1 outline-none focus:border-blue-600"
+            "w-[90px] rounded-md border text-sm border-gray-300 px-2 py-1 outline-none focus:border-blue-700"
           }
           onChange={(e) => {
             setColorHexCode(e.target.value);
             setDisabled(!inputArgs.validStringRegExp.test(e.target.value));
           }}
         />
-        <button
+        <Button
           disabled={disabled}
-          className={
-            "flex w-fit cursor-pointer flex-row items-center justify-center rounded-lg bg-blue-600 px-3 py-1 font-medium text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400"
-          }
+          text={"Select"}
           onClick={() => {
             if (inputArgs.validStringRegExp.test(colorHexCode)) {
               onColorSelected(colorHexCode);
             }
             onClose();
           }}
-        >
-          Choose
-        </button>
+        />
       </div>
       <div className={"flex flex-row justify-center space-x-2 px-2"}>
-        <button
+        <Button
           hidden={!active}
-          className={
-            "w-full rounded-md bg-red-600 p-1 text-white hover:bg-red-700"
-          }
+          text={"Remove Color"}
+          color={"danger"}
           onClick={() => {
             onColorSelected(REMOVE_COLOR);
             onClose();
           }}
-        >
-          Remove Color
-        </button>
-        <button
-          className={
-            "w-full rounded-md bg-gray-300 p-1 text-black hover:bg-gray-400"
-          }
+        />
+        <Button
+          text={"Cancel"}
+          color={"cancel"}
           onClick={() => {
             onClose();
           }}
-        >
-          Cancel
-        </button>
+        />
       </div>
     </div>
   );
