@@ -54,16 +54,7 @@ export default function ColorPickerDialog({
     !inputArgs.validStringRegExp.test(colorHexCode),
   );
 
-  const defaultColors: string[] = [
-    "#304FFE",
-    "#0097A7",
-    "#00695C",
-    "#E53935",
-    "#F06292",
-    "#0288D1",
-    "#EF6C00",
-    "#6D4C41",
-  ];
+  const defaultColors: string[] = ["#304FFE", "#0288D1", "#0097A7", "#E53935"];
 
   useEffect(() => {
     function keyManager(event: KeyboardEvent): void {
@@ -91,12 +82,12 @@ export default function ColorPickerDialog({
         left: coordinates.x,
       }}
       className={
-        "fixed flex w-72 flex-col space-y-3 z-50 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
+        "fixed flex w-72 flex-col space-y-5 z-50 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
       }
     >
       <div
         className={
-          "grid w-full grid-cols-4 place-items-center justify-center gap-4"
+          "grid w-full grid-cols-4 place-items-center justify-center gap-7"
         }
       >
         {defaultColors.map((color, index) => {
@@ -118,7 +109,7 @@ export default function ColorPickerDialog({
         })}
       </div>
       <div
-        className={"flex flex-row items-center justify-evenly space-x-4 px-2"}
+        className={"flex flex-row items-center justify-evenly space-x-2 px-2"}
       >
         <div
           className={"min-h-[28px] min-w-[28px] cursor-pointer rounded-full"}
