@@ -29,6 +29,7 @@ import {
   BulletListIcon,
   HeadingIcon,
   ImageIcon,
+  LinkIcon,
   NumberedListIcon,
   ParagraphIcon,
   QuoteIcon,
@@ -108,7 +109,7 @@ const MasterBlockTools: readonly Menu[] = [
     id: generateMenuId(),
     name: "Embed",
     description: `Add embeds like YouTube video.`,
-    icon: <QuoteIcon size={32} />,
+    icon: <LinkIcon size={30} />,
     allowedOn: ["paragraph"],
     execute: {
       type: "role",
