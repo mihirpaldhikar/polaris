@@ -43,7 +43,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Align Left",
     icon: <AlignStartIcon size={30} />,
-    allowedOn: ["image"],
+    allowedRoles: ["image", "youtubeVideoEmbed"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -65,7 +65,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Align Center",
     icon: <AlignCenterIcon size={30} />,
-    allowedOn: ["image"],
+    allowedRoles: ["image", "youtubeVideoEmbed"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -87,7 +87,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Align Right",
     icon: <AlignEndIcon size={30} />,
-    allowedOn: ["image"],
+    allowedRoles: ["image", "youtubeVideoEmbed"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -109,7 +109,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Resize",
     icon: <ResizeIcon size={30} />,
-    allowedOn: ["image"],
+    allowedRoles: ["image", "youtubeVideoEmbed"],
     execute: {
       type: "blockFunction",
       args: (block, onChange, _onDelete, _popupRoot, dialogRoot) => {
@@ -145,7 +145,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Change",
     icon: <ChangeIcon size={30} />,
-    allowedOn: ["image", "embed"],
+    allowedRoles: ["image", "youtubeVideoEmbed", "githubGistEmbed"],
     execute: {
       type: "blockFunction",
       args: (block, onChange) => {
@@ -158,7 +158,7 @@ export const AttachmentTools: Menu[] = [
     id: generateMenuId(),
     name: "Remove",
     icon: <DeleteIcon size={30} />,
-    allowedOn: ["image", "embed"],
+    allowedRoles: ["image", "youtubeVideoEmbed", "githubGistEmbed"],
     execute: {
       type: "blockFunction",
       args: (block, _onChange, onDelete) => {

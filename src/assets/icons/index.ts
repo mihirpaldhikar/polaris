@@ -44,3 +44,5 @@ export { default as DeleteIcon } from "./DeleteIcon";
 export { default as ChangeIcon } from "./ChangeIcon";
 export { default as ImageIcon } from "./ImageIcon";
 export { default as MoreOptionsIcon } from "./MoreOptionsIcon";
+export { default as YouTubeIcon } from "./YoutubeIcon";
+export { default as GitHubIcon } from "./GitHubIcon";

@@ -23,7 +23,7 @@
 import { type JSX } from "react";
 import { type Attachment, type Block } from "../../interfaces";
 import { BLOCK_NODE } from "../../constants";
-import { blockRenderTypeFromRole, generateGitHubGistURL } from "../../utils";
+import { generateGitHubGistURL } from "../../utils";
 
 interface GitHubGistEmbedProps {
   block: Block;
@@ -63,7 +63,7 @@ export default function GitHubGistEmbed({
     <iframe
       id={block.id}
       data-type={BLOCK_NODE}
-      data-block-render-type={blockRenderTypeFromRole(block.role)}
+      data-block-render-type={"githubGist"}
       data-block-url={attachment.url}
       className={"w-full"}
       style={{

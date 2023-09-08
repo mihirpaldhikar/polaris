@@ -27,15 +27,16 @@ import {
   AlignEndIcon,
   AlignStartIcon,
   BulletListIcon,
+  GitHubIcon,
   HeadingIcon,
   ImageIcon,
-  LinkIcon,
   NumberedListIcon,
   ParagraphIcon,
   QuoteIcon,
   SubHeadingIcon,
   SubTitleIcon,
   TitleIcon,
+  YouTubeIcon,
 } from "../icons";
 
 const MasterBlockTools: readonly Menu[] = [
@@ -44,7 +45,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Title",
     description: `Big section Heading`,
     icon: <TitleIcon size={32} />,
-    allowedOn: ["subTitle", "heading", "subHeading", "paragraph", "quote"],
+    allowedRoles: ["subTitle", "heading", "subHeading", "paragraph", "quote"],
     execute: {
       type: "role",
       args: "title",
@@ -55,7 +56,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Sub Title",
     description: `Big section Subheading`,
     icon: <SubTitleIcon size={32} />,
-    allowedOn: ["title", "heading", "subHeading", "paragraph", "quote"],
+    allowedRoles: ["title", "heading", "subHeading", "paragraph", "quote"],
     execute: {
       type: "role",
       args: "subTitle",
@@ -66,7 +67,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Heading",
     description: `Small Section heading`,
     icon: <HeadingIcon size={32} />,
-    allowedOn: ["title", "subTitle", "subHeading", "paragraph", "quote"],
+    allowedRoles: ["title", "subTitle", "subHeading", "paragraph", "quote"],
     execute: {
       type: "role",
       args: "heading",
@@ -77,7 +78,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Subheading",
     description: `Small Section Subheading`,
     icon: <SubHeadingIcon size={32} />,
-    allowedOn: ["title", "subTitle", "heading", "paragraph", "quote"],
+    allowedRoles: ["title", "subTitle", "heading", "paragraph", "quote"],
     execute: {
       type: "role",
       args: "subHeading",
@@ -88,7 +89,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Paragraph",
     description: `Just start typing`,
     icon: <ParagraphIcon size={32} />,
-    allowedOn: ["title", "subTitle", "heading", "subHeading", "quote"],
+    allowedRoles: ["title", "subTitle", "heading", "subHeading", "quote"],
     execute: {
       type: "role",
       args: "paragraph",
@@ -99,7 +100,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Quote",
     description: `Capture a quote`,
     icon: <QuoteIcon size={32} />,
-    allowedOn: ["paragraph"],
+    allowedRoles: ["paragraph"],
     execute: {
       type: "role",
       args: "quote",
@@ -107,13 +108,24 @@ const MasterBlockTools: readonly Menu[] = [
   },
   {
     id: generateMenuId(),
-    name: "Embed",
-    description: `Add embeds like YouTube video.`,
-    icon: <LinkIcon size={30} />,
-    allowedOn: ["paragraph"],
+    name: "Youtube Video",
+    description: `Add YouTube video.`,
+    icon: <YouTubeIcon size={30} />,
+    allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "embed",
+      args: "youtubeVideoEmbed",
+    },
+  },
+  {
+    id: generateMenuId(),
+    name: "GitHub",
+    description: `Add GitHub Gist`,
+    icon: <GitHubIcon size={30} />,
+    allowedRoles: ["paragraph"],
+    execute: {
+      type: "role",
+      args: "githubGistEmbed",
     },
   },
   {
@@ -121,7 +133,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Bullets List",
     description: `Create simple list`,
     icon: <BulletListIcon size={35} />,
-    allowedOn: ["paragraph"],
+    allowedRoles: ["paragraph"],
     execute: {
       type: "role",
       args: "bulletList",
@@ -132,7 +144,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Numbered List",
     description: `Create list with numbering`,
     icon: <NumberedListIcon size={35} />,
-    allowedOn: ["paragraph"],
+    allowedRoles: ["paragraph"],
     execute: {
       type: "role",
       args: "numberedList",
@@ -143,7 +155,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Image",
     description: `Add an image`,
     icon: <ImageIcon size={32} />,
-    allowedOn: ["paragraph"],
+    allowedRoles: ["paragraph"],
     execute: {
       type: "role",
       args: "image",
@@ -154,7 +166,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Align Start",
     description: `Align text to start`,
     icon: <AlignStartIcon size={32} />,
-    allowedOn: [
+    allowedRoles: [
       "title",
       "subTitle",
       "heading",
@@ -178,7 +190,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Align Center",
     description: `Align text at the center`,
     icon: <AlignCenterIcon size={32} />,
-    allowedOn: [
+    allowedRoles: [
       "title",
       "subTitle",
       "heading",
@@ -202,7 +214,7 @@ const MasterBlockTools: readonly Menu[] = [
     name: "Align End",
     description: `Align text at the end`,
     icon: <AlignEndIcon size={32} />,
-    allowedOn: [
+    allowedRoles: [
       "title",
       "subTitle",
       "heading",

@@ -31,7 +31,7 @@ interface Menu {
   description?: string;
   icon?: JSX.Element;
   active?: boolean;
-  allowedOn?: Role[];
+  allowedRoles?: Role[];
   execute: Executable;
 }
 

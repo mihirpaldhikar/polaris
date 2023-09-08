@@ -21,4 +21,4 @@
  */
 
 export const YoutubeURLRegex =
-  /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?vi?=|\\&vi?=))([^#\\&?]*).*/;
+  /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|youtubeVideoEmbed\/|shorts\/)|(?:(?:watch)?\?vi?=|\\&vi?=))([^#\\&?]*).*/;

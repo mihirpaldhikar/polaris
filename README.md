@@ -211,4 +211,4 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
 7. `bulletList` - To render bullet list
 8. `numberedList` - To render numbered list
 9. `image` - To render blocks an image
-10. `embed` - To render Embedded content.
+10. `youtubeVideoEmbed` - To render Embedded content.

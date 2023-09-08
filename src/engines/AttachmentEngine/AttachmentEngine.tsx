@@ -25,13 +25,12 @@ import {
   blockRenderTypeFromRole,
   getBlockNode,
   getNodeSiblings,
-  isYouTubeURL,
   nodeTypeFromRole,
   serializeNodeToBlock,
 } from "../../utils";
 import { type Attachment, type Block } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
-import { ImageIcon, LinkIcon } from "../../assets";
+import { GitHubIcon, ImageIcon, YouTubeIcon } from "../../assets";
 import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { YouTubeVideoEmbed } from "../../components/YouTubeVideoEmbed";
@@ -112,12 +111,23 @@ export default function AttachmentEngine({
     );
   }
 
-  if (attachment.url === "" && block.role === "embed") {
+  if (
+    attachment.url === "" &&
+    (block.role === "youtubeVideoEmbed" || block.role === "githubGistEmbed")
+  ) {
     return (
       <EmbedPicker
         id={block.id}
-        icon={<LinkIcon />}
-        message={"Click here to add an Embed."}
+        icon={
+          block.role === "youtubeVideoEmbed" ? (
+            <YouTubeIcon size={25} />
+          ) : (
+            <GitHubIcon size={25} />
+          )
+        }
+        message={`Click here to embed ${
+          block.role === "youtubeVideoEmbed" ? "a YouTube Video" : "GitHub Gist"
+        }.`}
         onEmbedPicked={(url) => {
           attachment.url = url;
           block.data = attachment;
@@ -130,7 +140,7 @@ export default function AttachmentEngine({
     );
   }
 
-  if (isYouTubeURL(attachment.url) && block.role === "embed")
+  if (block.role === "youtubeVideoEmbed")
     return (
       <AttachmentHolder
         block={block}
@@ -142,10 +152,7 @@ export default function AttachmentEngine({
       </AttachmentHolder>
     );
 
-  if (
-    attachment.url.startsWith("https://gist.github.com/") &&
-    block.role === "embed"
-  )
+  if (block.role === "githubGistEmbed")
     return (
       <AttachmentHolder
         block={block}

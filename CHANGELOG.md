@@ -14,8 +14,9 @@
 
 ### Fixes:
 
-- Fix an issue in which Blocks such as `image` and `embed` where getting delete when a new instance of `image`
-  or `embed` where added in the `list`.
+- Fix an issue in which Blocks such as `image` and `youtubeVideoEmbed` where getting delete when a new instance
+  of `image`
+  or `youtubeVideoEmbed` where added in the `list`.
 - Fix text overflow in the Editor.
 - Fix an issue in which Dialogs where not getting dismissed automatically when clicked outside the dialog.
 - Fix an issue in which options on the top right of the `image` was obstructing the Image. This is now replaced by

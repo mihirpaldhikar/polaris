@@ -36,6 +36,7 @@ type Role =
   | "bulletList"
   | "numberedList"
   | "image"
-  | "embed";
+  | "youtubeVideoEmbed"
+  | "githubGistEmbed";
 
 export default Role;

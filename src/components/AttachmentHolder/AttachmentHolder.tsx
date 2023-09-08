@@ -58,8 +58,8 @@ export default function AttachmentHolder({
   const { popUpRoot, dialogRoot } = useContext(RootContext);
   const { config } = useContext(RootContext);
   const tools = attachmentTools.filter((tool) => {
-    if (tool.allowedOn !== undefined) {
-      return tool.allowedOn?.includes(block.role);
+    if (tool.allowedRoles !== undefined) {
+      return tool.allowedRoles?.includes(block.role);
     }
     return true;
   });

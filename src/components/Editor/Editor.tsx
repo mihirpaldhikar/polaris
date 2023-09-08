@@ -516,8 +516,8 @@ export default function Editor({
     caretOffset: number,
   ): void {
     masterBlockTools = masterBlockTools.filter((menu) => {
-      if (menu.allowedOn !== undefined) {
-        return menu.allowedOn?.includes(block.role);
+      if (menu.allowedRoles !== undefined) {
+        return menu.allowedRoles?.includes(block.role);
       }
       return true;
     });

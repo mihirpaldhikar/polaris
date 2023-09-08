@@ -37,7 +37,6 @@ import { BLOCK_NODE, LINK_ATTRIBUTE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase, kebabCase } from "lodash";
 import { isInlineSpecifierNode } from "./DOMUtils";
-import { isYouTubeURL } from "./Validators";
 import {
   type AttachmentBlockConfig,
   type ListBlockConfig,
@@ -100,7 +99,8 @@ export function getConfigFromRole(
     case "bulletList":
     case "numberedList":
       return config.list;
-    case "embed":
+    case "youtubeVideoEmbed":
+    case "githubGistEmbed":
     case "image":
       return config.attachment;
     default:
@@ -209,7 +209,8 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
     case "numberedList":
       return RenderType.LIST;
     case "image":
-    case "embed":
+    case "youtubeVideoEmbed":
+    case "githubGistEmbed":
       return RenderType.ATTACHMENT;
     default:
       return RenderType.UNKNOWN;
@@ -356,8 +357,11 @@ export function getBlockRoleFromNode(node: HTMLElement): Role {
       return "numberedList";
     case "ul":
       return "bulletList";
-    case "iframe":
-      return "embed";
+    case "iframe": {
+      if (node.getAttribute("data-block-render-type") === "youtubeVideo")
+        return "youtubeVideoEmbed";
+      return "githubGistEmbed";
+    }
     default:
       if (node.parentElement?.parentElement?.tagName.toLowerCase() === "ul")
         return "bulletList";
@@ -509,10 +513,12 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     (block.data as Attachment).url !== ""
   ) {
     node = document.createElement("div");
-    node.style.setProperty("width", "100%");
     for (const style of block.style) {
       node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
     }
+    node.style.setProperty("width", "100%");
+    node.style.setProperty("padding-top", "15px");
+    node.style.setProperty("padding-bottom", "15px");
     const childNode = document.createElement("div");
     childNode.style.setProperty("display", "inline-block");
     childNode.style.setProperty("width", "100%");
@@ -528,19 +534,19 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       attachmentNode.width = attachment.width;
       attachmentNode.height = attachment.height;
       childNode.innerHTML = attachmentNode.outerHTML;
-    } else if (block.role === "embed") {
+    } else if (block.role === "youtubeVideoEmbed") {
       const attachmentNode = document.createElement("iframe");
       attachmentNode.id = block.id;
       attachmentNode.style.setProperty("display", "inline-block");
       attachmentNode.style.setProperty("border", "none");
-      if (isYouTubeURL(attachment.url)) {
-        attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(
-          attachment.url,
-        )}`;
-        attachmentNode.width = `${attachment.width}px`;
-        attachmentNode.height = `${attachment.height}px`;
-      } else if (attachment.url.startsWith("https://gist.github.com")) {
-        const gistDocument = `
+      attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(
+        attachment.url,
+      )}`;
+      attachmentNode.width = `${attachment.width}px`;
+      attachmentNode.height = `${attachment.height}px`;
+      childNode.innerHTML = attachmentNode.outerHTML;
+    } else if (block.role === "githubGistEmbed") {
+      const gistDocument = `
    data:text/html;charset=utf-8,
    <head>
      <base target="_blank" />
@@ -564,10 +570,13 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
      </script>
    </body>
       `;
-        attachmentNode.width = "100%";
-        attachmentNode.style.border = "none";
-        attachmentNode.src = gistDocument;
-      }
+      const attachmentNode = document.createElement("iframe");
+      attachmentNode.id = block.id;
+      attachmentNode.style.setProperty("display", "inline-block");
+      attachmentNode.style.setProperty("border", "none");
+      attachmentNode.width = "100%";
+      attachmentNode.style.border = "none";
+      attachmentNode.src = gistDocument;
       childNode.innerHTML = attachmentNode.outerHTML;
     }
     node.appendChild(childNode);
