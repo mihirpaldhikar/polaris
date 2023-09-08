@@ -146,36 +146,30 @@ Default Config:
 const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
   text: {
     title: {
-      fontSize: 2.25,
-      lineHeight: 2.5,
+      fontSize: 2.25
     },
     subTitle: {
-      fontSize: 1.875,
-      lineHeight: 2.25,
+      fontSize: 1.875
     },
     heading: {
-      fontSize: 1.5,
-      lineHeight: 2,
+      fontSize: 1.5
     },
     subHeading: {
-      fontSize: 1.25,
-      lineHeight: 1.75,
+      fontSize: 1.25
     },
     paragraph: {
-      fontSize: 1,
-      lineHeight: 1.5,
+      fontSize: 1
     },
     quote: {
-      fontSize: 1,
-      lineHeight: 1.5,
-    },
+      fontSize: 1
+    }
   },
   attachment: {
-    spacing: 1,
+    spacing: 1
   },
   list: {
-    spacing: 1,
-  },
+    spacing: 1
+  }
 };
 ```
 
