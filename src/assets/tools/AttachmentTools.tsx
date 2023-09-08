@@ -42,7 +42,7 @@ export const AttachmentTools: Menu[] = [
   {
     id: generateMenuId(),
     name: "Align Left",
-    icon: <AlignStartIcon />,
+    icon: <AlignStartIcon size={30} />,
     allowedOn: ["image"],
     execute: {
       type: "blockFunction",
@@ -64,7 +64,7 @@ export const AttachmentTools: Menu[] = [
   {
     id: generateMenuId(),
     name: "Align Center",
-    icon: <AlignCenterIcon />,
+    icon: <AlignCenterIcon size={30} />,
     allowedOn: ["image"],
     execute: {
       type: "blockFunction",
@@ -86,7 +86,7 @@ export const AttachmentTools: Menu[] = [
   {
     id: generateMenuId(),
     name: "Align Right",
-    icon: <AlignEndIcon />,
+    icon: <AlignEndIcon size={30} />,
     allowedOn: ["image"],
     execute: {
       type: "blockFunction",
@@ -108,7 +108,7 @@ export const AttachmentTools: Menu[] = [
   {
     id: generateMenuId(),
     name: "Resize",
-    icon: <ResizeIcon />,
+    icon: <ResizeIcon size={30} />,
     allowedOn: ["image"],
     execute: {
       type: "blockFunction",
@@ -147,7 +147,7 @@ export const AttachmentTools: Menu[] = [
   {
     id: generateMenuId(),
     name: "Change",
-    icon: <ChangeIcon />,
+    icon: <ChangeIcon size={30} />,
     allowedOn: ["image", "embed"],
     execute: {
       type: "blockFunction",
@@ -160,7 +160,7 @@ export const AttachmentTools: Menu[] = [
   {
     id: generateMenuId(),
     name: "Remove",
-    icon: <DeleteIcon />,
+    icon: <DeleteIcon size={30} />,
     allowedOn: ["image", "embed"],
     execute: {
       type: "blockFunction",

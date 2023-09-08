@@ -36,14 +36,21 @@ export default function ContextMenu({
   onClick,
   onClose,
 }: ContextMenuProps): JSX.Element {
+  const CONTEXT_MENU_WIDTH: number = 176;
+
+  const xAxis =
+    coordinates.x + CONTEXT_MENU_WIDTH > window.innerWidth
+      ? coordinates.x - CONTEXT_MENU_WIDTH - 50
+      : coordinates.x;
+
   return (
     <div
       className={
-        "fixed z-40 flex w-60 flex-col space-y-0.5 rounded-lg border border-gray-300 bg-white shadow-md"
+        "fixed overflow-y-auto z-40 max-h-96 flex w-44 flex-col space-y-0.5 px-1 py-1 rounded-lg border border-gray-300 bg-white shadow-md"
       }
       style={{
         top: coordinates.y,
-        left: coordinates.x,
+        left: xAxis,
       }}
     >
       {menu.map((m) => {
@@ -52,7 +59,7 @@ export default function ContextMenu({
             key={m.id}
             id={m.id}
             className={
-              "flex w-full cursor-pointer font-medium select-none flex-row items-center space-x-1 rounded-md px-1 text-sm outline-none ring-0 hover:bg-gray-200 focus:bg-gray-200"
+              "flex w-full cursor-pointer font-medium select-none flex-row items-center space-x-1 rounded-md px-1 text-xs outline-none ring-0 hover:bg-gray-100 focus:bg-gray-200"
             }
             onClick={() => {
               onClick(m.execute);
