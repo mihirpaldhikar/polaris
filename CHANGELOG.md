@@ -1,3 +1,26 @@
+## 0.3.0 (September 8, 2023)
+
+### New:
+
+- Add support for YouTube Video and GitHub Gist Embeds.
+- Add an option to configure Blocks and Editor with `PolarisConfig`.
+- Serialization from `Blob` to `HTML` now gives complete `HTML Document` as output instead of only containing `Block`.
+- Add `name` field to `Blob` for unique `Blob` name.
+
+### Breaking Changes:
+
+- `contents` field in `Blob` has now renamed to `blocks` for unified naming scheme and to avoid confusion.
+- `onImageSelected` callback has been renamed to `onAttachmentSelected`.
+
+### Fixes:
+
+- Fix an issue in which Blocks such as `image` and `embed` where getting delete when a new instance of `image`
+  or `embed` where added in the `list`.
+- Fix text overflow in the Editor.
+- Fix an issue in which Dialogs where not getting dismissed automatically when clicked outside the dialog.
+- Fix an issue in which options on the top right of the `image` was obstructing the Image. This is now replaced by
+  a `ContextMenu`.
+
 ## 0.2.4 (September 3, 2023)
 
 ### Breaking Changes:
