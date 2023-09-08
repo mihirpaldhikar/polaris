@@ -22,7 +22,6 @@
 
 export interface TextBlockConfig {
   fontSize: number;
-  lineHeight: number;
 }
 
 export interface AttachmentBlockConfig {

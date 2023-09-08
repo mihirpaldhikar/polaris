@@ -26,27 +26,21 @@ export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
   text: {
     title: {
       fontSize: 2.25,
-      lineHeight: 2.5,
     },
     subTitle: {
       fontSize: 1.875,
-      lineHeight: 2.25,
     },
     heading: {
       fontSize: 1.5,
-      lineHeight: 2,
     },
     subHeading: {
       fontSize: 1.25,
-      lineHeight: 1.75,
     },
     paragraph: {
       fontSize: 1,
-      lineHeight: 1.5,
     },
     quote: {
       fontSize: 1,
-      lineHeight: 1.5,
     },
   },
   attachment: {

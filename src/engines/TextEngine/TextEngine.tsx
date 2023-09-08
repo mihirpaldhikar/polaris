@@ -33,7 +33,7 @@ import { BLOCK_NODE } from "../../constants";
 import { type Block } from "../../interfaces";
 import type RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
-import { TextBlockConfig } from "../../interfaces/PolarisConfig";
+import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
 
 interface TextEngineProps {
   block: Block;
@@ -63,9 +63,6 @@ export default function TextEngine({
     style: {
       fontSize: `${
         (getConfigFromRole(block.role, config) as TextBlockConfig).fontSize
-      }rem`,
-      lineHeight: `${
-        (getConfigFromRole(block.role, config) as TextBlockConfig).lineHeight
       }rem`,
       ...setNodeStyle(block.style),
     },
