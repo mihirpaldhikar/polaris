@@ -24,6 +24,7 @@
 import { type JSX, useState } from "react";
 import {
   type Blob,
+  DEFAULT_POLARIS_CONFIG,
   Editor,
   serializeFileToBase64,
 } from "@mihirpaldhikar/polaris";
@@ -35,7 +36,8 @@ import { FaMagic } from "react-icons/fa";
 export default function Home(): JSX.Element {
   const [blob, updateBlob] = useState<Blob>({
     id: "MB1624",
-    contents: [
+    name: "Polaris Doc",
+    blocks: [
       {
         id: "k9AXBBKurgZShm4a7jpE5fDKuFuCeg",
         role: "title",
@@ -128,13 +130,16 @@ export default function Home(): JSX.Element {
       </div>
       <div
         className={
-          "border-gray-300 border bg-white min-h-[300px] mb-10 md:mx-60 rounded-md px-4 py-3"
+          "border-gray-300 border bg-white min-h-[300px] mb-10 lg:mx-60 rounded-md px-4 py-3"
         }
       >
         <Editor
           blob={blob}
-          onImageSelected={async (file) => {
-            return await serializeFileToBase64(file);
+          config={DEFAULT_POLARIS_CONFIG}
+          onAttachmentSelected={async (data) => {
+            if (typeof data !== "string")
+              return await serializeFileToBase64(data);
+            return "";
           }}
           onChange={(blob) => {
             updateBlob(blob);
