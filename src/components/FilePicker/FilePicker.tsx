@@ -77,7 +77,11 @@ export default function FilePicker({
       >
         <DeleteIcon size={20} color={"red"} />
       </span>
-      <div className={"flex h-full w-full  items-center justify-center"}>
+      <div
+        className={
+          "flex h-full w-full text-gray-500 items-center justify-center"
+        }
+      >
         {fileIcon}
         <span className={"font-medium text-sm"}>{message}</span>
       </div>

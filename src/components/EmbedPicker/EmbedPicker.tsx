@@ -95,7 +95,9 @@ export default function EmbedPicker({
         <DeleteIcon size={20} color={"red"} />
       </span>
       <div
-        className={"flex space-x-3 h-full w-full  items-center justify-center"}
+        className={
+          "flex space-x-3 h-full w-full text-gray-500 items-center justify-center"
+        }
       >
         {icon}
         <span className={"font-medium text-sm"}>{message}</span>
