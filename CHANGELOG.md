@@ -1,3 +1,15 @@
+## 0.4.0 (September 9, 2023)
+
+### Breaking Changes:
+
+- `youtubeVideoEmbed` and `githubGistEmbed` are now separate blocks instead of `embed` block.
+- `allowedOn` has been renamed to `allowedRoles` in `Menu`.
+- Removed `lineHeight` field from `PolarisConfig`. The line height is now automatically managed bt the `Editor`
+
+### Fixes:
+
+- Fix an issue in which `lineHeight` was causing unexpected spacings between texts when text blocks are rendered.
+
 ## 0.3.0 (September 8, 2023)
 
 ### New:
