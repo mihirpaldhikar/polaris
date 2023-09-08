@@ -23,7 +23,7 @@
 /**
  * @interface Style
  *
- * @description Describes about the type of style needs to be applied to the contents of the block when rendered.
+ * @description Describes about the type of style needs to be applied to the block when rendered.
  *
  * @author Mihir Paldhikar
  */

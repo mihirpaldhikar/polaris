@@ -33,7 +33,7 @@ export function serializeBlobToHTML(blob: Blob): string {
     return "";
   const master = document.createElement("html");
   const masterBody = document.createElement("body");
-  for (const block of blob.contents) {
+  for (const block of blob.blocks) {
     const node = serializeBlockToNode(block);
     if (node !== null) {
       masterBody.appendChild(node);

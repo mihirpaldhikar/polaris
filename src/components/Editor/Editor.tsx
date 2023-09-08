@@ -84,7 +84,7 @@ interface EditorProps {
  * @param inlineTools
  * @param onSave
  *
- * @description A Workspace is essentially as Editor which manages all the contents of the blob. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
+ * @description A Workspace is essentially as Editor which manages all the blocks of the blob. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
  *
  * @author Mihir Paldhikar
  */
@@ -104,7 +104,7 @@ export default function Editor({
   );
   let masterBlockTools: readonly Menu[] = cloneDeep(MasterBlockTools);
 
-  const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.contents);
+  const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.blocks);
   const [focusedNode, setFocusedNode] = useState<
     | {
         nodeId: string;
@@ -144,7 +144,7 @@ export default function Editor({
                 };
               });
               const blobRef = blob;
-              blobRef.contents = blockRef;
+              blobRef.blocks = blockRef;
               onSave(blobRef);
             }
           }
@@ -166,7 +166,7 @@ export default function Editor({
           };
         });
         const blobRef = blob;
-        blobRef.contents = blockRef;
+        blobRef.blocks = blockRef;
         onSave(blobRef);
       }, autoSaveTimeout);
     }

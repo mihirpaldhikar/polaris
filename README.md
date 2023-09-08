@@ -31,7 +31,7 @@ export default function MyApp(): JSX.Element {
   const blob: Blob = {
     id: "MB1624",
     name: "Polaris Doc",
-    contents: [
+    blocks: [
       {
         id: generateBlockId(),
         role: "title",
@@ -86,7 +86,7 @@ import { generateBlockId, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
 const blob: Blob = {
   id: "MB1624",
   name: "Polaris Doc",
-  contents: [
+  blocks: [
     {
       id: generateBlockId(),
       role: "title",
@@ -194,9 +194,9 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
 
 #### Terminologies
 
-1. `block` - A Block is the smallest unit holding all the necessary information required to render contents.
+1. `block` - A Block is the smallest unit holding all the necessary information required to render blocks.
 2. `blob` - A Blob is a collection of blocks holding all the information and position of the blocks.
-3. `composer` - A Composer uses block to determine how to render contents.
+3. `composer` - A Composer uses block to determine how to render blocks.
 4. `editor` - An Editor is an orchestrator for all the blocks. It uses blob to handle the creation, update, deletion of
    the blocks.
 
@@ -210,5 +210,5 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
 6. `quote` - To render content as quote
 7. `bulletList` - To render bullet list
 8. `numberedList` - To render numbered list
-9. `image` - To render contents an image
+9. `image` - To render blocks an image
 10. `embed` - To render Embedded content.
