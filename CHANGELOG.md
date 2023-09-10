@@ -1,3 +1,10 @@
+## 0.5.0 (September 10, 2023)
+
+### New:
+
+- Add support for Tables.
+- Performance of the editor has been improved.
+
 ## 0.4.0 (September 8, 2023)
 
 ### Breaking Changes:
