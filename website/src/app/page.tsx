@@ -255,28 +255,6 @@ export default function Home(): JSX.Element {
         style: [],
       },
       {
-        id: "k9AsxA1BBKurAZhm4a6JpE5fDKuFuCeg",
-        role: "subHeading",
-        data: "YouTube Videos",
-        style: [],
-      },
-      {
-        id: "k9AsxA1BBKurgZShm4a6JpE5fDKuF231aA",
-        role: "youtubeVideoEmbed",
-        data: {
-          url: "https://youtu.be/BsJbUBYvL2g",
-          description: "",
-          width: 500,
-          height: 300,
-        },
-        style: [
-          {
-            name: "text-align",
-            value: "center",
-          },
-        ],
-      },
-      {
         id: "k9A1BBKurgZShm4a6JpE5fDKuFuCeg",
         role: "quote",
         data: "This is an interactive playground. Start writing in the editor to experience the power of Polaris.",
