@@ -64,7 +64,7 @@ export default function Home(): JSX.Element {
       },
       {
         id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg",
-        role: "heading",
+        role: "subTitle",
         data: "Features",
         style: [],
       },
@@ -98,6 +98,183 @@ export default function Home(): JSX.Element {
           },
         ],
         style: [],
+      },
+      {
+        id: "k9AsxA1BBKurgZShm4a6JpE5fDKuFuCeg",
+        role: "subHeading",
+        data: "Tables Support",
+        style: [],
+      },
+      {
+        id: "teyek9A1BBKurgQZShm4a6JpE5fDKuFuCeg",
+        role: "table",
+        data: {
+          rows: [
+            {
+              id: "e949jciQnecin2ind",
+              columns: [
+                {
+                  id: "k123s9A1Q1BBKurgZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Sr. No",
+                  style: [],
+                },
+                {
+                  id: "k123s1A9A1BBKurgZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Company",
+                  style: [],
+                },
+                {
+                  id: "k23q123Sxs9A1BBKurgZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "CEO",
+                  style: [],
+                },
+                {
+                  id: "k12agZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Headquarters",
+                  style: [],
+                },
+                {
+                  id: "k123s129A1B21agZ21qQ4a6Jp",
+                  role: "paragraph",
+                  data: "Website",
+                  style: [],
+                },
+              ],
+            },
+            {
+              id: "e949jcinecin2ind1A",
+              columns: [
+                {
+                  id: "k123s9A1BBKurgZShm4a6JpE23",
+                  role: "paragraph",
+                  data: "1",
+                  style: [],
+                },
+                {
+                  id: "k123s9A1BBKurgZShm4a6JEKuF",
+                  role: "paragraph",
+                  data: "Google",
+                  style: [],
+                },
+                {
+                  id: "k23q123s9A1BBK1uhm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Sundar Pichai",
+                  style: [],
+                },
+                {
+                  id: "k123s129A1B1Shm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Googleplex, Mountain View, CA, USA",
+                  style: [],
+                },
+                {
+                  id: "k1212a29A1B1Shm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: '<span data-type="inline-specifier" data-link="https://google.com" style="text-decoration: underline;">https://google.com</span>',
+                  style: [],
+                },
+              ],
+            },
+            {
+              id: "e949jcinecin2ind2A",
+              columns: [
+                {
+                  id: "k123s9A1BBKurgZShm4a62fDKuFuCeg",
+                  role: "paragraph",
+                  data: "2",
+                  style: [],
+                },
+                {
+                  id: "k123s9A1BBKurgZShm1JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Microsoft",
+                  style: [],
+                },
+                {
+                  id: "k23q123s9A1BBKu2Shm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Satya Nadella",
+                  style: [],
+                },
+                {
+                  id: "k123s129A211agZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Redmond, Washington, USA",
+                  style: [],
+                },
+                {
+                  id: "k1Qwa29A1B1Shm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: '<span data-type="inline-specifier" data-link="https://microsoft.com" style="text-decoration: underline;">https://microsoft.com</span>',
+                  style: [],
+                },
+              ],
+            },
+            {
+              id: "e949jcinecin2ind3A",
+              columns: [
+                {
+                  id: "k123s9A1BBKurAshm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "3",
+                  style: [],
+                },
+                {
+                  id: "k123s9A1BrionyKurgZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Apple",
+                  style: [],
+                },
+                {
+                  id: "k23q123s9A34wurgZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "Tim Cook",
+                  style: [],
+                },
+                {
+                  id: "k123s129A112agZShm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: "One Apple Park Way, Cupertino, CA, USA",
+                  style: [],
+                },
+                {
+                  id: "k12229A1B1Shm4a6JpE5fDKuFuCeg",
+                  role: "paragraph",
+                  data: '<span data-type="inline-specifier" data-link="https://apple.com" style="text-decoration: underline;">https://apple.com</span>',
+                  style: [],
+                },
+              ],
+            },
+          ],
+        },
+        style: [],
+      },
+      {
+        id: "k9AsxA1BBKurAZhm4a6JpE5fDKuFuCeg",
+        role: "subHeading",
+        data: "YouTube Videos",
+        style: [],
+      },
+      {
+        id: "k9AsxA1BBKurgZShm4a6JpE5fDKuF231aA",
+        role: "youtubeVideoEmbed",
+        data: {
+          url: "https://youtu.be/BsJbUBYvL2g",
+          description: "",
+          width: 500,
+          height: 300,
+        },
+        style: [
+          {
+            name: "text-align",
+            value: "center",
+          },
+        ],
       },
       {
         id: "k9A1BBKurgZShm4a6JpE5fDKuFuCeg",
