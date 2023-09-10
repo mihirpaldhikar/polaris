@@ -26,7 +26,11 @@ npm install @mihirpaldhikar/polaris
 #### Creating an Editor
 
 ```tsx
-import { DEFAULT_POLARIS_CONFIG, Editor, generateBlockId } from "@mihirpaldhikar/polaris";
+import {
+  DEFAULT_POLARIS_CONFIG,
+  Editor,
+  generateBlockId,
+} from "@mihirpaldhikar/polaris";
 
 export default function MyApp(): JSX.Element {
   const blob: Blob = {
@@ -37,15 +41,15 @@ export default function MyApp(): JSX.Element {
         id: generateBlockId(),
         role: "title",
         data: "Introducing Polaris",
-        style: []
+        style: [],
       },
       {
         id: generateBlockId(),
         role: "paragraph",
         data: "Polaris is a rich semantic content editor.",
-        style: []
-      }
-    ]
+        style: [],
+      },
+    ],
   };
 
   function attachmentHandler(data: File | string): string {
@@ -92,15 +96,15 @@ const blob: Blob = {
       id: generateBlockId(),
       role: "title",
       data: "Introducing Polaris",
-      style: []
+      style: [],
     },
     {
       id: generateBlockId(),
       role: "paragraph",
       data: "Polaris is a rich semantic content editor.",
-      style: []
-    }
-  ]
+      style: [],
+    },
+  ],
 };
 
 function exportBlobToHTML(blob) {
@@ -111,28 +115,29 @@ function exportBlobToHTML(blob) {
 Output
 
 ```html
-
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Polaris Doc</title>
-</head>
-<body>
-<h1>Introducing Polaris</h1>
-<p>Polaris is a rich semantic content editor.</p>
-<script type="text/javascript">
-  window.onmessage = function(messageEvent) {
-    const height = messageEvent.data.height;
-    const gistFrame = document.getElementById(messageEvent.data.id);
-    if (gistFrame != null) {
-      gistFrame.style.height = height + "px";
-    }
-  };
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Polaris Doc</title>
+  </head>
+  <body>
+    <h1>Introducing Polaris</h1>
+    <p>Polaris is a rich semantic content editor.</p>
+    <script type="text/javascript">
+      window.onmessage = function (messageEvent) {
+        const height = messageEvent.data.height;
+        const gistFrame = document.getElementById(messageEvent.data.id);
+        if (gistFrame != null) {
+          gistFrame.style.height = height + "px";
+        }
+      };
+    </script>
+  </body>
 </html>
 ```
 
@@ -147,30 +152,30 @@ Default Config:
 const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
   text: {
     title: {
-      fontSize: 2.25
+      fontSize: 2.25,
     },
     subTitle: {
-      fontSize: 1.875
+      fontSize: 1.875,
     },
     heading: {
-      fontSize: 1.5
+      fontSize: 1.5,
     },
     subHeading: {
-      fontSize: 1.25
+      fontSize: 1.25,
     },
     paragraph: {
-      fontSize: 1
+      fontSize: 1,
     },
     quote: {
-      fontSize: 1
-    }
+      fontSize: 1,
+    },
   },
   attachment: {
-    spacing: 1
+    spacing: 1,
   },
   list: {
-    spacing: 1
-  }
+    spacing: 1,
+  },
 };
 ```
 
