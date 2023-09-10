@@ -13,6 +13,7 @@ content editing experience.
 6. [x] Image
 7. [x] Lists
 8. [x] Embeds (YouTube Video, GitHub Gist)
+9. [x] Tables
 
 ## Installation
 
@@ -183,8 +184,7 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
 
 ## Upcoming Features
 
-1. [ ] Tables
-2. [ ] Code
+1. [ ] Code
 
 #### Terminologies
 
@@ -207,3 +207,4 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
 9. `image` - To render blocks an image
 10. `youtubeVideoEmbed` - To Embed YouTube Video.
 11. `githubGistEmbed` - To Embed GitHub Gist.
+12. `table` - To Add tabular content.
