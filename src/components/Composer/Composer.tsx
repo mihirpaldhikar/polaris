@@ -54,7 +54,7 @@ import {
   unsubscribeFromEvent,
 } from "../../utils";
 import RenderType from "../../enums/RenderType";
-import { AttachmentEngine, TextEngine } from "../../engines";
+import { AttachmentEngine, TableEngine, TextEngine } from "../../engines";
 import { BLOCK_NODE } from "../../constants";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
@@ -63,7 +63,7 @@ interface ComposerProps {
   editable: boolean;
   parentBlock?: Block;
   block: Block;
-  onChange: (block: Block) => void;
+  onChange: (block: Block, focus?: boolean) => void;
   onCreate: (
     parentBlock: Block,
     targetBlock: Block,
@@ -544,7 +544,8 @@ export default function Composer({
           const { previous } = getNodeSiblings(currentBlockNode.id);
           if (
             previous != null &&
-            blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT
+            blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT &&
+            blockRenderTypeFromNode(previous) !== RenderType.TABLE
           ) {
             if (
               previous.tagName.toLowerCase() === "ol" ||
@@ -557,7 +558,8 @@ export default function Composer({
               if (
                 previousPrevious != null &&
                 blockRenderTypeFromNode(previousPrevious) !==
-                  RenderType.ATTACHMENT
+                  RenderType.ATTACHMENT &&
+                blockRenderTypeFromNode(previousPrevious) !== RenderType.TABLE
               ) {
                 const previousBlockChildNodeIndex =
                   previousPrevious?.lastChild?.textContent === ""
@@ -637,7 +639,8 @@ export default function Composer({
           const { next } = getNodeSiblings(currentBlockNode.id);
           if (
             next != null &&
-            blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT
+            blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT &&
+            blockRenderTypeFromNode(next) !== RenderType.TABLE
           ) {
             if (
               next.tagName.toLowerCase() === "ol" ||
@@ -647,7 +650,8 @@ export default function Composer({
 
               if (
                 nextNext != null &&
-                blockRenderTypeFromNode(nextNext) !== RenderType.ATTACHMENT
+                blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT &&
+                blockRenderTypeFromNode(next) !== RenderType.TABLE
               ) {
                 setCaretOffset(nextNext, 0);
               }
@@ -666,9 +670,11 @@ export default function Composer({
         }
 
         const { previous } = getNodeSiblings(currentBlockNode.id);
+
         if (
           previous != null &&
-          blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT
+          blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT &&
+          blockRenderTypeFromNode(previous) !== RenderType.TABLE
         ) {
           if (
             previous.tagName.toLowerCase() === "ol" ||
@@ -677,8 +683,8 @@ export default function Composer({
             const { previous: previousPrevious } = getNodeSiblings(previous.id);
             if (
               previousPrevious != null &&
-              blockRenderTypeFromNode(previousPrevious) !==
-                RenderType.ATTACHMENT
+              blockRenderTypeFromNode(previous) !== RenderType.ATTACHMENT &&
+              blockRenderTypeFromNode(previous) !== RenderType.TABLE
             ) {
               const nodeAtCaretOffset = getNodeAt(
                 previousPrevious,
@@ -739,7 +745,8 @@ export default function Composer({
         const { next } = getNodeSiblings(currentBlockNode.id);
         if (
           next != null &&
-          blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT
+          blockRenderTypeFromNode(next) !== RenderType.ATTACHMENT &&
+          blockRenderTypeFromNode(next) !== RenderType.TABLE
         ) {
           if (
             next.tagName.toLowerCase() === "ol" ||
@@ -855,6 +862,20 @@ export default function Composer({
         block={block}
         onChange={onChange}
         onAttachmentRequest={onAttachmentRequest}
+        onDelete={onDelete}
+      />
+    );
+  }
+
+  if (blockRenderTypeFromRole(block.role) === RenderType.TABLE) {
+    return (
+      <TableEngine
+        parentBlock={parentBlock}
+        block={block}
+        editable={editable}
+        onChange={onChange}
+        onClick={openLinkInNewTab}
+        onSelect={onSelect}
         onDelete={onDelete}
       />
     );

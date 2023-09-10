@@ -30,3 +30,4 @@ export type { default as Executable } from "./Executable";
 export type { default as InputArgs } from "./InputArgs";
 export type { default as Attachment } from "./Attachment";
 export type { default as PolarisConfig } from "./PolarisConfig";
+export type { default as Table } from "./Table";

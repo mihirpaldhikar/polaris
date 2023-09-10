@@ -22,3 +22,4 @@
 
 export { TextEngine } from "./TextEngine";
 export { AttachmentEngine } from "./AttachmentEngine";
+export { TableEngine } from "./TableEngine";

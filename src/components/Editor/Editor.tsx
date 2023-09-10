@@ -30,6 +30,7 @@ import {
   type Menu,
   type PolarisConfig,
   type Style,
+  type Table,
 } from "../../interfaces";
 import {
   blockRenderTypeFromNode,
@@ -201,7 +202,7 @@ export default function Editor({
     }
   }, [focusedNode]);
 
-  function changeHandler(block: Block): void {
+  function changeHandler(block: Block, focus?: boolean): void {
     const blockIndex: number = masterBlocks
       .map((blk) => blk.id)
       .indexOf(block.id);
@@ -211,7 +212,10 @@ export default function Editor({
       masterBlocks[blockIndex] = block;
       updateMasterBlocks(masterBlocks);
     }
-    if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
+    if (
+      blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT ||
+      (focus !== undefined && focus)
+    ) {
       setFocusedNode({
         nodeId: block.id,
         nodeIndex: 0,
@@ -291,7 +295,12 @@ export default function Editor({
     if (blockRenderTypeFromRole(block.role) === RenderType.LIST) {
       traverseAndUpdate(masterBlocks, block);
     } else {
-      traverseAndUpdate(masterBlocks, previousBlock);
+      if (
+        blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
+        blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
+      ) {
+        traverseAndUpdate(masterBlocks, previousBlock);
+      }
       traverseAndDelete(masterBlocks, block);
     }
     propagateChanges(masterBlocks, {
@@ -681,6 +690,206 @@ export default function Editor({
                     );
                   }
                 }
+              } else if (
+                blockRenderTypeFromRole(newRole) === RenderType.TABLE
+              ) {
+                let tableBlock: Block = {
+                  id: generateBlockId(),
+                  role: newRole,
+                  style: [],
+                  data: {
+                    rows: [
+                      {
+                        id: generateBlockId(),
+                        columns: [
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                        ],
+                      },
+                      {
+                        id: generateBlockId(),
+                        columns: [
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                        ],
+                      },
+                      {
+                        id: generateBlockId(),
+                        columns: [
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                        ],
+                      },
+                      {
+                        id: generateBlockId(),
+                        columns: [
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                          {
+                            id: generateBlockId(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                };
+                block.data = previousContent;
+                focusNode = (tableBlock.data as Table).rows[0].id;
+
+                if (blockRenderTypeFromNode(currentNode) === RenderType.LIST) {
+                  const parentNode = currentNode?.parentElement
+                    ?.parentElement as HTMLElement;
+                  const parentBlock = serializeNodeToBlock(parentNode);
+                  if (previousContent === "") {
+                    block.data = tableBlock.data;
+                    block.role = tableBlock.role;
+                    block.style = tableBlock.style;
+                    tableBlock = block;
+                  }
+                  traverseAndUpdate(parentBlock.data as Block[], block);
+                  if (previousContent !== "") {
+                    traverseAndUpdateBelow(
+                      parentBlock.data as Block[],
+                      block,
+                      tableBlock,
+                    );
+                  }
+                  traverseAndUpdate(masterBlocks, parentBlock);
+                  const newBlockIndex = traverseAndFindBlockPosition(
+                    parentBlock.data as Block[],
+                    tableBlock,
+                  );
+
+                  if (
+                    newBlockIndex ===
+                    (parentBlock.data as Block[]).length - 1
+                  ) {
+                    const emptyBlock: Block = {
+                      id: generateBlockId(),
+                      data: "",
+                      role: "paragraph",
+                      style: [],
+                    };
+                    traverseAndUpdateBelow(
+                      parentBlock.data as Block[],
+                      tableBlock,
+                      emptyBlock,
+                    );
+                  }
+                } else {
+                  if (previousContent === "") {
+                    block.data = tableBlock.data;
+                    block.role = tableBlock.role;
+                    block.style = tableBlock.style;
+                    tableBlock = block;
+                  }
+                  traverseAndUpdate(masterBlocks, block);
+                  if (previousContent !== "") {
+                    traverseAndUpdateBelow(masterBlocks, block, tableBlock);
+                  }
+                  const newBlockIndex = traverseAndFindBlockPosition(
+                    masterBlocks,
+                    tableBlock,
+                  );
+                  if (newBlockIndex === masterBlocks.length - 1) {
+                    const emptyBlock: Block = {
+                      id: generateBlockId(),
+                      data: "",
+                      role: "paragraph",
+                      style: [],
+                    };
+                    traverseAndUpdateBelow(
+                      masterBlocks,
+                      tableBlock,
+                      emptyBlock,
+                    );
+                  }
+                }
               }
 
               propagateChanges(masterBlocks, {
@@ -790,8 +999,8 @@ export default function Editor({
               key={block.id}
               editable={editable}
               block={block}
-              onChange={debounce((block) => {
-                changeHandler(block);
+              onChange={debounce((block, focus) => {
+                changeHandler(block, focus);
               }, 360)}
               onCreate={createHandler}
               onDelete={deletionHandler}

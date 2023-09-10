@@ -68,7 +68,7 @@ export default function AttachmentEngine({
       if (currentBlockIndex !== -1) {
         parentBlock.data.splice(currentBlockIndex, 1);
 
-        let previousNode: HTMLElement | null = null;
+        let previousNode: HTMLElement | null;
 
         if (currentBlockIndex === 0) {
           const currentNodeSibling = getNodeSiblings(parentBlock.id);

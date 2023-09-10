@@ -46,3 +46,8 @@ export { default as ImageIcon } from "./ImageIcon";
 export { default as MoreOptionsIcon } from "./MoreOptionsIcon";
 export { default as YouTubeIcon } from "./YoutubeIcon";
 export { default as GitHubIcon } from "./GitHubIcon";
+export { default as AddRowIcon } from "./AddRowIcon";
+export { default as AddColumnIcon } from "./AddColumnIcon";
+export { default as DeleteRowIcon } from "./DeleteRowIcon";
+export { default as DeleteColumnIcon } from "./DeleteColumnIcon";
+export { default as TableIcon } from "./TableIcon";

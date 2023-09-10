@@ -23,6 +23,7 @@
 import { type Role } from "../types";
 import type Style from "./Style";
 import { type Attachment } from "./index";
+import Table from "./Table";
 
 /**
  * @interface Block
@@ -35,7 +36,7 @@ import { type Attachment } from "./index";
 interface Block {
   id: string;
   role: Role;
-  data: string | Attachment | Block[];
+  data: string | Attachment | Block[] | Table;
   style: Style[];
 }
 

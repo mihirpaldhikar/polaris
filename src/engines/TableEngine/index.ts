@@ -20,24 +20,4 @@
  * SOFTWARE.
  */
 
-/**
- * @type Role
- *
- * @description Describes the role of the block in the Editor when rendered.
- * @author Mihir Paldhikar
- */
-type Role =
-  | "title"
-  | "subTitle"
-  | "heading"
-  | "subHeading"
-  | "paragraph"
-  | "quote"
-  | "bulletList"
-  | "numberedList"
-  | "image"
-  | "youtubeVideoEmbed"
-  | "githubGistEmbed"
-  | "table";
-
-export default Role;
+export { default as TableEngine } from "./TableEngine";

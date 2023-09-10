@@ -24,6 +24,7 @@ enum RenderType {
   TEXT,
   ATTACHMENT,
   LIST,
+  TABLE,
   UNKNOWN,
 }
 

@@ -27,6 +27,7 @@ import {
   type PolarisConfig,
   type Siblings,
   type Style,
+  type Table,
 } from "../interfaces";
 import {
   generateGitHubGistURL,
@@ -74,6 +75,8 @@ export function nodeTypeFromRole(role: Role): string {
       return "ol";
     case "image":
       return "img";
+    case "table":
+      return "table";
     default:
       return "p";
   }
@@ -212,6 +215,8 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
     case "youtubeVideoEmbed":
     case "githubGistEmbed":
       return RenderType.ATTACHMENT;
+    case "table":
+      return RenderType.TABLE;
     default:
       return RenderType.UNKNOWN;
   }
@@ -224,7 +229,10 @@ export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
   ) {
     return RenderType.ATTACHMENT;
   }
-  if (node.parentElement?.tagName.toLowerCase() === "li")
+  if (
+    node.parentElement?.tagName.toLowerCase() === "li" &&
+    node.tagName.toLowerCase() !== "table"
+  )
     return RenderType.LIST;
   switch (node.tagName.toLowerCase()) {
     case "h1":
@@ -235,7 +243,10 @@ export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
     case "blockquote":
       return RenderType.TEXT;
     case "img":
+    case "iframe":
       return RenderType.ATTACHMENT;
+    case "table":
+      return RenderType.TABLE;
     default:
       return RenderType.UNKNOWN;
   }
@@ -438,6 +449,47 @@ export function serializeNodeToBlock(node: HTMLElement): Block {
     };
   }
 
+  if (node.tagName.toLowerCase() === "table") {
+    const table: Table = {
+      rows: [],
+    };
+    const tableBody = node.firstElementChild as HTMLElement;
+    for (let i = 0; i < tableBody.childElementCount; i++) {
+      const row = tableBody.children[i] as HTMLElement;
+      const columns: Block[] = [];
+      for (let j = 0; j < row.childElementCount; j++) {
+        const column = row.children[j] as HTMLElement;
+        const columnStyle: Style[] = [];
+        const cssTextArray: string[] = column.style.cssText.split(";");
+
+        for (let i = 0; i < cssTextArray.length; i++) {
+          if (cssTextArray[i].length !== 0) {
+            columnStyle.push({
+              name: camelCase(cssTextArray[i].split(":")[0].trim()),
+              value: camelCase(cssTextArray[i].split(":")[1].trim()),
+            });
+          }
+        }
+        columns.push({
+          id: column.id,
+          role: "paragraph",
+          data: column.innerHTML,
+          style: columnStyle,
+        });
+      }
+      table.rows.push({
+        id: row.id,
+        columns,
+      });
+    }
+    return {
+      id: node.id,
+      role: "table",
+      data: table,
+      style,
+    };
+  }
+
   if (
     node.tagName.toLowerCase() === "div" &&
     node.getAttribute("data-block-render-type") === "attachment-placeholder"
@@ -599,6 +651,47 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       }
       node.appendChild(listNode);
     }
+  } else if (block.role === "table") {
+    node.id = block.id;
+    node.style.setProperty("display", "block");
+    node.style.setProperty("table-layout", "auto");
+    node.style.setProperty("border-collapse", "collapse");
+    node.style.setProperty("overflow-x", "auto");
+    const tableData = block.data as Table;
+    const tableBody = document.createElement("tbody");
+    for (let i = 0; i < tableData.rows.length; i++) {
+      const row = document.createElement("tr");
+      row.id = tableData.rows[i].id;
+      for (let j = 0; j < tableData.rows[i].columns.length; j++) {
+        const cell = document.createElement(i === 0 ? "th" : "td");
+        cell.id = tableData.rows[i].columns[j].id;
+        cell.innerHTML = tableData.rows[i].columns[j].data as string;
+        for (const style of tableData.rows[i].columns[j].style) {
+          cell.style.setProperty(kebabCase(style.name), kebabCase(style.value));
+        }
+        cell.style.setProperty("padding-left", "0.75rem");
+        cell.style.setProperty("padding-right", "0.75rem");
+        cell.style.setProperty("padding-top", "0.5rem");
+        cell.style.setProperty("padding-bottom", "0.5rem");
+        cell.style.setProperty("border", "1px solid #d1d5db");
+        for (const childNode of cell.childNodes) {
+          if (isInlineSpecifierNode(childNode)) {
+            const element = childNode as HTMLElement;
+            if (element.getAttribute(LINK_ATTRIBUTE) !== null) {
+              const anchorNode = document.createElement("a");
+              anchorNode.href = element.getAttribute(LINK_ATTRIBUTE) as string;
+              anchorNode.target = "_blank";
+              anchorNode.innerText = element.innerText;
+              anchorNode.style.cssText = element.style.cssText;
+              cell.replaceChild(anchorNode, element);
+            }
+          }
+        }
+        row.appendChild(cell);
+      }
+      tableBody.appendChild(row);
+    }
+    node.appendChild(tableBody);
   }
 
   return node;

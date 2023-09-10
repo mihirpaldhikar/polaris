@@ -20,24 +20,55 @@
  * SOFTWARE.
  */
 
-/**
- * @type Role
- *
- * @description Describes the role of the block in the Editor when rendered.
- * @author Mihir Paldhikar
- */
-type Role =
-  | "title"
-  | "subTitle"
-  | "heading"
-  | "subHeading"
-  | "paragraph"
-  | "quote"
-  | "bulletList"
-  | "numberedList"
-  | "image"
-  | "youtubeVideoEmbed"
-  | "githubGistEmbed"
-  | "table";
+import { type JSX } from "react";
 
-export default Role;
+export default function AddRowIcon({
+  size = 30,
+}: {
+  size?: number;
+}): JSX.Element {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 200 200"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect
+        x="23"
+        y="40"
+        width="153"
+        height="120"
+        rx="7"
+        stroke="black"
+        strokeWidth="6"
+      />
+      <line
+        x1="24"
+        y1="71.5"
+        x2="174"
+        y2="71.5"
+        stroke="black"
+        strokeWidth="3"
+      />
+      <line
+        x1="24"
+        y1="101.5"
+        x2="174"
+        y2="101.5"
+        stroke="black"
+        strokeWidth="3"
+      />
+      <line
+        x1="24"
+        y1="131.5"
+        x2="174"
+        y2="131.5"
+        stroke="black"
+        strokeWidth="3"
+      />
+      <line x1="101" y1="73" x2="101" y2="160" stroke="black" strokeWidth="4" />
+    </svg>
+  );
+}

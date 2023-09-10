@@ -35,6 +35,7 @@ import {
   QuoteIcon,
   SubHeadingIcon,
   SubTitleIcon,
+  TableIcon,
   TitleIcon,
   YouTubeIcon,
 } from "../icons";
@@ -104,6 +105,17 @@ const MasterBlockTools: readonly Menu[] = [
     execute: {
       type: "role",
       args: "quote",
+    },
+  },
+  {
+    id: generateMenuId(),
+    name: "Table",
+    description: `Add tabular content`,
+    icon: <TableIcon size={32} />,
+    allowedRoles: ["paragraph"],
+    execute: {
+      type: "role",
+      args: "table",
     },
   },
   {

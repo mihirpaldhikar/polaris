@@ -20,24 +20,13 @@
  * SOFTWARE.
  */
 
-/**
- * @type Role
- *
- * @description Describes the role of the block in the Editor when rendered.
- * @author Mihir Paldhikar
- */
-type Role =
-  | "title"
-  | "subTitle"
-  | "heading"
-  | "subHeading"
-  | "paragraph"
-  | "quote"
-  | "bulletList"
-  | "numberedList"
-  | "image"
-  | "youtubeVideoEmbed"
-  | "githubGistEmbed"
-  | "table";
+import type Block from "./Block";
 
-export default Role;
+interface Table {
+  rows: Array<{
+    id: string;
+    columns: Block[];
+  }>;
+}
+
+export default Table;
