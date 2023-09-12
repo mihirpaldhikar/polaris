@@ -978,13 +978,7 @@ export default function Editor({
           event.preventDefault();
         }}
       ></div>
-      <div
-        id={`dialog-${blob.id}`}
-        className={"select-none"}
-        onContextMenu={(event) => {
-          event.preventDefault();
-        }}
-      ></div>
+      <div id={`dialog-${blob.id}`} className={"select-none"}></div>
       <div
         data-type={"editor-root"}
         id={`editor-${blob.id}`}
