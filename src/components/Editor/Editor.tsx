@@ -82,7 +82,6 @@ interface EditorProps {
  * @param blob
  * @param autoSaveTime
  * @param inlineTools
- * @param onSave
  *
  * @description A Workspace is essentially as Editor which manages all the blocks of the blob. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
  *
