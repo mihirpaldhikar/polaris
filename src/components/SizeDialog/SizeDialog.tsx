@@ -21,7 +21,7 @@
  */
 
 import { type Coordinates } from "../../interfaces";
-import { Fragment, type JSX, useState } from "react";
+import { createRef, Fragment, type JSX } from "react";
 import { Button } from "../Button";
 import { DialogBox } from "../DialogBox";
 
@@ -41,19 +41,31 @@ export default function SizeDialog({
   onConfirm,
   onClose,
 }: SizeDialogProps): JSX.Element {
-  const [width, setWidth] = useState(initialSize.width.toString());
-  const [height, setHeight] = useState(initialSize.height.toString());
-
-  const [disabled, setDisabled] = useState(true);
+  const widthInputRef = createRef<HTMLInputElement>();
+  const heightInputRef = createRef<HTMLInputElement>();
 
   return (
     <DialogBox
       focusElementId={"width-input"}
       coordinates={coordinates}
       onClose={onClose}
+      onInitialize={() => {
+        if (widthInputRef.current != null && heightInputRef.current != null) {
+          widthInputRef.current.value = initialSize.width.toString();
+          heightInputRef.current.value = initialSize.height.toString();
+        }
+      }}
       onConfirm={() => {
-        if (width !== "" && height !== "") {
-          onConfirm(parseInt(width), parseInt(height));
+        if (
+          widthInputRef.current != null &&
+          heightInputRef.current != null &&
+          widthInputRef.current?.value !== "" &&
+          heightInputRef.current?.value !== ""
+        ) {
+          onConfirm(
+            parseInt(widthInputRef.current.value),
+            parseInt(heightInputRef.current.value),
+          );
         }
       }}
     >
@@ -63,29 +75,21 @@ export default function SizeDialog({
             id={"width-input"}
             type={"number"}
             placeholder={"width"}
-            min={0}
+            min={10}
+            ref={widthInputRef}
             className={
               "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
             }
-            value={width}
-            onChange={(event) => {
-              setWidth(event.target.value);
-              setDisabled(event.target.value === "");
-            }}
           />
           <span>x</span>
           <input
             type={"number"}
             placeholder={"height"}
-            min={0}
+            min={10}
+            ref={heightInputRef}
             className={
               "w-full rounded-md border border-gray-300 px-2 py-1 outline-none focus:border-blue-600 text-sm"
             }
-            value={height}
-            onChange={(event) => {
-              setHeight(event.target.value);
-              setDisabled(event.target.value === "");
-            }}
           />
         </div>
         <div
@@ -95,9 +99,22 @@ export default function SizeDialog({
         >
           <Button
             text={"Confirm"}
-            disabled={disabled}
+            disabled={
+              widthInputRef.current?.innerText === "" ||
+              heightInputRef.current?.innerText === ""
+            }
             onClick={() => {
-              onConfirm(parseInt(width), parseInt(height));
+              if (
+                widthInputRef.current != null &&
+                heightInputRef.current != null &&
+                widthInputRef.current?.innerText !== "" &&
+                heightInputRef.current?.innerText !== ""
+              ) {
+                onConfirm(
+                  parseInt(widthInputRef.current?.innerText),
+                  parseInt(heightInputRef.current?.innerText),
+                );
+              }
               onClose();
             }}
           />

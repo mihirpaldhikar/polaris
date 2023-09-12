@@ -30,6 +30,7 @@ interface DialogBoxProps {
   children: JSX.Element;
   onClose: () => void;
   onConfirm: () => void;
+  onInitialize?: () => void;
 }
 
 export default function DialogBox({
@@ -38,6 +39,7 @@ export default function DialogBox({
   children,
   onConfirm,
   onClose,
+  onInitialize,
 }: DialogBoxProps): JSX.Element {
   useEffect(() => {
     function onKeyboardEvent(event: KeyboardEvent): void {
@@ -72,11 +74,15 @@ export default function DialogBox({
       focusElement.focus();
     }
 
+    if (onInitialize !== undefined) {
+      onInitialize();
+    }
+
     return () => {
       dialogBoxNode.removeEventListener("keydown", onKeyboardEvent);
       editorRootNode.removeEventListener("mousedown", onMouseEvent);
     };
-  }, [focusElementId, onClose, onConfirm]);
+  }, [focusElementId, onClose, onConfirm, onInitialize]);
 
   const DIALOG_WIDTH: number = 250;
 
