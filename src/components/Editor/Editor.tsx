@@ -47,6 +47,7 @@ import {
   rgbStringToHex,
   serializeNodeToBlock,
   setCaretOffset,
+  subscribeToEditorEvent,
   traverseAndDelete,
   traverseAndFindBlockPosition,
   traverseAndUpdate,
@@ -69,7 +70,6 @@ interface EditorProps {
   editable?: boolean;
   blob: Blob;
   config: PolarisConfig;
-  onSave?: (blob: Blob) => void;
   inlineTools?: Menu[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
   onChange?: (blob: Blob) => void;
@@ -94,7 +94,6 @@ export default function Editor({
   blob,
   config,
   inlineTools,
-  onSave,
   onAttachmentSelected,
   onChange,
 }: EditorProps): JSX.Element {
@@ -135,32 +134,31 @@ export default function Editor({
         case "s": {
           if (event.ctrlKey) {
             event.preventDefault();
-            if (onSave !== undefined) {
-              const blockRef = masterBlocks.map((block) => {
-                return {
-                  ...block,
-                  reference: undefined,
-                };
-              });
-              const blobRef = blob;
-              blobRef.blocks = blockRef;
-              onSave(blobRef);
-            }
+            dispatchEditorEvent(`onSaved-${blob.id}`, {
+              ...blob,
+              blocks: masterBlocks,
+            } satisfies Blob);
           }
 
           break;
         }
       }
     },
-    [masterBlocks, blob, onSave],
+    [masterBlocks, blob],
   );
 
   useEffect(() => {
     window.addEventListener("keydown", keyboardManager);
+    subscribeToEditorEvent(`saveEditor-${blob.id}`, () => {
+      dispatchEditorEvent(`onSaved-${blob.id}`, {
+        ...blob,
+        blocks: masterBlocks,
+      } satisfies Blob);
+    });
     return () => {
       window.removeEventListener("keydown", keyboardManager);
     };
-  }, [keyboardManager]);
+  }, [blob, keyboardManager, masterBlocks]);
 
   useEffect(() => {
     if (focusedNode !== undefined) {
