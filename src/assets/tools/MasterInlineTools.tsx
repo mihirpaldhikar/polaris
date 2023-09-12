@@ -27,6 +27,8 @@ import {
   CodeIcon,
   ItalicIcon,
   LinkIcon,
+  SubscriptIcon,
+  SuperscriptIcon,
   TextBackgroundColorIcon,
   TextColorIcon,
   TextSizeIcon,
@@ -176,6 +178,42 @@ const MasterInlineTools: readonly Menu[] = [
         {
           name: "padding",
           value: "2px",
+        },
+      ],
+    },
+  },
+  {
+    id: generateMenuId(),
+    name: "Superscript",
+    icon: <SuperscriptIcon />,
+    execute: {
+      type: "style",
+      args: [
+        {
+          name: "vertical-align",
+          value: "super",
+        },
+        {
+          name: "line-height",
+          value: "1.0",
+        },
+      ],
+    },
+  },
+  {
+    id: generateMenuId(),
+    name: "Subscript",
+    icon: <SubscriptIcon />,
+    execute: {
+      type: "style",
+      args: [
+        {
+          name: "vertical-align",
+          value: "sub",
+        },
+        {
+          name: "line-height",
+          value: "1.0",
         },
       ],
     },

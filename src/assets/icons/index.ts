@@ -51,3 +51,5 @@ export { default as AddColumnIcon } from "./AddColumnIcon";
 export { default as DeleteRowIcon } from "./DeleteRowIcon";
 export { default as DeleteColumnIcon } from "./DeleteColumnIcon";
 export { default as TableIcon } from "./TableIcon";
+export { default as SuperscriptIcon } from "./SuperscriptIcon";
+export { default as SubscriptIcon } from "./SubscriptIcon";
