@@ -626,14 +626,18 @@ export function elementContainsStyle(
     return false;
   }
 
+  let cssString: string = "";
+
   if (!Array.isArray(style)) {
-    return element.style.getPropertyValue(style.name) === style.value;
+    return element.style.getPropertyValue(style.name) !== "";
   }
 
-  let cssString: string = "";
   for (const s of style) {
-    cssString = cssString.concat(`${s.name}:${s.value};`);
+    cssString = cssString.concat(
+      `${s.name}:${s.name.includes("color") ? hexToRgb(s.value) : s.value};`,
+    );
   }
+
   return element.style.cssText.replaceAll(" ", "").trim().includes(cssString);
 }
 
@@ -822,6 +826,38 @@ export function rgbStringToHex(rgb: string): string {
     parseInt(rgbArr[1]),
     parseInt(rgbArr[2]),
   );
+}
+
+export function hexToRgb(hex: string): string {
+  const hexCharacters = "a-f\\d";
+  const match3or4Hex = `#?[${hexCharacters}]{3}[${hexCharacters}]?`;
+  const match6or8Hex = `#?[${hexCharacters}]{6}([${hexCharacters}]{2})?`;
+  const nonHexChars = new RegExp(`[^#${hexCharacters}]`, "gi");
+  const validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
+  if (nonHexChars.test(hex) || !validHexSize.test(hex)) {
+    return "";
+  }
+
+  hex = hex.replace(/^#/, "");
+
+  if (hex.length === 8) {
+    hex = hex.slice(0, 6);
+  }
+
+  if (hex.length === 4) {
+    hex = hex.slice(0, 3);
+  }
+
+  if (hex.length === 3) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+
+  const number = Number.parseInt(hex, 16);
+  const red = number >> 16;
+  const green = (number >> 8) & 255;
+  const blue = number & 255;
+
+  return `rgb(${red},${green},${blue})`;
 }
 
 export function getNodeIndex(
