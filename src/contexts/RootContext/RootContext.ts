@@ -22,7 +22,7 @@
 import { createContext } from "react";
 import { type Root } from "react-dom/client";
 import { type PolarisConfig } from "../../interfaces";
-import { DEFAULT_POLARIS_CONFIG } from "../../constants/GlobalConstants";
+import { DEFAULT_POLARIS_CONFIG } from "../../constants";
 
 interface RootInterface {
   dialogRoot: Root | undefined;
