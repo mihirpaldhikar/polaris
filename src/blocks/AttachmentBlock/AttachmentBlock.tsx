@@ -33,13 +33,13 @@ import { FilePicker } from "../../components/FilePicker";
 import { GitHubIcon, ImageIcon, YouTubeIcon } from "../../assets";
 import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
-import { YouTubeVideoEmbed } from "../../components/YouTubeVideoEmbed";
+import { YouTubeVideoBlock } from "../YouTubeVideoBlock";
 import { AttachmentTools } from "../../assets/tools/AttachmentTools";
 import RenderType from "../../enums/RenderType";
 import { BLOCK_NODE } from "../../constants";
-import { GitHubGistEmbed } from "../../components/GitHubGistEmbed";
+import { GitHubGistBlock } from "../GitHubGistBlock";
 
-interface AttachmentEngineProps {
+interface AttachmentBlockProps {
   parentBlock?: Block;
   block: Block;
   onAttachmentRequest: (block: Block, data: File | string) => void;
@@ -47,13 +47,13 @@ interface AttachmentEngineProps {
   onChange: (block: Block) => void;
 }
 
-export default function AttachmentEngine({
+export default function AttachmentBlock({
   parentBlock,
   block,
   onAttachmentRequest,
   onDelete,
   onChange,
-}: AttachmentEngineProps): JSX.Element {
+}: AttachmentBlockProps): JSX.Element {
   const attachment: Attachment = block.data as Attachment;
 
   function deleteHandler(): void {
@@ -148,7 +148,7 @@ export default function AttachmentEngine({
         onDelete={deleteHandler}
         onChange={onChange}
       >
-        <YouTubeVideoEmbed block={block} />
+        <YouTubeVideoBlock block={block} />
       </AttachmentHolder>
     );
 
@@ -160,7 +160,7 @@ export default function AttachmentEngine({
         onDelete={deleteHandler}
         onChange={onChange}
       >
-        <GitHubGistEmbed block={block} />
+        <GitHubGistBlock block={block} />
       </AttachmentHolder>
     );
 

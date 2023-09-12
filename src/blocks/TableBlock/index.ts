@@ -20,31 +20,4 @@
  * SOFTWARE.
  */
 
-import { type JSX } from "react";
-import { getYouTubeVideoID } from "../../utils";
-import { type Attachment, type Block } from "../../interfaces";
-import { BLOCK_NODE } from "../../constants";
-
-interface YouTubeVideoEmbedProps {
-  block: Block;
-}
-
-export default function YouTubeVideoEmbed({
-  block,
-}: YouTubeVideoEmbedProps): JSX.Element {
-  const attachment = block.data as Attachment;
-  return (
-    <iframe
-      id={block.id}
-      data-type={BLOCK_NODE}
-      data-block-render-type={"youtubeVideo"}
-      data-block-url={attachment.url}
-      width={attachment.width}
-      height={attachment.height}
-      src={`https://www.youtube.com/embed/${getYouTubeVideoID(attachment.url)}`}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen={true}
-      className={"rounded-md inline-block border border-gray-300"}
-    />
-  );
-}
+export { default as TableBlock } from "./TableBlock";

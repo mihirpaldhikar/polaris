@@ -21,66 +21,30 @@
  */
 
 import { type JSX } from "react";
+import { getYouTubeVideoID } from "../../utils";
 import { type Attachment, type Block } from "../../interfaces";
 import { BLOCK_NODE } from "../../constants";
-import { generateGitHubGistURL } from "../../utils";
 
-interface GitHubGistEmbedProps {
+interface YouTubeVideoBlockProps {
   block: Block;
 }
 
-export default function GitHubGistEmbed({
+export default function YouTubeVideoBlock({
   block,
-}: GitHubGistEmbedProps): JSX.Element {
-  const attachment: Attachment = block.data as Attachment;
-
-  const gistDocument = `
-   data:text/html;charset=utf-8,
-   <head>
-     <base target="_blank" />
-     <title></title>
-   </head>
-   <body id="gist-${block.id}" onload="adjustFrame()">
-     <style>
-       * {
-         margin: 0;
-         padding: 0;
-       }
-     </style>
-     <script src="${generateGitHubGistURL(attachment.url)}"></script>
-     <script>
-       function adjustFrame() {
-         window.top.postMessage({
-           height: document.body.scrollHeight,
-           id: document.body.id.replace("gist-", "") 
-         }, "*");
-       }
-     </script>
-   </body>
-      `;
-
+}: YouTubeVideoBlockProps): JSX.Element {
+  const attachment = block.data as Attachment;
   return (
     <iframe
       id={block.id}
       data-type={BLOCK_NODE}
-      data-block-render-type={"githubGist"}
+      data-block-render-type={"youtubeVideo"}
       data-block-url={attachment.url}
-      className={"w-full"}
-      style={{
-        border: 0,
-      }}
-      src={gistDocument}
-      onLoad={() => {
-        window.onmessage = function (messageEvent) {
-          if (typeof messageEvent.data === "object") {
-            const height = messageEvent.data.height as number;
-            const gistFrame = document.getElementById(messageEvent.data.id);
-            if (gistFrame != null) {
-              gistFrame.style.height = `${height}px`;
-            }
-          }
-        };
-      }}
-    ></iframe>
+      width={attachment.width}
+      height={attachment.height}
+      src={`https://www.youtube.com/embed/${getYouTubeVideoID(attachment.url)}`}
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen={true}
+      className={"rounded-md inline-block border border-gray-300"}
+    />
   );
 }

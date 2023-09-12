@@ -52,7 +52,7 @@ import {
 } from "../../assets";
 import RenderType from "../../enums/RenderType";
 
-interface TableEngineProps {
+interface TableBlockProps {
   parentBlock?: Block;
   block: Block;
   editable: boolean;
@@ -67,7 +67,7 @@ interface TableEngineProps {
   ) => void;
 }
 
-export default function TableEngine({
+export default function TableBlock({
   parentBlock,
   block,
   editable,
@@ -75,7 +75,7 @@ export default function TableEngine({
   onChange,
   onSelect,
   onDelete,
-}: TableEngineProps): JSX.Element {
+}: TableBlockProps): JSX.Element {
   const tableData = block.data as Table;
 
   function onCellChange(

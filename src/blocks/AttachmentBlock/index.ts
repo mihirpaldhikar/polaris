@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as AttachmentEngine } from "./AttachmentEngine";
+export { default as AttachmentBlock } from "./AttachmentBlock";

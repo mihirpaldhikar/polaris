@@ -20,6 +20,4 @@
  * SOFTWARE.
  */
 
-export { TextEngine } from "./TextEngine";
-export { AttachmentEngine } from "./AttachmentEngine";
-export { TableEngine } from "./TableEngine";
+export { default as GitHubGistBlock } from "./GitHubGistBlock";

@@ -35,7 +35,7 @@ import type RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
 
-interface TextEngineProps {
+interface TextBlockProps {
   block: Block;
   editable: boolean;
   onUpdate: (event: ChangeEvent<HTMLElement>, renderType: RenderType) => void;
@@ -44,14 +44,14 @@ interface TextEngineProps {
   onKeyPressed: (event: KeyboardEvent, index: number) => void;
 }
 
-export default function TextEngine({
+export default function TextBlock({
   block,
   editable,
   onUpdate,
   onClick,
   onSelect,
   onKeyPressed,
-}: TextEngineProps): JSX.Element {
+}: TextBlockProps): JSX.Element {
   const { config } = useContext(RootContext);
   return createElement(nodeTypeFromRole(block.role), {
     "data-type": BLOCK_NODE,

@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as TextEngine } from "./TextEngine";
+export { default as YouTubeVideoBlock } from "./YouTubeVideoBlock";

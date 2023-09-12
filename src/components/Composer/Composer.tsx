@@ -54,7 +54,7 @@ import {
   unsubscribeFromEditorEvent,
 } from "../../utils";
 import RenderType from "../../enums/RenderType";
-import { AttachmentEngine, TableEngine, TextEngine } from "../../engines";
+import { AttachmentBlock, TableBlock, TextBlock } from "../../blocks";
 import { BLOCK_NODE } from "../../constants";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
@@ -844,7 +844,7 @@ export default function Composer({
 
   if (blockRenderTypeFromRole(block.role) === RenderType.TEXT) {
     return (
-      <TextEngine
+      <TextBlock
         block={block}
         editable={editable}
         onUpdate={notifyChange}
@@ -857,7 +857,7 @@ export default function Composer({
 
   if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
     return (
-      <AttachmentEngine
+      <AttachmentBlock
         parentBlock={parentBlock}
         block={block}
         onChange={onChange}
@@ -869,7 +869,7 @@ export default function Composer({
 
   if (blockRenderTypeFromRole(block.role) === RenderType.TABLE) {
     return (
-      <TableEngine
+      <TableBlock
         parentBlock={parentBlock}
         block={block}
         editable={editable}

@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as TableEngine } from "./TableEngine";
+export { default as TextBlock } from "./TextBlock";
