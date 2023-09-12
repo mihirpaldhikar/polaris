@@ -70,7 +70,6 @@ interface EditorProps {
   blob: Blob;
   config: PolarisConfig;
   onSave?: (blob: Blob) => void;
-  autoSaveTimeout?: number;
   inlineTools?: Menu[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
   onChange?: (blob: Blob) => void;
@@ -94,7 +93,6 @@ export default function Editor({
   editable = true,
   blob,
   config,
-  autoSaveTimeout,
   inlineTools,
   onSave,
   onAttachmentSelected,
@@ -156,22 +154,6 @@ export default function Editor({
     },
     [masterBlocks, blob, onSave],
   );
-
-  useEffect(() => {
-    if (editable && autoSaveTimeout !== undefined && onSave !== undefined) {
-      setInterval(() => {
-        const blockRef = masterBlocks.map((block) => {
-          return {
-            ...block,
-            reference: undefined,
-          };
-        });
-        const blobRef = blob;
-        blobRef.blocks = blockRef;
-        onSave(blobRef);
-      }, autoSaveTimeout);
-    }
-  }, [autoSaveTimeout, masterBlocks, blob, editable, onSave]);
 
   useEffect(() => {
     window.addEventListener("keydown", keyboardManager);
