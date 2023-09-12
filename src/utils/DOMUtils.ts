@@ -627,14 +627,14 @@ export function elementContainsStyle(
   }
 
   if (!Array.isArray(style)) {
-    return element.style.getPropertyValue(style.name) !== "";
+    return element.style.getPropertyValue(style.name) === style.value;
   }
 
+  let cssString: string = "";
   for (const s of style) {
-    if (element.style.getPropertyValue(s.name) === "") return false;
+    cssString = cssString.concat(`${s.name}:${s.value};`);
   }
-
-  return true;
+  return element.style.cssText.replaceAll(" ", "").trim().includes(cssString);
 }
 
 /**

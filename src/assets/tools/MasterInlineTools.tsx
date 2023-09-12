@@ -195,7 +195,7 @@ const MasterInlineTools: readonly Menu[] = [
         },
         {
           name: "line-height",
-          value: "1.0",
+          value: "1",
         },
       ],
     },
@@ -213,7 +213,7 @@ const MasterInlineTools: readonly Menu[] = [
         },
         {
           name: "line-height",
-          value: "1.0",
+          value: "1",
         },
       ],
     },
