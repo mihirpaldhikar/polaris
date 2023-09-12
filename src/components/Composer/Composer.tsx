@@ -23,7 +23,6 @@
 import {
   type ChangeEvent,
   createElement,
-  Fragment,
   type JSX,
   useContext,
   useEffect,
@@ -930,6 +929,5 @@ export default function Composer({
     );
   }
 
-  /// If no valid block type is found, render an empty Fragment.
-  return <Fragment />;
+  throw Error(`Block with role '${block.role}' is not a valid block.`);
 }
