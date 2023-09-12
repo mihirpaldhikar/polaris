@@ -20,21 +20,21 @@
  * SOFTWARE.
  */
 
-export function subscribeForEvent(
+export function subscribeToEditorEvent(
   eventName: string,
   listener: EventListenerOrEventListenerObject,
 ): void {
   document.addEventListener(eventName, listener);
 }
 
-export function unsubscribeFromEvent(
+export function unsubscribeFromEditorEvent(
   eventName: string,
   listener: EventListenerOrEventListenerObject,
 ): void {
   document.removeEventListener(eventName, listener);
 }
 
-export function dispatchEvent(eventName: string, data?: any): void {
+export function dispatchEditorEvent(eventName: string, data?: any): void {
   const event = new CustomEvent(eventName, { detail: data });
   document.dispatchEvent(event);
 }

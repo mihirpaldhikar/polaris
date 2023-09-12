@@ -49,9 +49,9 @@ import {
   setCaretOffset,
   setNodeStyle,
   splitBlocksAtCaretOffset,
-  subscribeForEvent,
+  subscribeToEditorEvent,
   traverseAndUpdate,
-  unsubscribeFromEvent,
+  unsubscribeFromEditorEvent,
 } from "../../utils";
 import RenderType from "../../enums/RenderType";
 import { AttachmentEngine, TableEngine, TextEngine } from "../../engines";
@@ -123,12 +123,12 @@ export default function Composer({
   const roleChangeByMarkdown = useRef(false);
   const { config } = useContext(RootContext);
   useEffect(() => {
-    subscribeForEvent("onActionMenu", (event: any) => {
+    subscribeToEditorEvent("onActionMenu", (event: any) => {
       isActionMenuOpen.current = event.detail.opened;
     });
 
     return () => {
-      unsubscribeFromEvent("onActionMenu", (event: any) => {
+      unsubscribeFromEditorEvent("onActionMenu", (event: any) => {
         isActionMenuOpen.current = event.detail.opened;
       });
     };

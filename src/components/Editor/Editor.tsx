@@ -35,7 +35,7 @@ import {
 import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
-  dispatchEvent,
+  dispatchEditorEvent,
   elementContainsStyle,
   generateBlockId,
   getBlockNode,
@@ -546,7 +546,7 @@ export default function Editor({
 
     if (popupNode.childElementCount !== 0) {
       popUpRoot.render(<Fragment />);
-      dispatchEvent("onActionMenu", {
+      dispatchEditorEvent("onActionMenu", {
         opened: false,
       });
       return;
@@ -564,7 +564,7 @@ export default function Editor({
         30,
     };
 
-    dispatchEvent("onActionMenu", {
+    dispatchEditorEvent("onActionMenu", {
       opened: true,
     });
 
@@ -573,7 +573,7 @@ export default function Editor({
         coordinates={actionMenuCoordinates}
         menu={masterBlockTools}
         onClose={() => {
-          dispatchEvent("onActionMenu", {
+          dispatchEditorEvent("onActionMenu", {
             opened: false,
           });
           popUpRoot.render(<Fragment />);
