@@ -72,7 +72,6 @@ interface EditorProps {
   config: PolarisConfig;
   inlineTools?: Menu[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
-  onChange?: (blob: Blob) => void;
 }
 
 /**
@@ -80,10 +79,12 @@ interface EditorProps {
  *
  * @param editable
  * @param blob
- * @param autoSaveTime
+ * @param config
+ * @param config
+ * @param onAttachmentSelected
  * @param inlineTools
  *
- * @description A Workspace is essentially as Editor which manages all the blocks of the blob. Workspace also handles user interactions and updates the re-renders the DOM accordingly.
+ * @description An Editor  manages all the blocks of the blob. Editor also handles user interactions and updates the re-renders the DOM accordingly.
  *
  * @author Mihir Paldhikar
  */
@@ -94,7 +95,6 @@ export default function Editor({
   config,
   inlineTools,
   onAttachmentSelected,
-  onChange,
 }: EditorProps): JSX.Element {
   let masterInlineTools: readonly Menu[] = cloneDeep(MasterInlineTools).concat(
     ...(inlineTools ?? []),
@@ -201,9 +201,10 @@ export default function Editor({
         caretOffset: 0,
       });
     }
-    if (onChange !== undefined) {
-      onChange(blob);
-    }
+    dispatchEditorEvent(`onChanged-${blob.id}`, {
+      ...blob,
+      blocks: masterBlocks,
+    } satisfies Blob);
   }
 
   function propagateChanges(
@@ -216,9 +217,10 @@ export default function Editor({
   ): void {
     updateMasterBlocks(blocks);
     setFocusedNode(focus);
-    if (onChange !== undefined) {
-      onChange(blob);
-    }
+    dispatchEditorEvent(`onChanged-${blob.id}`, {
+      ...blob,
+      blocks: masterBlocks,
+    } satisfies Blob);
   }
 
   function createHandler(
