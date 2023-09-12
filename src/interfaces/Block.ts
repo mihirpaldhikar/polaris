@@ -23,7 +23,7 @@
 import { type Role } from "../types";
 import type Style from "./Style";
 import { type Attachment } from "./index";
-import Table from "./Table";
+import type Table from "./Table";
 
 /**
  * @interface Block
