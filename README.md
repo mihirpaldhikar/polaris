@@ -59,7 +59,7 @@ export default function MyApp(): JSX.Element {
      */
     return fileURL;
   }
-  
+
   return (
     <Fragment>
       <Editor
@@ -106,30 +106,29 @@ function exportBlobToHTML(blob) {
 Output
 
 ```html
-
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
-  />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <title>Polaris Doc</title>
-</head>
-<body>
-<h1>Introducing Polaris</h1>
-<p>Polaris is a rich semantic content editor.</p>
-<script type="text/javascript">
-  window.onmessage = function(messageEvent) {
-    const height = messageEvent.data.height;
-    const gistFrame = document.getElementById(messageEvent.data.id);
-    if (gistFrame != null) {
-      gistFrame.style.height = height + "px";
-    }
-  };
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Polaris Doc</title>
+  </head>
+  <body>
+    <h1>Introducing Polaris</h1>
+    <p>Polaris is a rich semantic content editor.</p>
+    <script type="text/javascript">
+      window.onmessage = function (messageEvent) {
+        const height = messageEvent.data.height;
+        const gistFrame = document.getElementById(messageEvent.data.id);
+        if (gistFrame != null) {
+          gistFrame.style.height = height + "px";
+        }
+      };
+    </script>
+  </body>
 </html>
 ```
 
