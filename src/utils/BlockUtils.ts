@@ -290,6 +290,20 @@ export function traverseAndUpdate(
   }
 }
 
+export function traverseAndFind(
+  masterBlocks: Block[],
+  blockId: string,
+): Block | null {
+  for (let i = 0; i < masterBlocks.length; i++) {
+    if (masterBlocks[i].id === blockId) {
+      return masterBlocks[i];
+    } else if (Array.isArray(masterBlocks[i].data)) {
+      return traverseAndFind(masterBlocks[i].data as Block[], blockId);
+    }
+  }
+  return null;
+}
+
 export function traverseAndDelete(
   masterBlocks: Block[],
   targetBlock: Block,

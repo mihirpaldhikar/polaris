@@ -25,7 +25,9 @@ import {
   createElement,
   Fragment,
   type JSX,
+  useCallback,
   useContext,
+  useEffect,
 } from "react";
 import { BLOCK_NODE } from "../../constants";
 import { type Block, type Coordinates, type Table } from "../../interfaces";
@@ -34,12 +36,9 @@ import {
   conditionalClassName,
   generateBlockId,
   getBlockNode,
-  getCaretOffset,
   getEditorRoot,
-  getNodeAt,
   getNodeSiblings,
   serializeNodeToBlock,
-  setCaretOffset,
   setNodeStyle,
 } from "../../utils";
 import RootContext from "../../contexts/RootContext/RootContext";
@@ -90,224 +89,39 @@ export default function TableBlock({
 
   const { popUpRoot } = useContext(RootContext);
 
-  function handleKeyboard(
-    event: KeyboardEvent,
-    rowIndex: number,
-    columnIndex: number,
-  ): void {
-    const totalRow = tableData.rows.length;
-    const totalColumns = tableData.rows[rowIndex].columns.length;
-    const cell: Block = tableData.rows[rowIndex].columns[columnIndex];
-    const cellNode = getBlockNode(cell.id) as HTMLElement;
-    const caretOffset = getCaretOffset(cellNode);
-    switch (event.key.toLowerCase()) {
-      case "enter": {
-        event.preventDefault();
-        break;
-      }
-      case "arrowright": {
-        if (caretOffset === cellNode.innerText.length) {
+  const keyboardHandler = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key.toLowerCase()) {
+        case "enter": {
           event.preventDefault();
-          if (columnIndex + 1 < totalColumns) {
-            const nextCell = tableData.rows[rowIndex].columns[columnIndex + 1];
-            const nextCellNode = getBlockNode(nextCell.id) as HTMLElement;
-            setCaretOffset(nextCellNode, 0);
-          } else if (rowIndex + 1 < totalRow) {
-            const nextCell = tableData.rows[rowIndex + 1].columns[0];
-            const nextCellNode = getBlockNode(nextCell.id) as HTMLElement;
-            setCaretOffset(nextCellNode, 0);
-          } else if (
-            columnIndex + 1 === totalColumns &&
-            rowIndex + 1 === totalRow
+          break;
+        }
+        case "arrowright":
+        case "arrowleft":
+        case "arrowup":
+        case "arrowdown": {
+          const activeNode = document.activeElement;
+          if (
+            activeNode == null ||
+            activeNode.getAttribute("data-block-type") !== "tableCell"
           ) {
-            const cellSiblings = getNodeSiblings(block.id);
-            if (cellSiblings.next != null) {
-              setCaretOffset(cellSiblings.next, 0);
-              if (popUpRoot !== undefined) {
-                popUpRoot.render(<Fragment />);
-              }
-            }
-          }
-        }
-        break;
-      }
-      case "arrowleft": {
-        if (caretOffset === 0) {
-          event.preventDefault();
-          if (columnIndex - 1 >= 0) {
-            const previousCell =
-              tableData.rows[rowIndex].columns[columnIndex - 1];
-            const previousCellNode = getBlockNode(
-              previousCell.id,
-            ) as HTMLElement;
-            focusOnNode(previousCellNode);
-          } else if (rowIndex - 1 >= 0) {
-            const nextCell =
-              tableData.rows[rowIndex - 1].columns[totalColumns - 1];
-            const previousCellNode = getBlockNode(nextCell.id) as HTMLElement;
-            focusOnNode(previousCellNode);
-          } else if (columnIndex === 0 && rowIndex === 0) {
-            const cellSiblings = getNodeSiblings(block.id);
-            if (cellSiblings.previous != null) {
-              focusOnNode(cellSiblings.previous);
-              if (popUpRoot !== undefined) {
-                popUpRoot.render(<Fragment />);
-              }
-            }
-          }
-        }
-        break;
-      }
-      case "arrowup": {
-        event.preventDefault();
-        if (rowIndex - 1 >= 0) {
-          const aboveCell = tableData.rows[rowIndex - 1].columns[columnIndex];
-          const aboveCellNode = getBlockNode(aboveCell.id) as HTMLElement;
-
-          const nodeAtCaretOffset = getNodeAt(aboveCellNode, caretOffset);
-
-          const jumpNode =
-            caretOffset > aboveCellNode.innerText.length
-              ? aboveCellNode.lastChild ?? aboveCellNode
-              : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
-              ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
-              : nodeAtCaretOffset;
-
-          const computedCaretOffset =
-            caretOffset > aboveCellNode.innerText.length
-              ? aboveCellNode.lastChild?.textContent == null
-                ? 0
-                : aboveCellNode.lastChild.textContent.length
-              : caretOffset > (jumpNode.textContent as string).length
-              ? jumpNode.textContent == null
-                ? 0
-                : jumpNode.textContent.length
-              : caretOffset;
-
-          setCaretOffset(jumpNode, computedCaretOffset);
-        } else {
-          const tableSiblings = getNodeSiblings(block.id);
-          if (tableSiblings.previous != null) {
-            const previousNode = tableSiblings.previous;
-
-            const nodeAtCaretOffset = getNodeAt(previousNode, caretOffset);
-
-            const jumpNode =
-              caretOffset > previousNode.innerText.length
-                ? previousNode.lastChild ?? previousNode
-                : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
-                ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
-                : nodeAtCaretOffset;
-
-            const computedCaretOffset =
-              caretOffset > previousNode.innerText.length
-                ? previousNode.lastChild?.textContent == null
-                  ? 0
-                  : previousNode.lastChild.textContent.length
-                : caretOffset > (jumpNode.textContent as string).length
-                ? jumpNode.textContent == null
-                  ? 0
-                  : jumpNode.textContent.length
-                : caretOffset;
-
-            setCaretOffset(jumpNode, computedCaretOffset);
             if (popUpRoot !== undefined) {
               popUpRoot.render(<Fragment />);
             }
           }
+          break;
         }
-        break;
       }
-      case "arrowdown": {
-        event.preventDefault();
-        if (rowIndex + 1 < totalRow) {
-          const belowCell = tableData.rows[rowIndex + 1].columns[columnIndex];
-          const belowCellNode = getBlockNode(belowCell.id) as HTMLElement;
+    },
+    [popUpRoot],
+  );
 
-          const nodeAtCaretOffset = getNodeAt(belowCellNode, caretOffset);
-
-          const jumpNode =
-            caretOffset > belowCellNode.innerText.length
-              ? belowCellNode.lastChild ?? belowCellNode
-              : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
-              ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
-              : nodeAtCaretOffset;
-
-          const computedCaretOffset =
-            caretOffset > belowCellNode.innerText.length
-              ? belowCellNode.lastChild?.textContent == null
-                ? 0
-                : belowCellNode.lastChild.textContent.length
-              : caretOffset > (jumpNode.textContent as string).length
-              ? jumpNode.textContent == null
-                ? 0
-                : jumpNode.textContent.length
-              : caretOffset;
-
-          setCaretOffset(jumpNode, computedCaretOffset);
-        } else {
-          const tableSiblings = getNodeSiblings(block.id);
-          if (tableSiblings.next != null) {
-            const nextNode = tableSiblings.next;
-
-            const nodeAtCaretOffset = getNodeAt(nextNode, caretOffset);
-
-            const jumpNode =
-              caretOffset > nextNode.innerText.length
-                ? nextNode.lastChild ?? nextNode
-                : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
-                ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
-                : nodeAtCaretOffset;
-
-            const computedCaretOffset =
-              caretOffset > nextNode.innerText.length
-                ? nextNode.lastChild?.textContent == null
-                  ? 0
-                  : nextNode.lastChild.textContent.length
-                : caretOffset > (jumpNode.textContent as string).length
-                ? jumpNode.textContent == null
-                  ? 0
-                  : jumpNode.textContent.length
-                : caretOffset;
-
-            setCaretOffset(jumpNode, computedCaretOffset);
-            if (popUpRoot !== undefined) {
-              popUpRoot.render(<Fragment />);
-            }
-          }
-        }
-        break;
-      }
-    }
-  }
-
-  function focusOnNode(node: HTMLElement): void {
-    const previousCellChildNodeIndex =
-      node?.lastChild?.textContent === ""
-        ? node.childNodes.length - 2
-        : node.childNodes.length - 1;
-
-    const computedCaretOffset =
-      previousCellChildNodeIndex === -1
-        ? 0
-        : node.childNodes[previousCellChildNodeIndex] != null
-        ? node.childNodes[previousCellChildNodeIndex].nodeType ===
-          Node.ELEMENT_NODE
-          ? (node.childNodes[previousCellChildNodeIndex].textContent as string)
-              .length
-          : node.childNodes[previousCellChildNodeIndex].textContent?.length ??
-            node.innerText.length
-        : node.innerText.length;
-    setCaretOffset(
-      previousCellChildNodeIndex === -1
-        ? node
-        : node.childNodes[previousCellChildNodeIndex].nodeType ===
-          Node.ELEMENT_NODE
-        ? node.childNodes[previousCellChildNodeIndex].firstChild ?? node
-        : node.childNodes[previousCellChildNodeIndex],
-      computedCaretOffset,
-    );
-  }
+  useEffect(() => {
+    window.addEventListener("keyup", keyboardHandler);
+    return () => {
+      window.removeEventListener("keyup", keyboardHandler);
+    };
+  }, [keyboardHandler]);
 
   function deleteHandler(): void {
     if (
@@ -368,8 +182,7 @@ export default function TableBlock({
     editorRootNode.addEventListener("click", () => {
       if (
         document.activeElement == null ||
-        document.activeElement?.getAttribute("data-block-render-type") !==
-          "tableCell"
+        document.activeElement?.getAttribute("data-block-type") !== "tableCell"
       ) {
         if (popUpRoot !== undefined) {
           popUpRoot.render(<Fragment />);
@@ -491,18 +304,34 @@ export default function TableBlock({
       id={block.id}
       key={block.id}
       data-type={BLOCK_NODE}
-      data-block-render-type={"table"}
       className={"table-auto my-3 block overflow-x-auto w-full"}
     >
       <tbody>
         {tableData.rows.map((row, rowIndex) => {
           return (
-            <tr key={row.id} id={row.id} data-block-render-type={"tableRow"}>
+            <tr key={row.id} id={row.id}>
               {row.columns.map((cell, columnIndex) => {
                 return createElement(rowIndex === 0 ? "th" : "td", {
                   id: cell.id,
                   key: cell.id,
-                  "data-block-render-type": "tableCell",
+                  "data-block-type": "tableCell",
+                  "data-parent-block-id": block.id,
+                  "data-top-node-id":
+                    rowIndex === 0
+                      ? "null"
+                      : tableData.rows[rowIndex - 1].columns[columnIndex].id,
+                  "data-bottom-node-id":
+                    rowIndex === tableData.rows.length - 1
+                      ? "null"
+                      : tableData.rows[rowIndex + 1].columns[columnIndex].id,
+                  "data-left-node-id":
+                    columnIndex === 0
+                      ? "null"
+                      : row.columns[columnIndex - 1].id,
+                  "data-right-node-id":
+                    columnIndex === row.columns.length - 1
+                      ? "null"
+                      : row.columns[columnIndex + 1].id,
                   className: conditionalClassName(
                     `border focus:ring-0 max-w-fit min-w-[150px] focus:outline-none ring-0 outline-none border-gray-300 px-3 py-2`,
                     rowIndex === 0 ? "text-center" : "text-start",
@@ -520,9 +349,6 @@ export default function TableBlock({
                   onClick,
                   onInput: (event: ChangeEvent<HTMLElement>) => {
                     onCellChange(event, rowIndex, columnIndex);
-                  },
-                  onKeyDown: (event: KeyboardEvent) => {
-                    handleKeyboard(event, rowIndex, columnIndex);
                   },
                   onFocus: () => {
                     showTablePopup(rowIndex, columnIndex);

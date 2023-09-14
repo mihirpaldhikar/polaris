@@ -54,12 +54,6 @@ interface ComposerProps {
   ) => void;
   onPaste: (block: Block, data: string | string[], caretOffset: number) => void;
   onSelect: (block: Block) => void;
-  onActionKeyPressed: (
-    nodeIndex: number,
-    block: Block,
-    previousContent: string,
-    caretOffset: number,
-  ) => void;
   onAttachmentRequest: (block: Block, data: File | string) => void;
   onMarkdown: (block: Block) => void;
 }
@@ -74,7 +68,6 @@ interface ComposerProps {
  * @param onDelete
  * @param onPaste
  * @param onSelect
- * @param onActionKeyPressed
  * @returns JSX.Element
  *
  * @description Composer is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
@@ -92,7 +85,6 @@ export default function Composer({
   onPaste,
   onSelect,
   onAttachmentRequest,
-  onActionKeyPressed,
   onMarkdown,
 }: ComposerProps): JSX.Element {
   const { config } = useContext(RootContext);
@@ -106,7 +98,6 @@ export default function Composer({
         onChange={onChange}
         onClick={openLinkInNewTab}
         onSelect={onSelect}
-        onActionKeyPressed={onActionKeyPressed}
         onDelete={onDelete}
         onCreate={onCreate}
         onMarkdown={onMarkdown}
@@ -179,7 +170,6 @@ export default function Composer({
               onDelete={onDelete}
               onPaste={onPaste}
               onSelect={onSelect}
-              onActionKeyPressed={onActionKeyPressed}
               onAttachmentRequest={onAttachmentRequest}
               onMarkdown={onMarkdown}
             />

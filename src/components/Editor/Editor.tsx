@@ -20,7 +20,14 @@
  * SOFTWARE.
  */
 
-import { Fragment, type JSX, useCallback, useEffect, useState } from "react";
+import {
+  Fragment,
+  type JSX,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   type Attachment,
   type Blob,
@@ -37,11 +44,17 @@ import {
   blockRenderTypeFromRole,
   dispatchEditorEvent,
   elementContainsStyle,
+  findNextTextNode,
+  findPreviousTextNode,
   generateBlockId,
   getBlockNode,
   getCaretCoordinates,
+  getCaretOffset,
+  getNodeAt,
+  getNodeIndex,
   inlineSpecifierManager,
   nodeInViewPort,
+  nodeOffset,
   normalizeContent,
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
@@ -49,6 +62,7 @@ import {
   setCaretOffset,
   subscribeToEditorEvent,
   traverseAndDelete,
+  traverseAndFind,
   traverseAndFindBlockPosition,
   traverseAndUpdate,
   traverseAndUpdateBelow,
@@ -99,7 +113,9 @@ export default function Editor({
   let masterInlineTools: readonly Menu[] = cloneDeep(MasterInlineTools).concat(
     ...(inlineTools ?? []),
   );
-  let masterBlockTools: readonly Menu[] = cloneDeep(MasterBlockTools);
+  const masterBlockTools: readonly Menu[] = cloneDeep(MasterBlockTools);
+
+  const isActionMenuOpen = useRef<boolean>(false);
 
   const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.blocks);
   const [focusedNode, setFocusedNode] = useState<
@@ -127,8 +143,468 @@ export default function Editor({
     };
   }, [blob.id]);
 
+  const propagateChanges = useCallback(
+    (
+      blocks: Block[],
+      focus?: {
+        nodeId: string;
+        caretOffset: number;
+        nodeIndex?: number;
+      },
+    ) => {
+      updateMasterBlocks(blocks);
+      setFocusedNode(focus);
+      dispatchEditorEvent(`onChanged-${blob.id}`, {
+        ...blob,
+        blocks: masterBlocks,
+      } satisfies Blob);
+    },
+    [blob, masterBlocks],
+  );
+
+  const changeHandler = useCallback(
+    (block: Block, focus?: boolean) => {
+      const blockIndex: number = masterBlocks
+        .map((blk) => blk.id)
+        .indexOf(block.id);
+      if (blockIndex === -1) {
+        traverseAndUpdate(masterBlocks, block);
+      } else {
+        masterBlocks[blockIndex] = block;
+        updateMasterBlocks(masterBlocks);
+      }
+      if (
+        blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT ||
+        (focus !== undefined && focus)
+      ) {
+        setFocusedNode({
+          nodeId: block.id,
+          nodeIndex: 0,
+          caretOffset: 0,
+        });
+      }
+      dispatchEditorEvent(`onChanged-${blob.id}`, {
+        ...blob,
+        blocks: masterBlocks,
+      } satisfies Blob);
+    },
+    [blob, masterBlocks],
+  );
+
+  const actionKeyHandler = useCallback(
+    (
+      nodeIndex: number,
+      block: Block,
+      previousContent: string,
+      caretOffset: number,
+      blockTools: Menu[],
+    ) => {
+      const popupNode = window.document.getElementById(`popup-${blob.id}`);
+      const editorNode = window.document.getElementById(`editor-${blob.id}`);
+      const currentNode = getBlockNode(block.id);
+      if (
+        popupNode == null ||
+        editorNode == null ||
+        currentNode == null ||
+        popUpRoot === undefined ||
+        typeof block.data !== "string"
+      ) {
+        return;
+      }
+
+      if (popupNode.childElementCount !== 0) {
+        popUpRoot.render(<Fragment />);
+        dispatchEditorEvent("onActionMenu", {
+          opened: false,
+        });
+        isActionMenuOpen.current = false;
+        return;
+      }
+
+      if (!nodeInViewPort(currentNode)) {
+        currentNode.scrollIntoView();
+      }
+
+      const { x, y } = getCaretCoordinates(true);
+      const actionMenuCoordinates: Coordinates = {
+        x: block.data.length === 0 ? currentNode.getBoundingClientRect().x : x,
+        y:
+          (block.data.length === 0
+            ? currentNode.getBoundingClientRect().y
+            : y) + 30,
+      };
+
+      dispatchEditorEvent("onActionMenu", {
+        opened: true,
+      });
+      isActionMenuOpen.current = true;
+      popUpRoot.render(
+        <BlockTools
+          coordinates={actionMenuCoordinates}
+          menu={blockTools}
+          onClose={() => {
+            dispatchEditorEvent("onActionMenu", {
+              opened: false,
+            });
+            isActionMenuOpen.current = false;
+            popUpRoot.render(<Fragment />);
+          }}
+          onEscape={(query) => {
+            setFocusedNode({
+              nodeId: block.id,
+              caretOffset: caretOffset + query.length + 1,
+              nodeIndex,
+            });
+          }}
+          onSelect={(execute) => {
+            switch (execute.type) {
+              case "role": {
+                let focusNode = block.id;
+                const newRole = execute.args as Role;
+                if (blockRenderTypeFromRole(newRole) === RenderType.TEXT) {
+                  block.role = newRole;
+                  block.data = previousContent;
+                  traverseAndUpdate(masterBlocks, block);
+                } else if (
+                  blockRenderTypeFromRole(newRole) === RenderType.LIST
+                ) {
+                  block.role = newRole;
+                  focusNode = generateBlockId();
+                  block.data = [
+                    {
+                      id: focusNode,
+                      data: previousContent,
+                      style: block.style,
+                      role: "paragraph",
+                    },
+                  ];
+                  traverseAndUpdate(masterBlocks, block);
+                } else if (
+                  blockRenderTypeFromRole(newRole) === RenderType.ATTACHMENT
+                ) {
+                  let imageBlock: Block = {
+                    id: generateBlockId(),
+                    data: {
+                      url: "",
+                      description: "",
+                      width: 500,
+                      height: 300,
+                    },
+                    style: [],
+                    role: newRole,
+                  };
+                  block.data = previousContent;
+                  if (
+                    blockRenderTypeFromNode(currentNode) === RenderType.LIST
+                  ) {
+                    const parentNode = currentNode?.parentElement
+                      ?.parentElement as HTMLElement;
+                    const parentBlock = serializeNodeToBlock(parentNode);
+                    if (previousContent === "") {
+                      block.data = imageBlock.data;
+                      block.role = imageBlock.role;
+                      block.style = imageBlock.style;
+                      imageBlock = block;
+                    }
+                    traverseAndUpdate(parentBlock.data as Block[], block);
+                    if (previousContent !== "") {
+                      traverseAndUpdateBelow(
+                        parentBlock.data as Block[],
+                        block,
+                        imageBlock,
+                      );
+                    }
+                    traverseAndUpdate(masterBlocks, parentBlock);
+                    const newBlockIndex = traverseAndFindBlockPosition(
+                      parentBlock.data as Block[],
+                      imageBlock,
+                    );
+
+                    if (
+                      newBlockIndex ===
+                      (parentBlock.data as Block[]).length - 1
+                    ) {
+                      const emptyBlock: Block = {
+                        id: generateBlockId(),
+                        data: "",
+                        role: "paragraph",
+                        style: [],
+                      };
+                      traverseAndUpdateBelow(
+                        parentBlock.data as Block[],
+                        imageBlock,
+                        emptyBlock,
+                      );
+                    }
+                  } else {
+                    if (previousContent === "") {
+                      block.data = imageBlock.data;
+                      block.role = imageBlock.role;
+                      block.style = imageBlock.style;
+                      imageBlock = block;
+                    }
+                    traverseAndUpdate(masterBlocks, block);
+                    if (previousContent !== "") {
+                      traverseAndUpdateBelow(masterBlocks, block, imageBlock);
+                    }
+                    const newBlockIndex = traverseAndFindBlockPosition(
+                      masterBlocks,
+                      imageBlock,
+                    );
+                    if (newBlockIndex === masterBlocks.length - 1) {
+                      const emptyBlock: Block = {
+                        id: generateBlockId(),
+                        data: "",
+                        role: "paragraph",
+                        style: [],
+                      };
+                      traverseAndUpdateBelow(
+                        masterBlocks,
+                        imageBlock,
+                        emptyBlock,
+                      );
+                    }
+                  }
+                } else if (
+                  blockRenderTypeFromRole(newRole) === RenderType.TABLE
+                ) {
+                  let tableBlock: Block = {
+                    id: generateBlockId(),
+                    role: newRole,
+                    style: [],
+                    data: {
+                      rows: [
+                        {
+                          id: generateBlockId(),
+                          columns: [
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                          ],
+                        },
+                        {
+                          id: generateBlockId(),
+                          columns: [
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                          ],
+                        },
+                        {
+                          id: generateBlockId(),
+                          columns: [
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                          ],
+                        },
+                        {
+                          id: generateBlockId(),
+                          columns: [
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                            {
+                              id: generateBlockId(),
+                              role: "paragraph",
+                              data: "",
+                              style: [],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  };
+                  block.data = previousContent;
+                  focusNode = (tableBlock.data as Table).rows[0].id;
+
+                  if (
+                    blockRenderTypeFromNode(currentNode) === RenderType.LIST
+                  ) {
+                    const parentNode = currentNode?.parentElement
+                      ?.parentElement as HTMLElement;
+                    const parentBlock = serializeNodeToBlock(parentNode);
+                    if (previousContent === "") {
+                      block.data = tableBlock.data;
+                      block.role = tableBlock.role;
+                      block.style = tableBlock.style;
+                      tableBlock = block;
+                    }
+                    traverseAndUpdate(parentBlock.data as Block[], block);
+                    if (previousContent !== "") {
+                      traverseAndUpdateBelow(
+                        parentBlock.data as Block[],
+                        block,
+                        tableBlock,
+                      );
+                    }
+                    traverseAndUpdate(masterBlocks, parentBlock);
+                    const newBlockIndex = traverseAndFindBlockPosition(
+                      parentBlock.data as Block[],
+                      tableBlock,
+                    );
+
+                    if (
+                      newBlockIndex ===
+                      (parentBlock.data as Block[]).length - 1
+                    ) {
+                      const emptyBlock: Block = {
+                        id: generateBlockId(),
+                        data: "",
+                        role: "paragraph",
+                        style: [],
+                      };
+                      traverseAndUpdateBelow(
+                        parentBlock.data as Block[],
+                        tableBlock,
+                        emptyBlock,
+                      );
+                    }
+                  } else {
+                    if (previousContent === "") {
+                      block.data = tableBlock.data;
+                      block.role = tableBlock.role;
+                      block.style = tableBlock.style;
+                      tableBlock = block;
+                    }
+                    traverseAndUpdate(masterBlocks, block);
+                    if (previousContent !== "") {
+                      traverseAndUpdateBelow(masterBlocks, block, tableBlock);
+                    }
+                    const newBlockIndex = traverseAndFindBlockPosition(
+                      masterBlocks,
+                      tableBlock,
+                    );
+                    if (newBlockIndex === masterBlocks.length - 1) {
+                      const emptyBlock: Block = {
+                        id: generateBlockId(),
+                        data: "",
+                        role: "paragraph",
+                        style: [],
+                      };
+                      traverseAndUpdateBelow(
+                        masterBlocks,
+                        tableBlock,
+                        emptyBlock,
+                      );
+                    }
+                  }
+                }
+
+                propagateChanges(masterBlocks, {
+                  nodeId: focusNode,
+                  caretOffset,
+                  nodeIndex,
+                });
+                break;
+              }
+              case "style": {
+                const newStyle = execute.args as Style[];
+                for (let i = 0; i < newStyle.length; i++) {
+                  block.style = upsertStyle(block.style, newStyle[i]);
+                }
+                block.data = previousContent;
+                traverseAndUpdate(masterBlocks, block);
+                propagateChanges(masterBlocks, {
+                  nodeId: block.id,
+                  caretOffset,
+                  nodeIndex,
+                });
+                break;
+              }
+            }
+          }}
+        />,
+      );
+
+      editorNode.addEventListener("mousedown", () => {
+        popUpRoot.render(<Fragment />);
+      });
+    },
+    [blob.id, masterBlocks, popUpRoot, propagateChanges],
+  );
+
   const keyboardManager = useCallback(
     (event: KeyboardEvent): void => {
+      const activeNode = document.activeElement;
       switch (event.key.toLowerCase()) {
         case "s": {
           if (event.ctrlKey) {
@@ -138,12 +614,276 @@ export default function Editor({
               blocks: masterBlocks,
             } satisfies Blob);
           }
+          break;
+        }
+        case "/": {
+          if (
+            activeNode == null ||
+            activeNode.getAttribute("contenteditable") !== "true"
+          ) {
+            return;
+          }
+          const caretOffset = getCaretOffset(activeNode as HTMLElement);
+          const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
 
+          if (activeBlock == null || typeof activeBlock?.data !== "string") {
+            return;
+          }
+          const computedCaretOffset =
+            window.navigator.userAgent.toLowerCase().includes("android") ||
+            window.navigator.userAgent.includes("iphone")
+              ? caretOffset -
+                nodeOffset(
+                  activeNode as HTMLElement,
+                  getNodeAt(activeNode, caretOffset),
+                ) -
+                1
+              : caretOffset -
+                nodeOffset(
+                  activeNode as HTMLElement,
+                  getNodeAt(activeNode, caretOffset),
+                );
+
+          const filteredBlockTools = masterBlockTools.filter((menu) => {
+            if (menu.allowedRoles !== undefined) {
+              return menu.allowedRoles?.includes(activeBlock.role);
+            }
+            return true;
+          });
+
+          actionKeyHandler(
+            getNodeIndex(
+              activeNode as HTMLElement,
+              getNodeAt(activeNode as HTMLElement, caretOffset),
+            ),
+            activeBlock,
+            activeBlock.data,
+            computedCaretOffset,
+            filteredBlockTools,
+          );
+
+          break;
+        }
+        case "arrowup": {
+          event.preventDefault();
+
+          if (
+            isActionMenuOpen.current ||
+            activeNode == null ||
+            activeNode.getAttribute("contenteditable") !== "true"
+          )
+            return;
+          const caretOffset = getCaretOffset(activeNode as HTMLElement);
+          const previousNode = findPreviousTextNode(
+            activeNode as HTMLElement,
+            "top",
+          );
+          if (previousNode != null) {
+            const nodeAtCaretOffset = getNodeAt(previousNode, caretOffset);
+            const jumpNode =
+              caretOffset > previousNode.innerText.length
+                ? previousNode.lastChild ?? previousNode
+                : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
+                ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
+                : nodeAtCaretOffset;
+
+            const computedCaretOffset =
+              caretOffset > previousNode.innerText.length
+                ? previousNode.lastChild?.textContent == null
+                  ? 0
+                  : previousNode.lastChild.textContent.length
+                : caretOffset > (jumpNode.textContent as string).length
+                ? jumpNode.textContent == null
+                  ? 0
+                  : jumpNode.textContent.length
+                : caretOffset;
+            setCaretOffset(jumpNode, computedCaretOffset);
+          }
+          break;
+        }
+        case "arrowdown": {
+          event.preventDefault();
+
+          if (
+            isActionMenuOpen.current ||
+            activeNode == null ||
+            activeNode.getAttribute("contenteditable") !== "true"
+          )
+            return;
+
+          const caretOffset = getCaretOffset(activeNode as HTMLElement);
+          const nextNode = findNextTextNode(
+            activeNode as HTMLElement,
+            "bottom",
+          );
+          if (nextNode != null) {
+            const nodeAtCaretOffset = getNodeAt(nextNode, caretOffset);
+            const jumpNode =
+              caretOffset > nextNode.innerText.length
+                ? nextNode.firstChild ?? nextNode
+                : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
+                ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
+                : nodeAtCaretOffset;
+
+            const computedCaretOffset =
+              caretOffset > nextNode.innerText.length
+                ? nextNode.firstChild?.textContent == null
+                  ? 0
+                  : nextNode.firstChild.textContent.length
+                : caretOffset > (jumpNode.textContent as string).length
+                ? jumpNode.textContent == null
+                  ? 0
+                  : jumpNode.textContent.length
+                : caretOffset;
+            setCaretOffset(jumpNode, computedCaretOffset);
+          }
+
+          break;
+        }
+        case "arrowleft": {
+          if (
+            isActionMenuOpen.current ||
+            activeNode == null ||
+            activeNode.getAttribute("contenteditable") !== "true"
+          ) {
+            return;
+          }
+
+          const caretOffset = getCaretOffset(activeNode as HTMLElement);
+
+          if (caretOffset !== 0) {
+            return;
+          }
+
+          event.preventDefault();
+          const previousNode = findPreviousTextNode(
+            activeNode as HTMLElement,
+            "left",
+          );
+          if (previousNode != null) {
+            const previousBlockChildNodeIndex =
+              previousNode?.lastChild?.textContent === ""
+                ? previousNode.childNodes.length - 2
+                : previousNode.childNodes.length - 1;
+
+            const jumpNode =
+              previousBlockChildNodeIndex === -1
+                ? previousNode
+                : previousNode.childNodes[previousBlockChildNodeIndex]
+                    .nodeType === Node.ELEMENT_NODE
+                ? previousNode.childNodes[previousBlockChildNodeIndex]
+                    .firstChild ?? previousNode
+                : previousNode.childNodes[previousBlockChildNodeIndex];
+
+            const computedCaretOffset =
+              previousBlockChildNodeIndex === -1
+                ? 0
+                : previousNode.childNodes[previousBlockChildNodeIndex] != null
+                ? previousNode.childNodes[previousBlockChildNodeIndex]
+                    .nodeType === Node.ELEMENT_NODE
+                  ? (
+                      previousNode.childNodes[previousBlockChildNodeIndex]
+                        .textContent as string
+                    ).length
+                  : previousNode.childNodes[previousBlockChildNodeIndex]
+                      .textContent?.length ?? previousNode.innerText.length
+                : previousNode.innerText.length;
+            setCaretOffset(jumpNode, computedCaretOffset);
+          }
+          break;
+        }
+        case "arrowright": {
+          if (
+            isActionMenuOpen.current ||
+            activeNode == null ||
+            activeNode.getAttribute("contenteditable") !== "true"
+          ) {
+            return;
+          }
+
+          const caretOffset = getCaretOffset(activeNode as HTMLElement);
+
+          if (caretOffset !== (activeNode as HTMLElement).innerText.length) {
+            return;
+          }
+
+          event.preventDefault();
+          const nextNode = findNextTextNode(activeNode, "right");
+          if (nextNode != null) {
+            setCaretOffset(
+              nextNode.firstChild != null ? nextNode.firstChild : nextNode,
+              0,
+            );
+          }
+          break;
+        }
+        case "b": {
+          if (event.ctrlKey) {
+            event.preventDefault();
+
+            if (activeNode == null) return;
+            const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
+            if (activeBlock == null) return;
+
+            const style: Style[] = [
+              {
+                name: "font-weight",
+                value: "bold",
+              },
+            ];
+
+            inlineSpecifierManager(activeNode as HTMLElement, style);
+
+            activeBlock.data = activeNode.innerHTML;
+            changeHandler(activeBlock);
+          }
+          break;
+        }
+        case "i": {
+          if (event.ctrlKey) {
+            event.preventDefault();
+
+            if (activeNode == null) return;
+            const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
+            if (activeBlock == null) return;
+
+            const style: Style[] = [
+              {
+                name: "font-style",
+                value: "italic",
+              },
+            ];
+
+            inlineSpecifierManager(activeNode as HTMLElement, style);
+            activeBlock.data = activeNode.innerHTML;
+            changeHandler(activeBlock);
+          }
+          break;
+        }
+        case "u": {
+          if (event.ctrlKey) {
+            event.preventDefault();
+
+            if (activeNode == null) return;
+            const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
+            if (activeBlock == null) return;
+
+            const style: Style[] = [
+              {
+                name: "text-decoration",
+                value: "underline",
+              },
+            ];
+
+            inlineSpecifierManager(activeNode as HTMLElement, style);
+            activeBlock.data = activeNode.innerHTML;
+            changeHandler(activeBlock);
+          }
           break;
         }
       }
     },
-    [masterBlocks, blob],
+    [blob, masterBlocks, masterBlockTools, actionKeyHandler, changeHandler],
   );
 
   useEffect(() => {
@@ -180,48 +920,6 @@ export default function Editor({
       }
     }
   }, [focusedNode]);
-
-  function changeHandler(block: Block, focus?: boolean): void {
-    const blockIndex: number = masterBlocks
-      .map((blk) => blk.id)
-      .indexOf(block.id);
-    if (blockIndex === -1) {
-      traverseAndUpdate(masterBlocks, block);
-    } else {
-      masterBlocks[blockIndex] = block;
-      updateMasterBlocks(masterBlocks);
-    }
-    if (
-      blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT ||
-      (focus !== undefined && focus)
-    ) {
-      setFocusedNode({
-        nodeId: block.id,
-        nodeIndex: 0,
-        caretOffset: 0,
-      });
-    }
-    dispatchEditorEvent(`onChanged-${blob.id}`, {
-      ...blob,
-      blocks: masterBlocks,
-    } satisfies Blob);
-  }
-
-  function propagateChanges(
-    blocks: Block[],
-    focus?: {
-      nodeId: string;
-      caretOffset: number;
-      nodeIndex?: number;
-    },
-  ): void {
-    updateMasterBlocks(blocks);
-    setFocusedNode(focus);
-    dispatchEditorEvent(`onChanged-${blob.id}`, {
-      ...blob,
-      blocks: masterBlocks,
-    } satisfies Blob);
-  }
 
   function createHandler(
     parentBlock: Block,
@@ -499,411 +1197,6 @@ export default function Editor({
     );
   }
 
-  function actionKeyHandler(
-    nodeIndex: number,
-    block: Block,
-    previousContent: string,
-    caretOffset: number,
-  ): void {
-    masterBlockTools = masterBlockTools.filter((menu) => {
-      if (menu.allowedRoles !== undefined) {
-        return menu.allowedRoles?.includes(block.role);
-      }
-      return true;
-    });
-
-    const popupNode = window.document.getElementById(`popup-${blob.id}`);
-    const editorNode = window.document.getElementById(`editor-${blob.id}`);
-    const currentNode = getBlockNode(block.id);
-    if (
-      popupNode == null ||
-      editorNode == null ||
-      currentNode == null ||
-      popUpRoot === undefined ||
-      typeof block.data !== "string"
-    ) {
-      return;
-    }
-
-    if (popupNode.childElementCount !== 0) {
-      popUpRoot.render(<Fragment />);
-      dispatchEditorEvent("onActionMenu", {
-        opened: false,
-      });
-      return;
-    }
-
-    if (!nodeInViewPort(currentNode)) {
-      currentNode.scrollIntoView();
-    }
-
-    const { x, y } = getCaretCoordinates(true);
-    const actionMenuCoordinates: Coordinates = {
-      x: block.data.length === 0 ? currentNode.getBoundingClientRect().x : x,
-      y:
-        (block.data.length === 0 ? currentNode.getBoundingClientRect().y : y) +
-        30,
-    };
-
-    dispatchEditorEvent("onActionMenu", {
-      opened: true,
-    });
-
-    popUpRoot.render(
-      <BlockTools
-        coordinates={actionMenuCoordinates}
-        menu={masterBlockTools}
-        onClose={() => {
-          dispatchEditorEvent("onActionMenu", {
-            opened: false,
-          });
-          popUpRoot.render(<Fragment />);
-        }}
-        onEscape={(query) => {
-          setFocusedNode({
-            nodeId: block.id,
-            caretOffset: caretOffset + query.length + 1,
-            nodeIndex,
-          });
-        }}
-        onSelect={(execute) => {
-          switch (execute.type) {
-            case "role": {
-              let focusNode = block.id;
-              const newRole = execute.args as Role;
-              if (blockRenderTypeFromRole(newRole) === RenderType.TEXT) {
-                block.role = newRole;
-                block.data = previousContent;
-                traverseAndUpdate(masterBlocks, block);
-              } else if (blockRenderTypeFromRole(newRole) === RenderType.LIST) {
-                block.role = newRole;
-                focusNode = generateBlockId();
-                block.data = [
-                  {
-                    id: focusNode,
-                    data: previousContent,
-                    style: block.style,
-                    role: "paragraph",
-                  },
-                ];
-                traverseAndUpdate(masterBlocks, block);
-              } else if (
-                blockRenderTypeFromRole(newRole) === RenderType.ATTACHMENT
-              ) {
-                let imageBlock: Block = {
-                  id: generateBlockId(),
-                  data: {
-                    url: "",
-                    description: "",
-                    width: 500,
-                    height: 300,
-                  },
-                  style: [],
-                  role: newRole,
-                };
-                block.data = previousContent;
-                if (blockRenderTypeFromNode(currentNode) === RenderType.LIST) {
-                  const parentNode = currentNode?.parentElement
-                    ?.parentElement as HTMLElement;
-                  const parentBlock = serializeNodeToBlock(parentNode);
-                  if (previousContent === "") {
-                    block.data = imageBlock.data;
-                    block.role = imageBlock.role;
-                    block.style = imageBlock.style;
-                    imageBlock = block;
-                  }
-                  traverseAndUpdate(parentBlock.data as Block[], block);
-                  if (previousContent !== "") {
-                    traverseAndUpdateBelow(
-                      parentBlock.data as Block[],
-                      block,
-                      imageBlock,
-                    );
-                  }
-                  traverseAndUpdate(masterBlocks, parentBlock);
-                  const newBlockIndex = traverseAndFindBlockPosition(
-                    parentBlock.data as Block[],
-                    imageBlock,
-                  );
-
-                  if (
-                    newBlockIndex ===
-                    (parentBlock.data as Block[]).length - 1
-                  ) {
-                    const emptyBlock: Block = {
-                      id: generateBlockId(),
-                      data: "",
-                      role: "paragraph",
-                      style: [],
-                    };
-                    traverseAndUpdateBelow(
-                      parentBlock.data as Block[],
-                      imageBlock,
-                      emptyBlock,
-                    );
-                  }
-                } else {
-                  if (previousContent === "") {
-                    block.data = imageBlock.data;
-                    block.role = imageBlock.role;
-                    block.style = imageBlock.style;
-                    imageBlock = block;
-                  }
-                  traverseAndUpdate(masterBlocks, block);
-                  if (previousContent !== "") {
-                    traverseAndUpdateBelow(masterBlocks, block, imageBlock);
-                  }
-                  const newBlockIndex = traverseAndFindBlockPosition(
-                    masterBlocks,
-                    imageBlock,
-                  );
-                  if (newBlockIndex === masterBlocks.length - 1) {
-                    const emptyBlock: Block = {
-                      id: generateBlockId(),
-                      data: "",
-                      role: "paragraph",
-                      style: [],
-                    };
-                    traverseAndUpdateBelow(
-                      masterBlocks,
-                      imageBlock,
-                      emptyBlock,
-                    );
-                  }
-                }
-              } else if (
-                blockRenderTypeFromRole(newRole) === RenderType.TABLE
-              ) {
-                let tableBlock: Block = {
-                  id: generateBlockId(),
-                  role: newRole,
-                  style: [],
-                  data: {
-                    rows: [
-                      {
-                        id: generateBlockId(),
-                        columns: [
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                        ],
-                      },
-                      {
-                        id: generateBlockId(),
-                        columns: [
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                        ],
-                      },
-                      {
-                        id: generateBlockId(),
-                        columns: [
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                        ],
-                      },
-                      {
-                        id: generateBlockId(),
-                        columns: [
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                          {
-                            id: generateBlockId(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                };
-                block.data = previousContent;
-                focusNode = (tableBlock.data as Table).rows[0].id;
-
-                if (blockRenderTypeFromNode(currentNode) === RenderType.LIST) {
-                  const parentNode = currentNode?.parentElement
-                    ?.parentElement as HTMLElement;
-                  const parentBlock = serializeNodeToBlock(parentNode);
-                  if (previousContent === "") {
-                    block.data = tableBlock.data;
-                    block.role = tableBlock.role;
-                    block.style = tableBlock.style;
-                    tableBlock = block;
-                  }
-                  traverseAndUpdate(parentBlock.data as Block[], block);
-                  if (previousContent !== "") {
-                    traverseAndUpdateBelow(
-                      parentBlock.data as Block[],
-                      block,
-                      tableBlock,
-                    );
-                  }
-                  traverseAndUpdate(masterBlocks, parentBlock);
-                  const newBlockIndex = traverseAndFindBlockPosition(
-                    parentBlock.data as Block[],
-                    tableBlock,
-                  );
-
-                  if (
-                    newBlockIndex ===
-                    (parentBlock.data as Block[]).length - 1
-                  ) {
-                    const emptyBlock: Block = {
-                      id: generateBlockId(),
-                      data: "",
-                      role: "paragraph",
-                      style: [],
-                    };
-                    traverseAndUpdateBelow(
-                      parentBlock.data as Block[],
-                      tableBlock,
-                      emptyBlock,
-                    );
-                  }
-                } else {
-                  if (previousContent === "") {
-                    block.data = tableBlock.data;
-                    block.role = tableBlock.role;
-                    block.style = tableBlock.style;
-                    tableBlock = block;
-                  }
-                  traverseAndUpdate(masterBlocks, block);
-                  if (previousContent !== "") {
-                    traverseAndUpdateBelow(masterBlocks, block, tableBlock);
-                  }
-                  const newBlockIndex = traverseAndFindBlockPosition(
-                    masterBlocks,
-                    tableBlock,
-                  );
-                  if (newBlockIndex === masterBlocks.length - 1) {
-                    const emptyBlock: Block = {
-                      id: generateBlockId(),
-                      data: "",
-                      role: "paragraph",
-                      style: [],
-                    };
-                    traverseAndUpdateBelow(
-                      masterBlocks,
-                      tableBlock,
-                      emptyBlock,
-                    );
-                  }
-                }
-              }
-
-              propagateChanges(masterBlocks, {
-                nodeId: focusNode,
-                caretOffset,
-                nodeIndex,
-              });
-              break;
-            }
-            case "style": {
-              const newStyle = execute.args as Style[];
-              for (let i = 0; i < newStyle.length; i++) {
-                block.style = upsertStyle(block.style, newStyle[i]);
-              }
-              block.data = previousContent;
-              traverseAndUpdate(masterBlocks, block);
-              propagateChanges(masterBlocks, {
-                nodeId: block.id,
-                caretOffset,
-                nodeIndex,
-              });
-              break;
-            }
-          }
-        }}
-      />,
-    );
-
-    editorNode.addEventListener("mousedown", () => {
-      popUpRoot.render(<Fragment />);
-    });
-  }
-
   function attachmentRequestHandler(block: Block, data: File | string): void {
     if (block.role !== "image" || typeof block.data !== "object") {
       return;
@@ -983,7 +1276,6 @@ export default function Editor({
               onSelect={debounce((block) => {
                 selectionHandler(block);
               }, 360)}
-              onActionKeyPressed={actionKeyHandler}
               onAttachmentRequest={attachmentRequestHandler}
               onMarkdown={markdownHandler}
             />

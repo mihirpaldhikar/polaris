@@ -32,21 +32,14 @@ import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
   conditionalClassName,
-  findNextTextNode,
-  findPreviousTextNode,
   generateBlockId,
   getBlockNode,
   getCaretOffset,
   getConfigFromRole,
-  getNodeAt,
-  getNodeIndex,
   getNodeSiblings,
   getPlaceholderFromRole,
-  inlineSpecifierManager,
-  nodeOffset,
   nodeTypeFromRole,
   serializeNodeToBlock,
-  setCaretOffset,
   setNodeStyle,
   splitBlocksAtCaretOffset,
   subscribeToEditorEvent,
@@ -54,7 +47,7 @@ import {
   unsubscribeFromEditorEvent,
 } from "../../utils";
 import { BLOCK_NODE } from "../../constants";
-import { type Block, type Style } from "../../interfaces";
+import { type Block } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
 import RenderType from "../../enums/RenderType";
@@ -66,12 +59,6 @@ interface TextBlockProps {
   onClick: (event: MouseEvent) => void;
   onSelect: (block: Block) => void;
   onChange: (block: Block) => void;
-  onActionKeyPressed: (
-    nodeIndex: number,
-    block: Block,
-    previousContent: string,
-    caretOffset: number,
-  ) => void;
   onCreate: (
     parentBlock: Block,
     targetBlock: Block,
@@ -93,7 +80,6 @@ export default function TextBlock({
   onClick,
   onSelect,
   onChange,
-  onActionKeyPressed,
   onCreate,
   onDelete,
   onMarkdown,
@@ -116,52 +102,8 @@ export default function TextBlock({
   }, []);
 
   function onDataChange(event: ChangeEvent<HTMLElement>): void {
-    if (
-      window.navigator.userAgent.toLowerCase().includes("android") ||
-      window.navigator.userAgent.toLowerCase().includes("iphone")
-    ) {
-      const key = event.target.innerText
-        .charAt(event.target.innerText.length - 1)
-        .toLowerCase();
-      if (key === "/") {
-        actionMenuTriggerHandler();
-      }
-    }
-
     block.data = event.target.innerHTML;
     onChange(block);
-  }
-
-  function actionMenuTriggerHandler(): void {
-    const currentBlockNode = getBlockNode(block.id);
-    if (currentBlockNode === null) return;
-
-    const caretOffset = getCaretOffset(currentBlockNode);
-    if (typeof block.data === "string") {
-      const computedCaretOffset =
-        window.navigator.userAgent.toLowerCase().includes("android") ||
-        window.navigator.userAgent.includes("iphone")
-          ? caretOffset -
-            nodeOffset(
-              currentBlockNode,
-              getNodeAt(currentBlockNode, caretOffset),
-            ) -
-            1
-          : caretOffset -
-            nodeOffset(
-              currentBlockNode,
-              getNodeAt(currentBlockNode, caretOffset),
-            );
-      onActionKeyPressed(
-        getNodeIndex(
-          currentBlockNode,
-          getNodeAt(currentBlockNode, caretOffset),
-        ),
-        block,
-        block.data,
-        computedCaretOffset,
-      );
-    }
   }
 
   function keyboardHandler(event: KeyboardEvent): void {
@@ -384,62 +326,6 @@ export default function TextBlock({
         }
         break;
       }
-
-      case "/": {
-        actionMenuTriggerHandler();
-        break;
-      }
-      case "b": {
-        if (event.ctrlKey) {
-          event.preventDefault();
-
-          const style: Style[] = [
-            {
-              name: "font-weight",
-              value: "bold",
-            },
-          ];
-
-          inlineSpecifierManager(activeNode, style);
-
-          block.data = activeNode.innerHTML;
-          onChange(block);
-        }
-        break;
-      }
-      case "i": {
-        if (event.ctrlKey) {
-          event.preventDefault();
-          const style: Style[] = [
-            {
-              name: "font-style",
-              value: "italic",
-            },
-          ];
-
-          inlineSpecifierManager(activeNode, style);
-          block.data = activeNode.innerHTML;
-          onChange(block);
-        }
-        break;
-      }
-      case "u": {
-        if (event.ctrlKey) {
-          event.preventDefault();
-
-          const style: Style[] = [
-            {
-              name: "text-decoration",
-              value: "underline",
-            },
-          ];
-
-          inlineSpecifierManager(activeNode, style);
-          block.data = activeNode.innerHTML;
-          onChange(block);
-        }
-        break;
-      }
       case " ": {
         if (typeof block.data === "string") {
           switch (block.data) {
@@ -509,121 +395,6 @@ export default function TextBlock({
           roleChangeByMarkdown.current = true;
           onMarkdown(block);
         }
-        break;
-      }
-      case "arrowup": {
-        event.preventDefault();
-
-        if (isActionMenuOpen.current) return;
-
-        const previousNode = findPreviousTextNode(activeNode, "top");
-        if (previousNode != null) {
-          const nodeAtCaretOffset = getNodeAt(previousNode, caretOffset);
-          const jumpNode =
-            caretOffset > previousNode.innerText.length
-              ? previousNode.lastChild ?? previousNode
-              : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
-              ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
-              : nodeAtCaretOffset;
-
-          const computedCaretOffset =
-            caretOffset > previousNode.innerText.length
-              ? previousNode.lastChild?.textContent == null
-                ? 0
-                : previousNode.lastChild.textContent.length
-              : caretOffset > (jumpNode.textContent as string).length
-              ? jumpNode.textContent == null
-                ? 0
-                : jumpNode.textContent.length
-              : caretOffset;
-          setCaretOffset(jumpNode, computedCaretOffset);
-        }
-        break;
-      }
-      case "arrowdown": {
-        event.preventDefault();
-
-        if (isActionMenuOpen.current) return;
-
-        const nextNode = findNextTextNode(activeNode, "bottom");
-        if (nextNode != null) {
-          const nodeAtCaretOffset = getNodeAt(nextNode, caretOffset);
-          const jumpNode =
-            caretOffset > nextNode.innerText.length
-              ? nextNode.firstChild ?? nextNode
-              : nodeAtCaretOffset.nodeType === Node.ELEMENT_NODE
-              ? nodeAtCaretOffset.firstChild ?? nodeAtCaretOffset
-              : nodeAtCaretOffset;
-
-          const computedCaretOffset =
-            caretOffset > nextNode.innerText.length
-              ? nextNode.firstChild?.textContent == null
-                ? 0
-                : nextNode.firstChild.textContent.length
-              : caretOffset > (jumpNode.textContent as string).length
-              ? jumpNode.textContent == null
-                ? 0
-                : jumpNode.textContent.length
-              : caretOffset;
-          setCaretOffset(jumpNode, computedCaretOffset);
-        }
-
-        break;
-      }
-      case "arrowleft": {
-        if (caretOffset !== 0 || isActionMenuOpen.current) {
-          return;
-        }
-        event.preventDefault();
-        const previousNode = findPreviousTextNode(activeNode, "left");
-        if (previousNode != null) {
-          const previousBlockChildNodeIndex =
-            previousNode?.lastChild?.textContent === ""
-              ? previousNode.childNodes.length - 2
-              : previousNode.childNodes.length - 1;
-
-          const jumpNode =
-            previousBlockChildNodeIndex === -1
-              ? previousNode
-              : previousNode.childNodes[previousBlockChildNodeIndex]
-                  .nodeType === Node.ELEMENT_NODE
-              ? previousNode.childNodes[previousBlockChildNodeIndex]
-                  .firstChild ?? previousNode
-              : previousNode.childNodes[previousBlockChildNodeIndex];
-
-          const computedCaretOffset =
-            previousBlockChildNodeIndex === -1
-              ? 0
-              : previousNode.childNodes[previousBlockChildNodeIndex] != null
-              ? previousNode.childNodes[previousBlockChildNodeIndex]
-                  .nodeType === Node.ELEMENT_NODE
-                ? (
-                    previousNode.childNodes[previousBlockChildNodeIndex]
-                      .textContent as string
-                  ).length
-                : previousNode.childNodes[previousBlockChildNodeIndex]
-                    .textContent?.length ?? previousNode.innerText.length
-              : previousNode.innerText.length;
-          setCaretOffset(jumpNode, computedCaretOffset);
-        }
-        break;
-      }
-      case "arrowright": {
-        if (
-          caretOffset !== activeNode.innerText.length ||
-          isActionMenuOpen.current
-        ) {
-          return;
-        }
-        event.preventDefault();
-        const nextNode = findNextTextNode(activeNode, "right");
-        if (nextNode != null) {
-          setCaretOffset(
-            nextNode.firstChild != null ? nextNode.firstChild : nextNode,
-            0,
-          );
-        }
-
         break;
       }
     }
