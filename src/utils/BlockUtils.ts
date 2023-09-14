@@ -733,3 +733,66 @@ export function findBlockNodeFromNode(node: HTMLElement): HTMLElement | null {
 export function upsertStyle(arr: Style[], newObj: Style): Style[] {
   return [...arr.filter((obj) => obj.name !== newObj.name), { ...newObj }];
 }
+
+export function findPreviousTextNode(
+  node: HTMLElement | Element,
+  navigate: "top" | "left",
+): HTMLElement | null {
+  const previousNodeId = node.getAttribute(`data-${navigate}-node-id`);
+  if (previousNodeId != null && previousNodeId !== "null") {
+    const targetNode = getBlockNode(previousNodeId);
+    if (targetNode != null) {
+      return targetNode;
+    }
+  } else if (previousNodeId === "null") {
+    const parentNodeId = node.getAttribute("data-parent-block-id");
+    if (parentNodeId != null) {
+      const parentNode = getBlockNode(parentNodeId);
+      if (parentNode?.previousElementSibling != null)
+        return parentNode.previousElementSibling as HTMLElement;
+      return null;
+    } else {
+      return null;
+    }
+  }
+  const textElements = Array.from(
+    document.querySelectorAll(`[contenteditable="true"]`).values(),
+  );
+  const blockDOMIndex = textElements.map((blk) => blk).indexOf(node);
+  if (blockDOMIndex === -1 || blockDOMIndex === 0) return null;
+  else {
+    return textElements[blockDOMIndex - 1] as HTMLElement;
+  }
+}
+
+export function findNextTextNode(
+  node: HTMLElement | Element,
+  navigate: "bottom" | "right",
+): HTMLElement | null {
+  const nextNodeId = node.getAttribute(`data-${navigate}-node-id`);
+  if (nextNodeId != null && nextNodeId !== "null") {
+    const targetNode = getBlockNode(nextNodeId);
+    if (targetNode != null) {
+      return targetNode;
+    }
+  } else if (nextNodeId === "null") {
+    const parentNodeId = node.getAttribute("data-parent-block-id");
+    if (parentNodeId != null) {
+      const parentNode = getBlockNode(parentNodeId);
+      if (parentNode?.nextElementSibling != null)
+        return parentNode.nextElementSibling as HTMLElement;
+      return null;
+    } else {
+      return null;
+    }
+  }
+  const textElements = Array.from(
+    document.querySelectorAll(`[contenteditable="true"]`).values(),
+  );
+  const blockDOMIndex = textElements.map((blk) => blk).indexOf(node);
+  if (blockDOMIndex === -1 || blockDOMIndex === textElements.length - 1)
+    return null;
+  else {
+    return textElements[blockDOMIndex + 1] as HTMLElement;
+  }
+}
