@@ -1,3 +1,29 @@
+## 0.6.0 (September 16, 2023)
+
+### New:
+
+- Add support for Subscript and Superscript in Inline Toolbar.
+- Single list now breaks into two separate list when active block of list is empty and enter key is pressed.
+- Editor now throws an error if no block with the provided role is found.
+- Editor performance has been improved for larger `Blobs`.
+
+### Breaking Changes:
+
+- Disable nested list as it was causing extra computing overhead.
+- Removed onChange. The onChanged is replaced by Editor Event onChanged-blobID.
+- Removed onSave callback from Editor. The onSave has been replaced by the editor event saveEditor-blobID and
+  onSaved-blobID.
+- Removed auto save feature as it was causing unnecessary load for the editor.
+
+### Fixes:
+
+- Fix an issue in which focus on block was not working as expected when a table block is initialized which was causing
+  rendering error.
+- Fix an issue in which Action Menu was not working in mobile devices.
+- Fix an issue in which Block Tools popup was getting dismissed due to arrow navigation code of table block.
+- Fix an issue in which Copy, Paste and other options not working in Dialog Box input fields for Mobile Devices.
+- Fix an issue in which height field of Size Dialog losing focus while typing.
+
 ## 0.5.0 (September 10, 2023)
 
 ### New:
