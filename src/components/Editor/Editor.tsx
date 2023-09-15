@@ -921,21 +921,19 @@ export default function Editor({
   function createHandler(
     parentBlock: Block,
     targetBlock: Block,
-    creationType: "list" | "nonList",
+    holder?: Block[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
   ): void {
-    if (creationType === "list") {
-      traverseAndUpdate(masterBlocks, parentBlock);
-    } else {
-      const blockIndex = masterBlocks
-        .map((blk) => blk.id)
-        .indexOf(parentBlock.id);
-      masterBlocks[blockIndex] = parentBlock;
-      masterBlocks.splice(blockIndex + 1, 0, targetBlock);
-    }
+    traverseAndUpdate(holder ?? masterBlocks, parentBlock);
+    traverseAndUpdateBelow(holder ?? masterBlocks, parentBlock, targetBlock);
     propagateChanges(masterBlocks, {
-      nodeId: targetBlock.id,
-      caretOffset: 0,
-      nodeIndex: 0,
+      nodeId: focusOn !== undefined ? focusOn.nodeId : targetBlock.id,
+      caretOffset: focusOn?.caretOffset ?? 0,
+      nodeIndex: focusOn?.nodeChildIndex ?? 0,
     });
   }
 
@@ -944,6 +942,7 @@ export default function Editor({
     previousBlock: Block,
     nodeId: string,
     setCursorToStart?: boolean,
+    holder?: Block[],
   ): void {
     const previousNode = getBlockNode(nodeId) as HTMLElement;
 
@@ -968,17 +967,9 @@ export default function Editor({
               ?.length ?? previousNode.innerText.length
         : previousNode.innerText.length;
 
-    if (blockRenderTypeFromRole(block.role) === RenderType.LIST) {
-      traverseAndUpdate(masterBlocks, block);
-    } else {
-      if (
-        blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-        blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
-      ) {
-        traverseAndUpdate(masterBlocks, previousBlock);
-      }
-      traverseAndDelete(masterBlocks, block);
-    }
+    traverseAndUpdate(holder ?? masterBlocks, previousBlock);
+    traverseAndDelete(holder ?? masterBlocks, block);
+
     propagateChanges(masterBlocks, {
       nodeId,
       caretOffset: computedCaretOffset,
@@ -1258,11 +1249,12 @@ export default function Editor({
           event.preventDefault();
         }}
       >
-        {masterBlocks.map((block) => {
+        {masterBlocks.map((block, index) => {
           return (
             <Composer
               key={block.id}
               editable={editable}
+              previousParentBlock={index === 0 ? null : masterBlocks[index - 1]}
               block={block}
               onChange={debounce((block, focus) => {
                 changeHandler(block, focus);

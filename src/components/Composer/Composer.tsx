@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { createElement, type JSX, useContext } from "react";
+import { createElement, Fragment, type JSX, useContext } from "react";
 import { type Block } from "../../interfaces";
 import {
   blockRenderTypeFromRole,
@@ -39,18 +39,29 @@ import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 interface ComposerProps {
   editable: boolean;
   parentBlock?: Block;
+  previousParentBlock: Block | null;
   block: Block;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
   onChange: (block: Block, focus?: boolean) => void;
   onCreate: (
     parentBlock: Block,
     targetBlock: Block,
-    creationType: "list" | "nonList",
+    holder?: Block[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
   ) => void;
   onDelete: (
     block: Block,
     previousBlock: Block,
     nodeId: string,
     setCursorToStart?: boolean,
+    holder?: Block[],
   ) => void;
   onPaste: (block: Block, data: string | string[], caretOffset: number) => void;
   onSelect: (block: Block) => void;
@@ -78,6 +89,8 @@ interface ComposerProps {
 export default function Composer({
   editable,
   parentBlock,
+  previousParentBlock,
+  listMetadata,
   block,
   onChange,
   onCreate,
@@ -92,7 +105,8 @@ export default function Composer({
   if (blockRenderTypeFromRole(block.role) === RenderType.TEXT) {
     return (
       <TextBlock
-        parentBlock={parentBlock}
+        listMetadata={listMetadata}
+        previousParentBlock={previousParentBlock}
         block={block}
         editable={editable}
         onChange={onChange}
@@ -149,7 +163,10 @@ export default function Composer({
           block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },
-      block.data.map((childBlock) => {
+      block.data.map((childBlock, index) => {
+        if (childBlock.role.toLowerCase().includes("list")) {
+          return <Fragment key={childBlock.id} />;
+        }
         return (
           <li
             key={childBlock.id}
@@ -163,6 +180,11 @@ export default function Composer({
           >
             <Composer
               parentBlock={block}
+              listMetadata={{
+                parent: block,
+                currentIndex: index,
+              }}
+              previousParentBlock={previousParentBlock}
               editable={editable}
               block={childBlock}
               onChange={onChange}

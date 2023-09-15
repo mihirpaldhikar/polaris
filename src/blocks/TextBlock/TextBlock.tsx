@@ -29,31 +29,30 @@ import {
   useRef,
 } from "react";
 import {
-  blockRenderTypeFromNode,
   blockRenderTypeFromRole,
   conditionalClassName,
   generateUUID,
   getBlockNode,
   getCaretOffset,
   getConfigFromRole,
-  getNodeSiblings,
   getPlaceholderFromRole,
   nodeTypeFromRole,
-  serializeNodeToBlock,
   setNodeStyle,
   splitBlocksAtCaretOffset,
   subscribeToEditorEvent,
-  traverseAndUpdate,
   unsubscribeFromEditorEvent,
 } from "../../utils";
 import { BLOCK_NODE } from "../../constants";
-import { type Block } from "../../interfaces";
+import { type Block, type Table } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
-import RenderType from "../../enums/RenderType";
 
 interface TextBlockProps {
-  parentBlock?: Block;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
+  previousParentBlock: Block | null;
   block: Block;
   editable: boolean;
   onClick: (event: MouseEvent) => void;
@@ -62,20 +61,27 @@ interface TextBlockProps {
   onCreate: (
     parentBlock: Block,
     targetBlock: Block,
-    creationType: "list" | "nonList",
+    holder?: Block[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
   ) => void;
   onDelete: (
     block: Block,
     previousBlock: Block,
     nodeId: string,
     setCursorToStart?: boolean,
+    holder?: Block[],
   ) => void;
   onMarkdown: (block: Block) => void;
 }
 
 export default function TextBlock({
-  parentBlock,
+  listMetadata,
   block,
+  previousParentBlock,
   editable,
   onClick,
   onSelect,
@@ -123,60 +129,47 @@ export default function TextBlock({
           role: "paragraph",
           style: [],
         };
+
+        const splitNode = splitBlocksAtCaretOffset(block, caretOffset);
+        block = splitNode[0];
+        newBlock = splitNode[1];
+
         if (
-          parentBlock !== undefined &&
-          blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-          Array.isArray(parentBlock.data)
+          listMetadata !== undefined &&
+          (block.data as string).length === 0 &&
+          (newBlock.data as string).length === 0
         ) {
-          const currentChildBlockIndex = parentBlock.data
-            .map((blk) => blk.id)
-            .indexOf(block.id);
+          const listData = listMetadata.parent.data as Block[];
+          const remainingList = listData.splice(
+            listMetadata.currentIndex,
+            listData.length - listMetadata.currentIndex,
+          );
+          remainingList.splice(0, 1);
+          listMetadata.parent.data = listData;
+          onCreate(listMetadata.parent, newBlock);
 
-          if (
-            activeNode.innerText.length === 0 &&
-            currentChildBlockIndex === parentBlock.data.length - 1
-          ) {
-            const parentSiblings = getNodeSiblings(parentBlock.id);
+          if (remainingList.length > 0) {
+            const newListBlock: Block = {
+              id: generateUUID(),
+              role: listMetadata.parent.role,
+              style: listMetadata.parent.style,
+              data: remainingList,
+            };
+            onCreate(newBlock, newListBlock, undefined, {
+              nodeId: newBlock.id,
+            });
+          }
 
-            if (
-              parentSiblings.previous?.parentElement?.parentElement != null &&
-              blockRenderTypeFromNode(parentSiblings.previous) ===
-                RenderType.LIST
-            ) {
-              const previousParentBlock = serializeNodeToBlock(
-                parentSiblings.previous.parentElement.parentElement,
-              );
-              parentBlock.data.splice(currentChildBlockIndex, 1);
-              traverseAndUpdate(
-                previousParentBlock.data as Block[],
-                parentBlock,
-              );
-              (previousParentBlock.data as Block[]).push(newBlock);
-              onCreate(previousParentBlock, newBlock, "list");
-            } else {
-              parentBlock.data.pop();
-              onCreate(parentBlock, newBlock, "nonList");
-            }
-          } else if (caretOffset !== activeNode.innerText.length) {
-            const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
-            newBlock = spiltBlockPair[1];
-            parentBlock.data.splice(
-              currentChildBlockIndex,
-              1,
-              ...spiltBlockPair,
-            );
-          } else {
-            parentBlock.data.splice(currentChildBlockIndex + 1, 0, newBlock);
-          }
-          onCreate(parentBlock, newBlock, "list");
-        } else {
-          if (caretOffset !== activeNode.innerText.length) {
-            const spiltBlockPair = splitBlocksAtCaretOffset(block, caretOffset);
-            block = spiltBlockPair[0];
-            newBlock = spiltBlockPair[1];
-          }
-          onCreate(block, newBlock, "nonList");
+          return;
         }
+
+        onCreate(
+          block,
+          newBlock,
+          listMetadata !== undefined
+            ? (listMetadata.parent.data as Block[])
+            : undefined,
+        );
         break;
       }
 
@@ -187,143 +180,116 @@ export default function TextBlock({
           roleChangeByMarkdown.current = false;
           break;
         }
+        if (caretOffset !== 0) return;
 
-        if (
-          parentBlock !== undefined &&
-          blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-          Array.isArray(parentBlock.data) &&
-          caretOffset === 0
-        ) {
-          event.preventDefault();
+        event.preventDefault();
 
-          const currentChildBlockIndex = parentBlock.data
-            .map((blk) => blk.id)
-            .indexOf(block.id);
-
-          if (
-            blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-            currentChildBlockIndex !== 0
-          ) {
-            const previousBlock = parentBlock.data[currentChildBlockIndex - 1];
-
-            if (
-              blockRenderTypeFromRole(previousBlock.role) === RenderType.TEXT
-            ) {
-              previousBlock.data = (previousBlock.data as string).concat(
-                block.data as string,
+        if (listMetadata !== undefined) {
+          const listData = listMetadata.parent.data as Block[];
+          if (listMetadata.currentIndex === 0) {
+            if (previousParentBlock == null) return;
+            const separateBlock = listData.splice(0, 1)[0];
+            onCreate(previousParentBlock, separateBlock, undefined, {
+              nodeId: separateBlock.id,
+              caretOffset: 0,
+            });
+            if (listData.length === 0) {
+              onDelete(
+                listMetadata.parent,
+                separateBlock,
+                separateBlock.id,
+                true,
               );
-
-              parentBlock.data.splice(
-                currentChildBlockIndex - 1,
-                2,
-                previousBlock,
-              );
-
-              onDelete(parentBlock, previousBlock, previousBlock.id);
             }
-          } else {
-            const parentSiblings = getNodeSiblings(parentBlock.id);
-
-            if (
-              parentSiblings.previous?.parentElement?.parentElement != null &&
-              blockRenderTypeFromNode(parentSiblings.previous) ===
-                RenderType.LIST
-            ) {
-              const previousParentBlock = serializeNodeToBlock(
-                parentSiblings.previous.parentElement.parentElement,
-              );
-              if (Array.isArray(previousParentBlock.data)) {
-                const parentBlockIndex = previousParentBlock.data
-                  .map((blk) => blk.id)
-                  .indexOf(parentBlock.id);
-
-                previousParentBlock.data.splice(
-                  parentBlockIndex,
-                  1,
-                  ...parentBlock.data,
-                );
-                onDelete(
-                  previousParentBlock,
-                  previousParentBlock.data[parentBlockIndex],
-                  previousParentBlock.data[parentBlockIndex].id,
-                  true,
-                );
-              }
-            } else {
-              if (parentSiblings.previous !== null) {
-                const previousParentBlock = serializeNodeToBlock(
-                  parentSiblings.previous,
-                );
-                const parentFirstChild = parentBlock.data[0];
-                onCreate(previousParentBlock, parentFirstChild, "nonList");
-                if (parentBlock.data.length === 1) {
-                  parentBlock.role = "paragraph";
-                  parentBlock.data = "";
-                  onDelete(
-                    parentBlock,
-                    parentFirstChild,
-                    parentFirstChild.id,
-                    true,
-                  );
-                } else {
-                  parentBlock.data.splice(0, 1);
-                  onDelete(
-                    parentBlock,
-                    parentFirstChild,
-                    parentFirstChild.id,
-                    true,
-                  );
-                }
-              }
-            }
-          }
-        } else if (caretOffset === 0) {
-          event.preventDefault();
-          const currentNodeSiblings = getNodeSiblings(block.id);
-          if (
-            currentNodeSiblings.previous !== null &&
-            blockRenderTypeFromNode(currentNodeSiblings.previous) ===
-              RenderType.TEXT
-          ) {
-            const previousBlock = serializeNodeToBlock(
-              currentNodeSiblings.previous,
-            );
-
-            previousBlock.data = (previousBlock.data as string).concat(
-              block.data as string,
-            );
-
-            onDelete(block, previousBlock, previousBlock.id);
           } else if (
-            currentNodeSiblings.previous !== null &&
-            blockRenderTypeFromNode(currentNodeSiblings.previous) ===
-              RenderType.LIST
+            typeof listData[listMetadata.currentIndex - 1].data === "string"
           ) {
-            const previousBlock = serializeNodeToBlock(
-              currentNodeSiblings.previous.parentElement
-                ?.parentElement as HTMLElement,
+            listData[listMetadata.currentIndex - 1].data = (
+              listData[listMetadata.currentIndex - 1].data as string
+            ).concat(block.data as string);
+            listMetadata.parent.data = listData;
+            onDelete(
+              block,
+              listData[listMetadata.currentIndex - 1],
+              listData[listMetadata.currentIndex - 1].id,
+              false,
+              listMetadata.parent.data,
             );
-
-            const previousBlockLastChild = (previousBlock.data as Block[])[
-              (previousBlock.data as Block[]).length - 1
-            ];
-
-            if (
-              blockRenderTypeFromRole(previousBlockLastChild.role) ===
-              RenderType.TEXT
-            ) {
-              previousBlockLastChild.data = (
-                previousBlockLastChild.data as string
-              ).concat(block.data as string);
-
-              (previousBlock.data as Block[])[
-                (previousBlock.data as Block[]).length - 1
-              ] = previousBlockLastChild;
-
-              onDelete(block, previousBlock, previousBlockLastChild.id);
-            }
+          } else if (
+            typeof listData[listMetadata.currentIndex - 1].data === "object" &&
+            listData[listMetadata.currentIndex - 1].role
+              .toLowerCase()
+              .includes("table")
+          ) {
+            const tableData = listData[listMetadata.currentIndex - 1]
+              .data as Table;
+            tableData.rows[tableData.rows.length - 1].columns[
+              tableData.rows[tableData.rows.length - 1].columns.length - 1
+            ].data = (
+              tableData.rows[tableData.rows.length - 1].columns[
+                tableData.rows[tableData.rows.length - 1].columns.length - 1
+              ].data as string
+            ).concat(block.data as string);
+            listData[listMetadata.currentIndex - 1].data = tableData;
+            onDelete(
+              block,
+              tableData.rows[tableData.rows.length - 1].columns[
+                tableData.rows[tableData.rows.length - 1].columns.length - 1
+              ],
+              tableData.rows[tableData.rows.length - 1].columns[
+                tableData.rows[tableData.rows.length - 1].columns.length - 1
+              ].id,
+            );
           }
+          return;
         }
+
+        if (previousParentBlock == null) return;
+
+        if (typeof previousParentBlock.data === "string") {
+          previousParentBlock.data = previousParentBlock.data.concat(
+            block.data as string,
+          );
+          onDelete(block, previousParentBlock, previousParentBlock.id);
+        } else if (
+          Array.isArray(previousParentBlock.data) &&
+          previousParentBlock.role.toLowerCase().includes("list")
+        ) {
+          const listData = previousParentBlock.data;
+          if (typeof listData[listData.length - 1].data === "string") {
+            listData[listData.length - 1].data = (
+              listData[listData.length - 1].data as string
+            ).concat(block.data as string);
+            onDelete(
+              block,
+              listData[listData.length - 1],
+              listData[listData.length - 1].id,
+            );
+          }
+        } else if (
+          typeof previousParentBlock.data === "object" &&
+          previousParentBlock.role.toLowerCase().includes("table")
+        ) {
+          const tableData = previousParentBlock.data as Table;
+          tableData.rows[tableData.rows.length - 1].columns[
+            tableData.rows[tableData.rows.length - 1].columns.length - 1
+          ].data = (
+            tableData.rows[tableData.rows.length - 1].columns[
+              tableData.rows[tableData.rows.length - 1].columns.length - 1
+            ].data as string
+          ).concat(block.data as string);
+          previousParentBlock.data = tableData;
+          onDelete(
+            block,
+            tableData.rows[tableData.rows.length - 1].columns[
+              tableData.rows[tableData.rows.length - 1].columns.length - 1
+            ],
+            tableData.rows[tableData.rows.length - 1].columns[
+              tableData.rows[tableData.rows.length - 1].columns.length - 1
+            ].id,
+          );
+        }
+
         break;
       }
       case " ": {
