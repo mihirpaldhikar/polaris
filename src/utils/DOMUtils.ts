@@ -205,27 +205,6 @@ export function splitElement(
 
 /**
  *
- * @function splitElement
- *
- * @param parentElement
- * @param targetElement
- *
- * @description Splits the element from the offset.
- *
- * @author Mihir Paldhikar
- */
-
-export function joinElements(
-  parentElement: HTMLElement,
-  targetElement: HTMLElement,
-): string {
-  const tempElement = parentElement.cloneNode(true) as HTMLElement;
-  tempElement.innerHTML = tempElement.innerHTML.concat(targetElement.innerHTML);
-  return tempElement.outerHTML;
-}
-
-/**
- *
  * @function generateHTMLFragment
  *
  * @param startNode
@@ -690,28 +669,6 @@ export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
       inlineSpecifierNodes[i].remove();
     }
   }
-}
-
-export function areInlineSpecifierEqual(
-  first: HTMLElement,
-  second: HTMLElement,
-): boolean {
-  return (
-    first.style.cssText === second.style.cssText &&
-    inlineSpecifierLink(first) === inlineSpecifierLink(second)
-  );
-}
-
-export function cssTextToStyle(cssText: string): Style[] {
-  const cssArray = cssText.split(";");
-  cssArray.pop();
-  return cssArray.map((cssStyle) => {
-    return {
-      name: cssStyle.split(":")[0].trim(),
-      value: cssStyle.split(":")[1].trim(),
-      enabled: true,
-    } satisfies Style;
-  });
 }
 
 export function inlineSpecifierManager(

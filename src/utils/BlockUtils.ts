@@ -25,7 +25,6 @@ import {
   type Attachment,
   type Block,
   type PolarisConfig,
-  type Siblings,
   type Style,
   type Table,
 } from "../interfaces";
@@ -145,31 +144,6 @@ export function getBlockNode(blockId: string): HTMLElement | null {
 }
 
 /**
- * @function getNodeSiblings
- *
- * @param blockId
- *
- * @description Finds the Siblings of the current Node from the provided BlockId. If no siblings exist either above or below then returns null for that sibling.
- *
- * @author Mihir Paldhikar
- */
-
-export function getNodeSiblings(blockId: string): Siblings {
-  const blockDOM = Array.from(
-    document.querySelectorAll(`[${NODE_TYPE}="${BLOCK_NODE}"]`).values(),
-  );
-  const blockDOMIndex = blockDOM.map((blk) => blk.id).indexOf(blockId);
-  return {
-    previous:
-      blockDOMIndex !== 0 ? getBlockNode(blockDOM[blockDOMIndex - 1].id) : null,
-    next:
-      blockDOMIndex !== blockDOM.length - 1
-        ? getBlockNode(blockDOM[blockDOMIndex + 1].id)
-        : null,
-  };
-}
-
-/**
  * @function normalizeContent
  *
  * @param string
@@ -234,28 +208,6 @@ export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
     default:
       return RenderType.UNKNOWN;
   }
-}
-
-export function nodeHierarchy(node: HTMLElement | null): HTMLElement[] {
-  if (node === null) return [];
-  const hierarchy: HTMLElement[] = [];
-  hierarchy.push(getBlockNode(node.id) as HTMLElement);
-  while (
-    hierarchy[hierarchy.length - 1].tagName.toLowerCase() !== "div" &&
-    !hierarchy[hierarchy.length - 1].id.includes("editor")
-  ) {
-    const p = getBlockNode(hierarchy[hierarchy.length - 1].id);
-    if (p?.parentElement != null) {
-      if (p.parentElement?.tagName.toLowerCase() === "li") {
-        hierarchy.push(p.parentElement.parentElement as HTMLElement);
-      } else {
-        hierarchy.push(p.parentElement);
-      }
-    } else {
-      break;
-    }
-  }
-  return hierarchy.reverse();
 }
 
 export function traverseAndUpdate(
@@ -334,183 +286,6 @@ export function traverseAndFindBlockPosition(
     }
   }
   return -1;
-}
-
-export function getParentBlock(
-  masterBlocks: Block[],
-  blockId: string,
-): Block[] {
-  const find = (block: Block): any =>
-    block.id.includes(blockId) ||
-    (Array.isArray(block.data) && block.data.find(find));
-  return masterBlocks.filter(find);
-}
-
-export function getBlockRoleFromNode(node: HTMLElement): Role {
-  switch (node.tagName.toLowerCase()) {
-    case "h1":
-      return "title";
-    case "h2":
-      return "subTitle";
-    case "h3":
-      return "heading";
-    case "h4":
-      return "subHeading";
-    case "p":
-      return "paragraph";
-    case "img":
-      return "image";
-    case "blockquote":
-      return "quote";
-    case "ol":
-      return "numberedList";
-    case "ul":
-      return "bulletList";
-    case "iframe": {
-      if (node.getAttribute("data-block-render-type") === "youtubeVideo")
-        return "youtubeVideoEmbed";
-      return "githubGistEmbed";
-    }
-    default:
-      if (node.parentElement?.parentElement?.tagName.toLowerCase() === "ul")
-        return "bulletList";
-      if (node.parentElement?.parentElement?.tagName.toLowerCase() === "ol")
-        return "numberedList";
-      return "paragraph";
-  }
-}
-
-export function serializeNodeToBlock(node: HTMLElement): Block {
-  const tempNode = findBlockNodeFromNode(node);
-  if (tempNode != null) {
-    node = tempNode;
-  }
-  const style: Style[] = [];
-  const cssTextArray: string[] = node.style.cssText.split(";");
-
-  for (let i = 0; i < cssTextArray.length; i++) {
-    if (cssTextArray[i].length !== 0) {
-      style.push({
-        name: camelCase(cssTextArray[i].split(":")[0].trim()),
-        value: camelCase(cssTextArray[i].split(":")[1].trim()),
-      });
-    }
-  }
-
-  if (
-    node.tagName.toLowerCase() === "ul" ||
-    node.tagName.toLowerCase() === "ol"
-  ) {
-    const blocks: Block[] = [];
-    const childNodes = node.children;
-    for (let i = 0; i < childNodes.length; i++) {
-      const tempNode = childNodes[i].firstElementChild;
-      if (tempNode !== null) {
-        blocks.push(serializeNodeToBlock(tempNode as HTMLElement));
-      }
-    }
-    return {
-      id: node.id,
-      data: blocks,
-      role: getBlockRoleFromNode(node),
-      style,
-    };
-  }
-
-  if (node.tagName.toLowerCase() === "img") {
-    const imageNode = node as HTMLImageElement;
-    return {
-      id: node.id,
-      data: {
-        url: imageNode.src,
-        description: imageNode.alt,
-        width: imageNode.width,
-        height: imageNode.height,
-      },
-      role: getBlockRoleFromNode(node),
-      style,
-    };
-  }
-
-  if (node.tagName.toLowerCase() === "iframe") {
-    const embedNode = node as HTMLIFrameElement;
-    return {
-      id: node.id,
-      data: {
-        url: node.getAttribute("data-block-url") as string,
-        description: "",
-        width: parseInt(embedNode.width),
-        height: parseInt(embedNode.height),
-      },
-      role: getBlockRoleFromNode(node),
-      style,
-    };
-  }
-
-  if (node.tagName.toLowerCase() === "table") {
-    const table: Table = {
-      rows: [],
-    };
-    const tableBody = node.firstElementChild as HTMLElement;
-    for (let i = 0; i < tableBody.childElementCount; i++) {
-      const row = tableBody.children[i] as HTMLElement;
-      const columns: Block[] = [];
-      for (let j = 0; j < row.childElementCount; j++) {
-        const column = row.children[j] as HTMLElement;
-        const columnStyle: Style[] = [];
-        const cssTextArray: string[] = column.style.cssText.split(";");
-
-        for (let i = 0; i < cssTextArray.length; i++) {
-          if (cssTextArray[i].length !== 0) {
-            columnStyle.push({
-              name: camelCase(cssTextArray[i].split(":")[0].trim()),
-              value: camelCase(cssTextArray[i].split(":")[1].trim()),
-            });
-          }
-        }
-        columns.push({
-          id: column.id,
-          role: "paragraph",
-          data: column.innerHTML,
-          style: columnStyle,
-        });
-      }
-      table.rows.push({
-        id: row.id,
-        columns,
-      });
-    }
-    return {
-      id: node.id,
-      role: "table",
-      data: table,
-      style,
-    };
-  }
-
-  if (
-    node.tagName.toLowerCase() === "div" &&
-    node.getAttribute("data-block-render-type") === "attachment-placeholder"
-  ) {
-    return {
-      id: node.id,
-      data: {
-        url: "",
-        description: "",
-        width: 0,
-        height: 0,
-      },
-      role: "image",
-      style,
-    };
-  }
-
-  return {
-    id: node.id,
-    data: node.innerHTML,
-    role: getBlockRoleFromNode(node),
-    style,
-  };
 }
 
 export function getEditorRoot(): HTMLElement {

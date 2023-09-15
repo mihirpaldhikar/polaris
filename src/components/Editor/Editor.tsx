@@ -59,7 +59,6 @@ import {
   normalizeContent,
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
-  serializeNodeToBlock,
   setCaretOffset,
   subscribeToEditorEvent,
   traverseAndDelete,
@@ -300,7 +299,11 @@ export default function Editor({
                   ) {
                     const parentNode = currentNode?.parentElement
                       ?.parentElement as HTMLElement;
-                    const parentBlock = serializeNodeToBlock(parentNode);
+                    const parentBlock = traverseAndFind(
+                      masterBlocks,
+                      parentNode.id,
+                    ) as Block;
+
                     if (previousContent === "") {
                       block.data = imageBlock.data;
                       block.role = imageBlock.role;
@@ -502,7 +505,11 @@ export default function Editor({
                   ) {
                     const parentNode = currentNode?.parentElement
                       ?.parentElement as HTMLElement;
-                    const parentBlock = serializeNodeToBlock(parentNode);
+                    const parentBlock = traverseAndFind(
+                      masterBlocks,
+                      parentNode.id,
+                    ) as Block;
+
                     if (previousContent === "") {
                       block.data = tableBlock.data;
                       block.role = tableBlock.role;
@@ -1221,9 +1228,10 @@ export default function Editor({
       if (blockIndex === -1) {
         const blockNode = getBlockNode(block.id) as HTMLElement;
         if (blockRenderTypeFromNode(blockNode) === RenderType.LIST) {
-          const parentBlock = serializeNodeToBlock(
-            blockNode.parentElement?.parentElement as HTMLElement,
-          );
+          const parentBlock = traverseAndFind(
+            masterBlocks,
+            (blockNode.parentElement?.parentElement as HTMLElement).id,
+          ) as Block;
           traverseAndUpdate(parentBlock.data as Block[], block);
           traverseAndUpdate(masterBlocks, parentBlock);
         } else {
