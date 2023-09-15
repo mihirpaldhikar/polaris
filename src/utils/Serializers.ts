@@ -21,7 +21,7 @@
  */
 
 import { type Blob } from "../interfaces";
-import { serializeBlockToNode } from "./BlockUtils";
+import { serializeBlockToNode } from "./DOMUtils";
 
 export function serializeBlobToHTML(blob: Blob): string {
   if (
