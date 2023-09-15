@@ -46,7 +46,7 @@ import {
   elementContainsStyle,
   findNextTextNode,
   findPreviousTextNode,
-  generateBlockId,
+  generateUUID,
   getBlockNode,
   getCaretCoordinates,
   getCaretOffset,
@@ -269,7 +269,7 @@ export default function Editor({
                   blockRenderTypeFromRole(newRole) === RenderType.LIST
                 ) {
                   block.role = newRole;
-                  focusNode = generateBlockId();
+                  focusNode = generateUUID();
                   block.data = [
                     {
                       id: focusNode,
@@ -283,7 +283,7 @@ export default function Editor({
                   blockRenderTypeFromRole(newRole) === RenderType.ATTACHMENT
                 ) {
                   let imageBlock: Block = {
-                    id: generateBlockId(),
+                    id: generateUUID(),
                     data: {
                       url: "",
                       description: "",
@@ -325,7 +325,7 @@ export default function Editor({
                       (parentBlock.data as Block[]).length - 1
                     ) {
                       const emptyBlock: Block = {
-                        id: generateBlockId(),
+                        id: generateUUID(),
                         data: "",
                         role: "paragraph",
                         style: [],
@@ -353,7 +353,7 @@ export default function Editor({
                     );
                     if (newBlockIndex === masterBlocks.length - 1) {
                       const emptyBlock: Block = {
-                        id: generateBlockId(),
+                        id: generateUUID(),
                         data: "",
                         role: "paragraph",
                         style: [],
@@ -369,34 +369,34 @@ export default function Editor({
                   blockRenderTypeFromRole(newRole) === RenderType.TABLE
                 ) {
                   let tableBlock: Block = {
-                    id: generateBlockId(),
+                    id: generateUUID(),
                     role: newRole,
                     style: [],
                     data: {
                       rows: [
                         {
-                          id: generateBlockId(),
+                          id: generateUUID(),
                           columns: [
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
@@ -404,28 +404,28 @@ export default function Editor({
                           ],
                         },
                         {
-                          id: generateBlockId(),
+                          id: generateUUID(),
                           columns: [
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
@@ -433,28 +433,28 @@ export default function Editor({
                           ],
                         },
                         {
-                          id: generateBlockId(),
+                          id: generateUUID(),
                           columns: [
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
@@ -462,28 +462,28 @@ export default function Editor({
                           ],
                         },
                         {
-                          id: generateBlockId(),
+                          id: generateUUID(),
                           columns: [
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
                             },
                             {
-                              id: generateBlockId(),
+                              id: generateUUID(),
                               role: "paragraph",
                               data: "",
                               style: [],
@@ -527,7 +527,7 @@ export default function Editor({
                       (parentBlock.data as Block[]).length - 1
                     ) {
                       const emptyBlock: Block = {
-                        id: generateBlockId(),
+                        id: generateUUID(),
                         data: "",
                         role: "paragraph",
                         style: [],
@@ -555,7 +555,7 @@ export default function Editor({
                     );
                     if (newBlockIndex === masterBlocks.length - 1) {
                       const emptyBlock: Block = {
-                        id: generateBlockId(),
+                        id: generateUUID(),
                         data: "",
                         role: "paragraph",
                         style: [],
@@ -810,10 +810,7 @@ export default function Editor({
           event.preventDefault();
           const nextNode = findNextTextNode(activeNode, "right");
           if (nextNode != null) {
-            setCaretOffset(
-              nextNode.firstChild != null ? nextNode.firstChild : nextNode,
-              0,
-            );
+            setCaretOffset(nextNode.firstChild ?? nextNode, 0);
           }
           break;
         }
@@ -1006,7 +1003,7 @@ export default function Editor({
     ) {
       const pasteBlocks: Block[] = data.map((copiedText, index) => {
         return {
-          id: generateBlockId(),
+          id: generateUUID(),
           role: block.role,
           style: block.style,
           data:

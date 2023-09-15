@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-import { generateRandomString } from "./SharedUtils";
 import { type Block, type Coordinates, type Style } from "../interfaces";
 import {
   INLINE_SPECIFIER_NODE,
@@ -28,21 +27,8 @@ import {
   NODE_TYPE,
   REMOVE_LINK,
 } from "../constants";
-import { generateBlockId, getBlockNode } from "./BlockUtils";
-
-/**
- * @function generateRefreshKey
- *
- * @returns string
- *
- * @description Generates a unique key which is used to refresh the DOM.
- *
- * @author Mihir Paldhikar
- */
-
-export function generateRefreshKey(): string {
-  return generateRandomString(20);
-}
+import { getBlockNode } from "./BlockUtils";
+import { generateUUID } from "./SharedUtils";
 
 /**
  *
@@ -407,8 +393,7 @@ export function generateInlineSpecifiers(
   link?: string,
 ): void {
   if (
-    selection === null ||
-    selection.focusNode == null ||
+    selection?.focusNode == null ||
     selection.anchorNode == null ||
     selection.toString() === ""
   ) {
@@ -908,7 +893,7 @@ export function splitBlocksAtCaretOffset(
   );
 
   const newBlock: Block = {
-    id: generateBlockId(),
+    id: generateUUID(),
     role: "paragraph",
     data: "",
     style: [],
@@ -959,7 +944,7 @@ export function splitBlocksAtCaretOffset(
         );
     }
   }
-  block.id = generateBlockId();
+  block.id = generateUUID();
   block.data = currentBlockContent;
   newBlock.data = newBlockContent;
   newBlock.role = block.role;

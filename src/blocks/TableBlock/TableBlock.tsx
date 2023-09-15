@@ -34,7 +34,7 @@ import { type Block, type Coordinates, type Table } from "../../interfaces";
 import {
   blockRenderTypeFromRole,
   conditionalClassName,
-  generateBlockId,
+  generateUUID,
   getBlockNode,
   getEditorRoot,
   getNodeSiblings,
@@ -207,14 +207,14 @@ export default function TableBlock({
             const columns: Block[] = [];
             for (let i = 0; i < totalColumns; i++) {
               columns.push({
-                id: generateBlockId(),
+                id: generateUUID(),
                 role: "paragraph",
                 data: "",
                 style: [],
               });
             }
             const newRow = {
-              id: generateBlockId(),
+              id: generateUUID(),
               columns,
             };
             tableData.rows.splice(rowIndex + 1, 0, newRow);
@@ -232,7 +232,7 @@ export default function TableBlock({
               for (let j = 0; j < tableData.rows[i].columns.length; j++) {
                 if (j === columnIndex) {
                   tableData.rows[i].columns.splice(columnIndex + 1, 0, {
-                    id: generateBlockId(),
+                    id: generateUUID(),
                     role: "paragraph",
                     data: "",
                     style: [],

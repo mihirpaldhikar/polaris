@@ -21,7 +21,7 @@
  */
 
 import { type Menu } from "../../interfaces";
-import { generateMenuId } from "../../utils";
+import { generateUUID } from "../../utils";
 import {
   AlignCenterIcon,
   AlignEndIcon,
@@ -42,7 +42,7 @@ import {
 
 const MasterBlockTools: readonly Menu[] = [
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Title",
     description: `Big section Heading`,
     icon: <TitleIcon size={32} />,
@@ -53,7 +53,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Sub Title",
     description: `Big section Subheading`,
     icon: <SubTitleIcon size={32} />,
@@ -64,7 +64,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Heading",
     description: `Small Section heading`,
     icon: <HeadingIcon size={32} />,
@@ -75,7 +75,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Subheading",
     description: `Small Section Subheading`,
     icon: <SubHeadingIcon size={32} />,
@@ -86,7 +86,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Paragraph",
     description: `Just start typing`,
     icon: <ParagraphIcon size={32} />,
@@ -97,7 +97,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Quote",
     description: `Capture a quote`,
     icon: <QuoteIcon size={32} />,
@@ -108,7 +108,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Table",
     description: `Add tabular content`,
     icon: <TableIcon size={32} />,
@@ -119,7 +119,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Youtube Video",
     description: `Add YouTube video.`,
     icon: <YouTubeIcon size={30} />,
@@ -130,7 +130,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "GitHub",
     description: `Add GitHub Gist`,
     icon: <GitHubIcon size={30} />,
@@ -141,7 +141,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Bullets List",
     description: `Create simple list`,
     icon: <BulletListIcon size={35} />,
@@ -152,7 +152,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Numbered List",
     description: `Create list with numbering`,
     icon: <NumberedListIcon size={35} />,
@@ -163,7 +163,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Image",
     description: `Add an image`,
     icon: <ImageIcon size={32} />,
@@ -174,7 +174,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Align Start",
     description: `Align text to start`,
     icon: <AlignStartIcon size={32} />,
@@ -198,7 +198,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Align Center",
     description: `Align text at the center`,
     icon: <AlignCenterIcon size={32} />,
@@ -222,7 +222,7 @@ const MasterBlockTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Align End",
     description: `Align text at the end`,
     icon: <AlignEndIcon size={32} />,

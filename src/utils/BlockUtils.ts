@@ -29,11 +29,7 @@ import {
   type Style,
   type Table,
 } from "../interfaces";
-import {
-  generateGitHubGistURL,
-  generateRandomString,
-  getYouTubeVideoID,
-} from "./SharedUtils";
+import { generateGitHubGistURL, getYouTubeVideoID } from "./SharedUtils";
 import { BLOCK_NODE, LINK_ATTRIBUTE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase, kebabCase } from "lodash";
@@ -130,18 +126,6 @@ export function setNodeStyle(style: Style[]): Record<string, string> {
     }),
     {},
   );
-}
-
-/**
- * @function generateBlockId
- *
- * @description Generates a unique id for the block.
- *
- * @author Mihir Paldhikar
- */
-
-export function generateBlockId(): string {
-  return generateRandomString(30);
 }
 
 /**

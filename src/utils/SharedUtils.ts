@@ -22,10 +22,10 @@
 
 import { isYouTubeURL } from "./Validators";
 import { YoutubeURLRegex } from "../constants";
+import { v4 as uuid } from "uuid";
 
 /**
- * @function generateRandomString
- * @param length
+ * @function generateUUID
  *
  * @description Generates a random string of provided length size.
  *
@@ -34,23 +34,8 @@ import { YoutubeURLRegex } from "../constants";
  * @author Mihir Paldhikar
  */
 
-export function generateRandomString(length: number): string {
-  let randomString = "";
-  const characters: string =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    randomString += characters.charAt(
-      Math.floor(Math.random() * charactersLength),
-    );
-    counter += 1;
-  }
-  return randomString;
-}
-
-export function generateMenuId(): string {
-  return generateRandomString(10);
+export function generateUUID(): string {
+  return uuid();
 }
 
 export function isAllowedActionMenuKey(key: string): boolean {

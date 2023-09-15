@@ -23,8 +23,7 @@
 import "./styles/global.css";
 
 export type { Block, PolarisConfig } from "./interfaces";
-export { generateBlockId } from "./utils";
-export { generateMenuId } from "./utils";
+export { generateUUID } from "./utils";
 export { serializeBlobToHTML } from "./utils";
 export {
   dispatchEditorEvent,

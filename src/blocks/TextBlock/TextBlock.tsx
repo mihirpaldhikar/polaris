@@ -32,7 +32,7 @@ import {
   blockRenderTypeFromNode,
   blockRenderTypeFromRole,
   conditionalClassName,
-  generateBlockId,
+  generateUUID,
   getBlockNode,
   getCaretOffset,
   getConfigFromRole,
@@ -118,7 +118,7 @@ export default function TextBlock({
         }
 
         let newBlock: Block = {
-          id: generateBlockId(),
+          id: generateUUID(),
           data: "",
           role: "paragraph",
           style: [],
@@ -366,7 +366,7 @@ export default function TextBlock({
               block.role = "bulletList";
               block.data = [
                 {
-                  id: generateBlockId(),
+                  id: generateUUID(),
                   data: "",
                   role: "paragraph",
                   style: [],
@@ -380,7 +380,7 @@ export default function TextBlock({
                 block.role = "numberedList";
                 block.data = [
                   {
-                    id: generateBlockId(),
+                    id: generateUUID(),
                     data: "",
                     role: "paragraph",
                     style: [],

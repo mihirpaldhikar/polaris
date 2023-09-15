@@ -21,7 +21,7 @@
  */
 
 import { type Menu } from "../../interfaces";
-import { generateMenuId } from "../../utils";
+import { generateUUID } from "../../utils";
 import {
   BoldIcon,
   CodeIcon,
@@ -38,7 +38,7 @@ import { REMOVE_COLOR, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
 const MasterInlineTools: readonly Menu[] = [
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Bold",
     icon: <BoldIcon />,
     execute: {
@@ -52,7 +52,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Italic",
     icon: <ItalicIcon />,
     execute: {
@@ -66,7 +66,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Underline",
     icon: <UnderlineIcon />,
     execute: {
@@ -80,7 +80,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Link",
     separator: true,
     icon: <LinkIcon />,
@@ -98,7 +98,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Text Size",
     separator: true,
     icon: <TextSizeIcon />,
@@ -119,7 +119,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Text Color",
     icon: <TextColorIcon />,
     execute: {
@@ -138,7 +138,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Text Background Color",
     icon: <TextBackgroundColorIcon />,
     execute: {
@@ -157,7 +157,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Code",
     icon: <CodeIcon />,
     execute: {
@@ -183,7 +183,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Superscript",
     icon: <SuperscriptIcon />,
     execute: {
@@ -201,7 +201,7 @@ const MasterInlineTools: readonly Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Subscript",
     icon: <SubscriptIcon />,
     execute: {

@@ -26,7 +26,7 @@ import {
   type Menu,
   type Style,
 } from "../../interfaces";
-import { generateMenuId, getBlockNode } from "../../utils";
+import { generateUUID, getBlockNode } from "../../utils";
 import {
   AlignCenterIcon,
   AlignEndIcon,
@@ -40,7 +40,7 @@ import { SizeDialog } from "../../components/SizeDialog";
 
 export const AttachmentTools: Menu[] = [
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Align Left",
     icon: <AlignStartIcon size={30} />,
     allowedRoles: ["image", "youtubeVideoEmbed"],
@@ -62,7 +62,7 @@ export const AttachmentTools: Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Align Center",
     icon: <AlignCenterIcon size={30} />,
     allowedRoles: ["image", "youtubeVideoEmbed"],
@@ -84,7 +84,7 @@ export const AttachmentTools: Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Align Right",
     icon: <AlignEndIcon size={30} />,
     allowedRoles: ["image", "youtubeVideoEmbed"],
@@ -106,7 +106,7 @@ export const AttachmentTools: Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Resize",
     icon: <ResizeIcon size={30} />,
     allowedRoles: ["image", "youtubeVideoEmbed"],
@@ -142,7 +142,7 @@ export const AttachmentTools: Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Change",
     icon: <ChangeIcon size={30} />,
     allowedRoles: ["image", "youtubeVideoEmbed", "githubGistEmbed"],
@@ -155,7 +155,7 @@ export const AttachmentTools: Menu[] = [
     },
   },
   {
-    id: generateMenuId(),
+    id: generateUUID(),
     name: "Remove",
     icon: <DeleteIcon size={30} />,
     allowedRoles: ["image", "youtubeVideoEmbed", "githubGistEmbed"],
