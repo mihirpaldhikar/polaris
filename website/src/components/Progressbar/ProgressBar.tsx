@@ -20,10 +20,26 @@
  * SOFTWARE.
  */
 
-export { Navbar } from "./Navbar";
-export { MenuItem } from "./MenuItem";
-export { Footer } from "./Footer";
-export { ZigZag } from "./ZigZag";
-export { Glow } from "./Glow";
-export { FeatureCard } from "./FeatureCard";
-export { ProgressBar } from "./Progressbar";
+import { Fragment, type JSX } from "react";
+
+interface ProgressBarProps {
+  type?: "linear" | "circular";
+}
+
+export default function ProgressBar({
+  type = "circular",
+}: ProgressBarProps): JSX.Element {
+  return (
+    <Fragment>
+      {type === "linear" ? (
+        <div className={`w-full`}>
+          <div className="linear-progress-bar">
+            <div className="linear-progress-bar-value"></div>
+          </div>
+        </div>
+      ) : (
+        <progress className="circular-progress-bar" />
+      )}
+    </Fragment>
+  );
+}

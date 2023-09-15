@@ -21,77 +21,80 @@
  */
 
 "use client";
-import { type JSX, useState } from "react";
+import { type JSX, useEffect, useState } from "react";
 import {
   type Blob,
   DEFAULT_POLARIS_CONFIG,
   Editor,
+  generateUUID,
   serializeFileToBase64,
 } from "@mihirpaldhikar/polaris";
 import Link from "next/link";
-import { FeatureCard, Glow, ZigZag } from "@components/index";
+import { FeatureCard, Glow, ProgressBar, ZigZag } from "@components/index";
 import { FaMarkdown } from "react-icons/fa6";
 import { FaMagic } from "react-icons/fa";
 
 export default function Home(): JSX.Element {
-  const [blob, updateBlob] = useState<Blob>({
-    id: "MB1624",
+  const [mounted, setMounted] = useState(false);
+
+  const blob: Blob = {
+    id: generateUUID(),
     name: "Polaris Doc",
     blocks: [
       {
-        id: "k9AXBBKurgZShm4a7jpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "title",
         data: "Introducing Polaris",
         style: [],
       },
       {
-        id: "TYAXBBKurgZShm4a7jpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "paragraph",
         data: "",
         style: [],
       },
       {
-        id: "k9ATBBKurgZShm4a7jpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "paragraph",
         data: "Polaris is a WYSIWYG Editor, built on top of Web APIs and React for creating a rich editing experiences. With powerful editing support, you can write and get exact output in HTML.",
         style: [],
       },
       {
-        id: "TYAXBBKurgZShm4a7jpE5fDVBFuCeg",
+        id: generateUUID(),
         role: "paragraph",
         data: "",
         style: [],
       },
       {
-        id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "subTitle",
         data: "Features",
         style: [],
       },
       {
-        id: "k9A1BBKurgZShZ4a7jpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "numberedList",
         data: [
           {
-            id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg1",
+            id: generateUUID(),
             role: "paragraph",
             data: "'/' (slash) commands for performing various actions.",
             style: [],
           },
           {
-            id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg2",
+            id: generateUUID(),
             role: "paragraph",
             data: 'Selection menu for applying inline styling such as <span data-type="inline-specifier" style="font-weight: bold;">bold</span>, <span data-type="inline-specifier" style="font-style: italic;">italic</span>, <span data-type="inline-specifier" style="text-decoration: underline;">underline</span> and <span data-type="inline-specifier" data-link="https://mihirpaldhikar.com" style="text-decoration: underline;">links</span>.',
             style: [],
           },
           {
-            id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg3",
+            id: generateUUID(),
             role: "paragraph",
             data: "Markdown support",
             style: [],
           },
           {
-            id: "k9A1BBKurgZShm4a7jpE5fDKuFuCeg4",
+            id: generateUUID(),
             role: "paragraph",
             data: "Images support",
             style: [],
@@ -100,45 +103,45 @@ export default function Home(): JSX.Element {
         style: [],
       },
       {
-        id: "k9AsxA1BBKurgZShm4a6JpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "subHeading",
         data: "Tables Support",
         style: [],
       },
       {
-        id: "teyek9A1BBKurgQZShm4a6JpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "table",
         data: {
           rows: [
             {
-              id: "e949jciQnecin2ind",
+              id: generateUUID(),
               columns: [
                 {
-                  id: "k123s9A1Q1BBKurgZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Sr. No",
                   style: [],
                 },
                 {
-                  id: "k123s1A9A1BBKurgZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Company",
                   style: [],
                 },
                 {
-                  id: "k23q123Sxs9A1BBKurgZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "CEO",
                   style: [],
                 },
                 {
-                  id: "k12agZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Headquarters",
                   style: [],
                 },
                 {
-                  id: "k123s129A1B21agZ21qQ4a6Jp",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Website",
                   style: [],
@@ -146,7 +149,7 @@ export default function Home(): JSX.Element {
               ],
             },
             {
-              id: "e949jcinecin2ind1A",
+              id: generateUUID(),
               columns: [
                 {
                   id: "k123s9A1BBKurgZShm4a6JpE23",
@@ -155,25 +158,25 @@ export default function Home(): JSX.Element {
                   style: [],
                 },
                 {
-                  id: "k123s9A1BBKurgZShm4a6JEKuF",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Google",
                   style: [],
                 },
                 {
-                  id: "k23q123s9A1BBK1uhm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Sundar Pichai",
                   style: [],
                 },
                 {
-                  id: "k123s129A1B1Shm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Googleplex, Mountain View, CA, USA",
                   style: [],
                 },
                 {
-                  id: "k1212a29A1B1Shm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: '<span data-type="inline-specifier" data-link="https://google.com" style="text-decoration: underline;">https://google.com</span>',
                   style: [],
@@ -181,34 +184,34 @@ export default function Home(): JSX.Element {
               ],
             },
             {
-              id: "e949jcinecin2ind2A",
+              id: generateUUID(),
               columns: [
                 {
-                  id: "k123s9A1BBKurgZShm4a62fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "2",
                   style: [],
                 },
                 {
-                  id: "k123s9A1BBKurgZShm1JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Microsoft",
                   style: [],
                 },
                 {
-                  id: "k23q123s9A1BBKu2Shm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Satya Nadella",
                   style: [],
                 },
                 {
-                  id: "k123s129A211agZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Redmond, Washington, USA",
                   style: [],
                 },
                 {
-                  id: "k1Qwa29A1B1Shm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: '<span data-type="inline-specifier" data-link="https://microsoft.com" style="text-decoration: underline;">https://microsoft.com</span>',
                   style: [],
@@ -216,34 +219,34 @@ export default function Home(): JSX.Element {
               ],
             },
             {
-              id: "e949jcinecin2ind3A",
+              id: generateUUID(),
               columns: [
                 {
-                  id: "k123s9A1BBKurAshm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "3",
                   style: [],
                 },
                 {
-                  id: "k123s9A1BrionyKurgZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Apple",
                   style: [],
                 },
                 {
-                  id: "k23q123s9A34wurgZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "Tim Cook",
                   style: [],
                 },
                 {
-                  id: "k123s129A112agZShm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: "One Apple Park Way, Cupertino, CA, USA",
                   style: [],
                 },
                 {
-                  id: "k12229A1B1Shm4a6JpE5fDKuFuCeg",
+                  id: generateUUID(),
                   role: "paragraph",
                   data: '<span data-type="inline-specifier" data-link="https://apple.com" style="text-decoration: underline;">https://apple.com</span>',
                   style: [],
@@ -255,13 +258,27 @@ export default function Home(): JSX.Element {
         style: [],
       },
       {
-        id: "k9A1BBKurgZShm4a6JpE5fDKuFuCeg",
+        id: generateUUID(),
         role: "quote",
         data: "This is an interactive playground. Start writing in the editor to experience the power of Polaris.",
         style: [],
       },
     ],
-  });
+  };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted)
+    return (
+      <main className={"h-screen flex"}>
+        <div className={"m-auto w-[300px] flex flex-col"}>
+          <ProgressBar type={"linear"} />
+        </div>
+      </main>
+    );
+
   return (
     <main>
       <div className={"flex items-center justify-center flex-col"}>
@@ -295,9 +312,6 @@ export default function Home(): JSX.Element {
             if (typeof data !== "string")
               return await serializeFileToBase64(data);
             return "";
-          }}
-          onChange={(blob) => {
-            updateBlob(blob);
           }}
         />
       </div>

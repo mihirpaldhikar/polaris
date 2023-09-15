@@ -20,10 +20,4 @@
  * SOFTWARE.
  */
 
-export { Navbar } from "./Navbar";
-export { MenuItem } from "./MenuItem";
-export { Footer } from "./Footer";
-export { ZigZag } from "./ZigZag";
-export { Glow } from "./Glow";
-export { FeatureCard } from "./FeatureCard";
-export { ProgressBar } from "./Progressbar";
+export { default as ProgressBar } from "./ProgressBar";
