@@ -21,6 +21,7 @@
  */
 
 import {
+  type ChangeEvent,
   Fragment,
   type JSX,
   useCallback,
@@ -602,6 +603,72 @@ export default function Editor({
     [blob.id, masterBlocks, popUpRoot, propagateChanges],
   );
 
+  const actionMenuTriggerHandler = useCallback(() => {
+    const activeNode = document.activeElement;
+    if (
+      activeNode === null ||
+      activeNode.getAttribute("contenteditable") !== "true"
+    )
+      return;
+
+    const activeBlock = traverseAndFind(masterBlocks, activeNode.id) as Block;
+
+    const caretOffset = getCaretOffset(activeNode as HTMLElement);
+    if (typeof activeBlock.data === "string") {
+      const computedCaretOffset =
+        window.navigator.userAgent.toLowerCase().includes("android") ||
+        window.navigator.userAgent.includes("iphone")
+          ? caretOffset -
+            nodeOffset(
+              activeNode as HTMLElement,
+              getNodeAt(activeNode, caretOffset),
+            ) -
+            1
+          : caretOffset -
+            nodeOffset(
+              activeNode as HTMLElement,
+              getNodeAt(activeNode, caretOffset),
+            );
+
+      const filteredBlockTools = masterBlockTools.filter((menu) => {
+        if (menu.allowedRoles !== undefined) {
+          return menu.allowedRoles?.includes(activeBlock.role);
+        }
+        return true;
+      });
+
+      actionKeyHandler(
+        getNodeIndex(
+          activeNode as HTMLElement,
+          getNodeAt(activeNode, caretOffset),
+        ),
+        activeBlock,
+        activeBlock.data,
+        computedCaretOffset,
+        filteredBlockTools,
+      );
+    }
+  }, [actionKeyHandler, masterBlockTools, masterBlocks]);
+
+  const mobileInputHandler = useCallback(
+    (event: Event) => {
+      const inputEvent = event as unknown as ChangeEvent<HTMLElement>;
+
+      if (
+        window.navigator.userAgent.toLowerCase().includes("android") ||
+        window.navigator.userAgent.toLowerCase().includes("iphone")
+      ) {
+        const key = inputEvent.target.innerText
+          .charAt(inputEvent.target.innerText.length - 1)
+          .toLowerCase();
+        if (key === "/") {
+          actionMenuTriggerHandler();
+        }
+      }
+    },
+    [actionMenuTriggerHandler],
+  );
+
   const keyboardManager = useCallback(
     (event: KeyboardEvent): void => {
       const activeNode = document.activeElement;
@@ -617,51 +684,7 @@ export default function Editor({
           break;
         }
         case "/": {
-          if (
-            activeNode == null ||
-            activeNode.getAttribute("contenteditable") !== "true"
-          ) {
-            return;
-          }
-          const caretOffset = getCaretOffset(activeNode as HTMLElement);
-          const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
-
-          if (activeBlock == null || typeof activeBlock?.data !== "string") {
-            return;
-          }
-          const computedCaretOffset =
-            window.navigator.userAgent.toLowerCase().includes("android") ||
-            window.navigator.userAgent.includes("iphone")
-              ? caretOffset -
-                nodeOffset(
-                  activeNode as HTMLElement,
-                  getNodeAt(activeNode, caretOffset),
-                ) -
-                1
-              : caretOffset -
-                nodeOffset(
-                  activeNode as HTMLElement,
-                  getNodeAt(activeNode, caretOffset),
-                );
-
-          const filteredBlockTools = masterBlockTools.filter((menu) => {
-            if (menu.allowedRoles !== undefined) {
-              return menu.allowedRoles?.includes(activeBlock.role);
-            }
-            return true;
-          });
-
-          actionKeyHandler(
-            getNodeIndex(
-              activeNode as HTMLElement,
-              getNodeAt(activeNode as HTMLElement, caretOffset),
-            ),
-            activeBlock,
-            activeBlock.data,
-            computedCaretOffset,
-            filteredBlockTools,
-          );
-
+          actionMenuTriggerHandler();
           break;
         }
         case "arrowup": {
@@ -880,11 +903,12 @@ export default function Editor({
         }
       }
     },
-    [blob, masterBlocks, masterBlockTools, actionKeyHandler, changeHandler],
+    [blob, masterBlocks, actionMenuTriggerHandler, changeHandler],
   );
 
   useEffect(() => {
     window.addEventListener("keydown", keyboardManager);
+    window.addEventListener("input", mobileInputHandler);
     subscribeToEditorEvent(`saveEditor-${blob.id}`, () => {
       dispatchEditorEvent(`onSaved-${blob.id}`, {
         ...blob,
@@ -893,8 +917,9 @@ export default function Editor({
     });
     return () => {
       window.removeEventListener("keydown", keyboardManager);
+      window.removeEventListener("input", mobileInputHandler);
     };
-  }, [blob, keyboardManager, masterBlocks]);
+  }, [blob, keyboardManager, masterBlocks, mobileInputHandler]);
 
   useEffect(() => {
     if (focusedNode !== undefined) {
