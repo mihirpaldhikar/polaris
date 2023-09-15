@@ -498,7 +498,7 @@ export default function Editor({
                     },
                   };
                   block.data = previousContent;
-                  focusNode = (tableBlock.data as Table).rows[0].id;
+                  focusNode = (tableBlock.data as Table).rows[0].columns[0].id;
 
                   if (
                     blockRenderTypeFromNode(currentNode) === RenderType.LIST
@@ -579,8 +579,8 @@ export default function Editor({
 
                 propagateChanges(masterBlocks, {
                   nodeId: focusNode,
-                  caretOffset,
-                  nodeIndex,
+                  caretOffset: newRole === "table" ? 0 : caretOffset,
+                  nodeIndex: newRole === "table" ? 0 : nodeIndex,
                 });
                 break;
               }
