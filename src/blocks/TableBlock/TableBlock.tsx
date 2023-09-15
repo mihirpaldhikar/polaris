@@ -28,6 +28,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
 } from "react";
 import { BLOCK_NODE } from "../../constants";
 import { type Block, type Coordinates, type Table } from "../../interfaces";
@@ -40,6 +41,8 @@ import {
   getNodeSiblings,
   serializeNodeToBlock,
   setNodeStyle,
+  subscribeToEditorEvent,
+  unsubscribeFromEditorEvent,
 } from "../../utils";
 import RootContext from "../../contexts/RootContext/RootContext";
 import {
@@ -87,7 +90,21 @@ export default function TableBlock({
     onChange(block);
   }
 
+  const isActionMenuOpen = useRef(false);
+
   const { popUpRoot } = useContext(RootContext);
+
+  useEffect(() => {
+    subscribeToEditorEvent("onActionMenu", (event: any) => {
+      isActionMenuOpen.current = event.detail.opened;
+    });
+
+    return () => {
+      unsubscribeFromEditorEvent("onActionMenu", (event: any) => {
+        isActionMenuOpen.current = event.detail.opened;
+      });
+    };
+  }, []);
 
   const keyboardHandler = useCallback(
     (event: KeyboardEvent) => {
@@ -102,8 +119,9 @@ export default function TableBlock({
         case "arrowdown": {
           const activeNode = document.activeElement;
           if (
-            activeNode == null ||
-            activeNode.getAttribute("data-block-type") !== "tableCell"
+            !isActionMenuOpen.current &&
+            (activeNode == null ||
+              activeNode.getAttribute("data-block-type") !== "tableCell")
           ) {
             if (popUpRoot !== undefined) {
               popUpRoot.render(<Fragment />);
