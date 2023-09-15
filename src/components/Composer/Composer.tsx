@@ -38,7 +38,6 @@ import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 
 interface ComposerProps {
   editable: boolean;
-  parentBlock?: Block;
   previousParentBlock: Block | null;
   block: Block;
   listMetadata?: {
@@ -88,7 +87,6 @@ interface ComposerProps {
 
 export default function Composer({
   editable,
-  parentBlock,
   previousParentBlock,
   listMetadata,
   block,
@@ -122,8 +120,10 @@ export default function Composer({
   if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
     return (
       <AttachmentBlock
-        parentBlock={parentBlock}
         block={block}
+        previousParentBlock={previousParentBlock}
+        listMetadata={listMetadata}
+        onCreate={onCreate}
         onChange={onChange}
         onAttachmentRequest={onAttachmentRequest}
         onDelete={onDelete}
@@ -134,13 +134,15 @@ export default function Composer({
   if (blockRenderTypeFromRole(block.role) === RenderType.TABLE) {
     return (
       <TableBlock
-        parentBlock={parentBlock}
         block={block}
+        previousParentBlock={previousParentBlock}
+        listMetadata={listMetadata}
         editable={editable}
         onChange={onChange}
         onClick={openLinkInNewTab}
         onSelect={onSelect}
         onDelete={onDelete}
+        onCreate={onCreate}
       />
     );
   }
@@ -179,7 +181,6 @@ export default function Composer({
             }}
           >
             <Composer
-              parentBlock={block}
               listMetadata={{
                 parent: block,
                 currentIndex: index,

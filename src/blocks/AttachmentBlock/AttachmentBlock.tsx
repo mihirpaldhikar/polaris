@@ -23,10 +23,8 @@
 import { createElement, Fragment, type JSX } from "react";
 import {
   blockRenderTypeFromRole,
-  getBlockNode,
-  getNodeSiblings,
+  generateUUID,
   nodeTypeFromRole,
-  serializeNodeToBlock,
 } from "../../utils";
 import { type Attachment, type Block } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
@@ -35,63 +33,118 @@ import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { YouTubeVideoBlock } from "../YouTubeVideoBlock";
 import { AttachmentTools } from "../../assets/tools/AttachmentTools";
-import RenderType from "../../enums/RenderType";
 import { BLOCK_NODE } from "../../constants";
 import { GitHubGistBlock } from "../GitHubGistBlock";
 
 interface AttachmentBlockProps {
-  parentBlock?: Block;
+  previousParentBlock: Block | null;
   block: Block;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
   onAttachmentRequest: (block: Block, data: File | string) => void;
-  onDelete: (block: Block, previousBlock: Block, nodeId: string) => void;
   onChange: (block: Block) => void;
+  onDelete: (
+    block: Block,
+    previousBlock: Block,
+    nodeId: string,
+    setCursorToStart?: boolean,
+    holder?: Block[],
+  ) => void;
+  onCreate: (
+    parentBlock: Block,
+    targetBlock: Block,
+    holder?: Block[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
+  ) => void;
 }
 
 export default function AttachmentBlock({
-  parentBlock,
   block,
   onAttachmentRequest,
   onDelete,
   onChange,
+  onCreate,
+  previousParentBlock,
+  listMetadata,
 }: AttachmentBlockProps): JSX.Element {
   const attachment: Attachment = block.data as Attachment;
 
   function deleteHandler(): void {
-    if (
-      parentBlock !== undefined &&
-      blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-      Array.isArray(parentBlock.data)
-    ) {
-      const currentBlockIndex = parentBlock.data
-        .map((blk) => blk.id)
-        .indexOf(block.id);
-      if (currentBlockIndex !== -1) {
-        parentBlock.data.splice(currentBlockIndex, 1);
+    if (listMetadata !== undefined) {
+      const listData = listMetadata.parent.data as Block[];
+      listData.splice(listMetadata.currentIndex, 1);
+      listMetadata.parent.data = listData;
 
-        let previousNode: HTMLElement | null;
-
-        if (currentBlockIndex === 0) {
-          const currentNodeSibling = getNodeSiblings(parentBlock.id);
-          previousNode = currentNodeSibling.previous;
-        } else {
-          previousNode = getBlockNode(
-            parentBlock.data[currentBlockIndex - 1].id,
-          );
-        }
-        if (previousNode !== null) {
-          onDelete(parentBlock, block, previousNode.id);
-        }
-      }
-    } else {
-      const currentBlockSibling = getNodeSiblings(block.id);
-      if (currentBlockSibling.previous != null) {
+      if (
+        listMetadata.currentIndex === 0 &&
+        listData.length > 0 &&
+        previousParentBlock != null
+      ) {
         onDelete(
           block,
-          serializeNodeToBlock(currentBlockSibling.previous),
-          currentBlockSibling.previous.id,
+          listData[listMetadata.currentIndex],
+          listData[listMetadata.currentIndex].id,
+          false,
+          listMetadata.parent.data,
+        );
+      } else if (
+        listMetadata.currentIndex === 0 &&
+        listData.length === 0 &&
+        previousParentBlock != null
+      ) {
+        onDelete(
+          listMetadata.parent,
+          previousParentBlock,
+          previousParentBlock.id,
+        );
+      } else if (
+        listMetadata.currentIndex === 0 &&
+        listData.length === 0 &&
+        previousParentBlock == null
+      ) {
+        const emptyBlock: Block = {
+          id: generateUUID(),
+          data: "",
+          role: "paragraph",
+          style: [],
+        };
+        onCreate(listMetadata.parent, emptyBlock, undefined, {
+          nodeId: emptyBlock.id,
+        });
+        onDelete(listMetadata.parent, emptyBlock, emptyBlock.id);
+      } else {
+        onDelete(
+          block,
+          listData[listMetadata.currentIndex - 1],
+          listData[listMetadata.currentIndex - 1].id,
+          false,
+          listMetadata.parent.data,
         );
       }
+      return;
     }
+
+    if (previousParentBlock == null) {
+      const emptyBlock: Block = {
+        id: generateUUID(),
+        data: "",
+        role: "paragraph",
+        style: [],
+      };
+      onCreate(block, emptyBlock, undefined, {
+        nodeId: emptyBlock.id,
+      });
+      onDelete(block, emptyBlock, emptyBlock.id, true);
+      return;
+    }
+
+    onDelete(block, previousParentBlock, previousParentBlock.id);
   }
 
   if (attachment.url === "" && block.role === "image") {

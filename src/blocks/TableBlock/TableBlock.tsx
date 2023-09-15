@@ -33,13 +33,10 @@ import {
 import { BLOCK_NODE } from "../../constants";
 import { type Block, type Coordinates, type Table } from "../../interfaces";
 import {
-  blockRenderTypeFromRole,
   conditionalClassName,
   generateUUID,
   getBlockNode,
   getEditorRoot,
-  getNodeSiblings,
-  serializeNodeToBlock,
   setNodeStyle,
   subscribeToEditorEvent,
   unsubscribeFromEditorEvent,
@@ -52,11 +49,14 @@ import {
   DeleteIcon,
   DeleteRowIcon,
 } from "../../assets";
-import RenderType from "../../enums/RenderType";
 
 interface TableBlockProps {
-  parentBlock?: Block;
+  previousParentBlock: Block | null;
   block: Block;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
   editable: boolean;
   onChange: (block: Block, focus?: boolean) => void;
   onClick: (even: MouseEvent) => void;
@@ -65,18 +65,31 @@ interface TableBlockProps {
     block: Block,
     previousBlock: Block,
     nodeId: string,
-    setCursorToStart?: boolean | undefined,
+    setCursorToStart?: boolean,
+    holder?: Block[],
+  ) => void;
+  onCreate: (
+    parentBlock: Block,
+    targetBlock: Block,
+    holder?: Block[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
   ) => void;
 }
 
 export default function TableBlock({
-  parentBlock,
   block,
+  listMetadata,
+  previousParentBlock,
   editable,
   onClick,
   onChange,
   onSelect,
   onDelete,
+  onCreate,
 }: TableBlockProps): JSX.Element {
   const tableData = block.data as Table;
 
@@ -142,44 +155,79 @@ export default function TableBlock({
   }, [keyboardHandler]);
 
   function deleteHandler(): void {
-    if (
-      parentBlock !== undefined &&
-      blockRenderTypeFromRole(parentBlock.role) === RenderType.LIST &&
-      Array.isArray(parentBlock.data)
-    ) {
-      const currentBlockIndex = parentBlock.data
-        .map((blk) => blk.id)
-        .indexOf(block.id);
-      if (currentBlockIndex !== -1) {
-        parentBlock.data.splice(currentBlockIndex, 1);
-
-        let previousNode: HTMLElement | null;
-
-        if (currentBlockIndex === 0) {
-          const currentNodeSibling = getNodeSiblings(parentBlock.id);
-          previousNode = currentNodeSibling.previous;
-        } else {
-          previousNode = getBlockNode(
-            parentBlock.data[currentBlockIndex - 1].id,
-          );
-        }
-        if (previousNode !== null) {
-          onDelete(parentBlock, block, previousNode.id);
-        }
-      }
-    } else {
-      const currentBlockSibling = getNodeSiblings(block.id);
-      if (currentBlockSibling.previous != null) {
-        onDelete(
-          block,
-          serializeNodeToBlock(currentBlockSibling.previous),
-          currentBlockSibling.previous.id,
-        );
-      }
-    }
     if (popUpRoot !== undefined) {
       popUpRoot.render(<Fragment />);
     }
+
+    if (listMetadata !== undefined) {
+      const listData = listMetadata.parent.data as Block[];
+      listData.splice(listMetadata.currentIndex, 1);
+      listMetadata.parent.data = listData;
+
+      if (
+        listMetadata.currentIndex === 0 &&
+        listData.length > 0 &&
+        previousParentBlock != null
+      ) {
+        onDelete(
+          block,
+          listData[listMetadata.currentIndex],
+          listData[listMetadata.currentIndex].id,
+          false,
+          listMetadata.parent.data,
+        );
+      } else if (
+        listMetadata.currentIndex === 0 &&
+        listData.length === 0 &&
+        previousParentBlock != null
+      ) {
+        onDelete(
+          listMetadata.parent,
+          previousParentBlock,
+          previousParentBlock.id,
+        );
+      } else if (
+        listMetadata.currentIndex === 0 &&
+        listData.length === 0 &&
+        previousParentBlock == null
+      ) {
+        const emptyBlock: Block = {
+          id: generateUUID(),
+          data: "",
+          role: "paragraph",
+          style: [],
+        };
+        onCreate(listMetadata.parent, emptyBlock, undefined, {
+          nodeId: emptyBlock.id,
+        });
+        onDelete(listMetadata.parent, emptyBlock, emptyBlock.id);
+      } else {
+        onDelete(
+          block,
+          listData[listMetadata.currentIndex - 1],
+          listData[listMetadata.currentIndex - 1].id,
+          false,
+          listMetadata.parent.data,
+        );
+      }
+      return;
+    }
+
+    if (previousParentBlock == null) {
+      const emptyBlock: Block = {
+        id: generateUUID(),
+        data: "",
+        role: "paragraph",
+        style: [],
+      };
+      onCreate(block, emptyBlock, undefined, {
+        nodeId: emptyBlock.id,
+      });
+      onDelete(block, emptyBlock, emptyBlock.id, true);
+      return;
+    }
+
+    onDelete(block, previousParentBlock, previousParentBlock.id);
   }
 
   function showTablePopup(rowIndex: number, columnIndex: number): void {
