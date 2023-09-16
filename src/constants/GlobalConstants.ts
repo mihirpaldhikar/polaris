@@ -23,30 +23,32 @@
 import { type PolarisConfig } from "../interfaces";
 
 export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
-  text: {
-    title: {
-      fontSize: 2.25,
+  block: {
+    text: {
+      title: {
+        fontSize: 2.25,
+      },
+      subTitle: {
+        fontSize: 1.875,
+      },
+      heading: {
+        fontSize: 1.5,
+      },
+      subHeading: {
+        fontSize: 1.25,
+      },
+      paragraph: {
+        fontSize: 1,
+      },
+      quote: {
+        fontSize: 1,
+      },
     },
-    subTitle: {
-      fontSize: 1.875,
+    attachment: {
+      spacing: 1,
     },
-    heading: {
-      fontSize: 1.5,
+    list: {
+      spacing: 1,
     },
-    subHeading: {
-      fontSize: 1.25,
-    },
-    paragraph: {
-      fontSize: 1,
-    },
-    quote: {
-      fontSize: 1,
-    },
-  },
-  attachment: {
-    spacing: 1,
-  },
-  list: {
-    spacing: 1,
   },
 };

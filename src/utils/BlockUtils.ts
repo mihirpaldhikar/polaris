@@ -75,24 +75,24 @@ export function getConfigFromRole(
 ): TextBlockConfig | AttachmentBlockConfig | ListBlockConfig | null {
   switch (role) {
     case "title":
-      return config.text.title;
+      return config.block.text.title;
     case "subTitle":
-      return config.text.subTitle;
+      return config.block.text.subTitle;
     case "heading":
-      return config.text.heading;
+      return config.block.text.heading;
     case "subHeading":
-      return config.text.subHeading;
+      return config.block.text.subHeading;
     case "paragraph":
-      return config.text.paragraph;
+      return config.block.text.paragraph;
     case "quote":
-      return config.text.quote;
+      return config.block.text.quote;
     case "bulletList":
     case "numberedList":
-      return config.list;
+      return config.block.list;
     case "youtubeVideoEmbed":
     case "githubGistEmbed":
     case "image":
-      return config.attachment;
+      return config.block.attachment;
     default:
       return null;
   }

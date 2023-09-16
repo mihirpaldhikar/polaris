@@ -33,16 +33,18 @@ export interface ListBlockConfig {
 }
 
 interface PolarisConfig {
-  text: {
-    title: TextBlockConfig;
-    subTitle: TextBlockConfig;
-    heading: TextBlockConfig;
-    subHeading: TextBlockConfig;
-    paragraph: TextBlockConfig;
-    quote: TextBlockConfig;
+  block: {
+    text: {
+      title: TextBlockConfig;
+      subTitle: TextBlockConfig;
+      heading: TextBlockConfig;
+      subHeading: TextBlockConfig;
+      paragraph: TextBlockConfig;
+      quote: TextBlockConfig;
+    };
+    attachment: AttachmentBlockConfig;
+    list: ListBlockConfig;
   };
-  attachment: AttachmentBlockConfig;
-  list: ListBlockConfig;
 }
 
 export default PolarisConfig;
