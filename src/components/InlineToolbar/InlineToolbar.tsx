@@ -58,10 +58,10 @@ export default function InlineToolbar({
 
   const xAxis =
     window.innerWidth > 500
-      ? window.innerWidth - (ACTION_MENU_WIDTH + coordinates.x) <= 1
+      ? ACTION_MENU_WIDTH + coordinates.x >= window.innerWidth
         ? coordinates.x - ACTION_MENU_WIDTH - 30
         : coordinates.x
-      : (window.innerWidth - ACTION_MENU_WIDTH) / 2;
+      : (window.innerWidth - ACTION_MENU_WIDTH) / 2 - 32;
 
   const yAxis =
     coordinates.y <= 30
