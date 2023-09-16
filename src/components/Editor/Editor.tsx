@@ -1291,13 +1291,13 @@ export default function Editor({
               block={block}
               onChange={debounce((block, focus) => {
                 changeHandler(block, focus);
-              }, 360)}
+              }, 260)}
               onCreate={createHandler}
               onDelete={deletionHandler}
               onPaste={pasteHandler}
               onSelect={debounce((block) => {
                 selectionHandler(block);
-              }, 360)}
+              }, 260)}
               onAttachmentRequest={attachmentRequestHandler}
               onMarkdown={markdownHandler}
             />
