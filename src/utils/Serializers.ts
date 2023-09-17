@@ -63,13 +63,15 @@ export function serializeBlobToHTML(blob: Blob): string {
   master.lang = "en";
   master.appendChild(head);
   master.appendChild(masterBody);
-  return master.outerHTML.replace(/&[l|g]t;/g, function (c) {
-    if (c === "&lt;") {
-      return "<";
-    } else {
-      return ">";
-    }
-  });
+  return "<!doctype html>".concat(
+    master.outerHTML.replace(/&[l|g]t;/g, function (c) {
+      if (c === "&lt;") {
+        return "<";
+      } else {
+        return ">";
+      }
+    }),
+  );
 }
 
 export async function serializeFileToBase64(file: File): Promise<string> {
