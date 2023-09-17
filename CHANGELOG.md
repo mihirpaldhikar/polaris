@@ -1,3 +1,19 @@
+## 0.7.0 (September 17. 2023)
+
+### New:
+
+- Add HTML doctype declaration to the output when `Blob` is serialized to `HTML`.
+
+### Breaking Changes:
+
+- Move `text`, `list` and `attachment` config to `block` object in `PolarisConfig`.
+
+### Fixes:
+
+- Fix an issue in which Inline toolbar was getting out of viewport for mobile devices.
+- Fix an issue in which Slash command was not working as expected and keeps the slash if some block or tool is selected.
+- Fix debounce interval from 360 to 260 in onChange and onSelect callbacks for better typing experience.
+
 ## 0.6.0 (September 16, 2023)
 
 ### New:
