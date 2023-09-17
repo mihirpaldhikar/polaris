@@ -21,7 +21,6 @@
  */
 
 import {
-  type ChangeEvent,
   Fragment,
   type JSX,
   useCallback,
@@ -610,70 +609,69 @@ export default function Editor({
     [blob.id, masterBlocks, popUpRoot, propagateChanges],
   );
 
-  const actionMenuTriggerHandler = useCallback(() => {
-    const activeNode = document.activeElement;
-    if (
-      activeNode === null ||
-      activeNode.getAttribute("contenteditable") !== "true"
-    )
-      return;
-
-    const activeBlock = traverseAndFind(masterBlocks, activeNode.id) as Block;
-
-    const caretOffset = getCaretOffset(activeNode as HTMLElement);
-    if (typeof activeBlock.data === "string") {
-      const computedCaretOffset =
-        window.navigator.userAgent.toLowerCase().includes("android") ||
-        window.navigator.userAgent.includes("iphone")
+  const actionMenuTriggerHandler = useCallback(
+    (activeBlock: Block, activeNode: HTMLElement, isMobile: boolean) => {
+      const caretOffset = getCaretOffset(activeNode);
+      if (typeof activeBlock.data === "string") {
+        const computedCaretOffset = isMobile
           ? caretOffset -
-            nodeOffset(
-              activeNode as HTMLElement,
-              getNodeAt(activeNode, caretOffset),
-            ) -
+            nodeOffset(activeNode, getNodeAt(activeNode, caretOffset)) -
             1
           : caretOffset -
-            nodeOffset(
-              activeNode as HTMLElement,
-              getNodeAt(activeNode, caretOffset),
-            );
+            nodeOffset(activeNode, getNodeAt(activeNode, caretOffset));
 
-      const filteredBlockTools = masterBlockTools.filter((menu) => {
-        if (menu.allowedRoles !== undefined) {
-          return menu.allowedRoles?.includes(activeBlock.role);
-        }
-        return true;
-      });
+        const filteredBlockTools = masterBlockTools.filter((menu) => {
+          if (menu.allowedRoles !== undefined) {
+            return menu.allowedRoles?.includes(activeBlock.role);
+          }
+          return true;
+        });
 
-      actionKeyHandler(
-        getNodeIndex(
-          activeNode as HTMLElement,
-          getNodeAt(activeNode, caretOffset),
-        ),
-        activeBlock,
-        activeBlock.data,
-        computedCaretOffset,
-        filteredBlockTools,
-      );
-    }
-  }, [actionKeyHandler, masterBlockTools, masterBlocks]);
+        actionKeyHandler(
+          getNodeIndex(activeNode, getNodeAt(activeNode, caretOffset)),
+          activeBlock,
+          !isMobile
+            ? activeBlock.data
+            : activeBlock.data
+                .substring(0, caretOffset - 1)
+                .concat(activeBlock.data.substring(caretOffset)),
+          computedCaretOffset,
+          filteredBlockTools,
+        );
+      }
+    },
+    [actionKeyHandler, masterBlockTools],
+  );
 
   const mobileInputHandler = useCallback(
-    (event: Event) => {
-      const inputEvent = event as unknown as ChangeEvent<HTMLElement>;
-
+    (event: any) => {
+      const activeNode = document.activeElement;
       if (
-        window.navigator.userAgent.toLowerCase().includes("android") ||
-        window.navigator.userAgent.toLowerCase().includes("iphone")
+        activeNode != null &&
+        activeNode.getAttribute("contenteditable") === "true" &&
+        (window.navigator.userAgent.toLowerCase().includes("android") ||
+          window.navigator.userAgent.toLowerCase().includes("iphone"))
       ) {
-        const key = inputEvent.target.innerText
-          .charAt(inputEvent.target.innerText.length - 1)
-          .toLowerCase();
-        if (key === "/") {
-          actionMenuTriggerHandler();
+        const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
+        if (
+          activeBlock != null &&
+          event.data != null &&
+          event.data === "/" &&
+          typeof activeBlock.data === "string"
+        ) {
+          actionMenuTriggerHandler(
+            activeBlock,
+            activeNode as HTMLElement,
+            true,
+          );
+        } else {
+          if (popUpRoot !== undefined) {
+            popUpRoot.render(<Fragment />);
+          }
         }
       }
     },
-    [actionMenuTriggerHandler],
+    [actionMenuTriggerHandler, popUpRoot],
   );
 
   const keyboardManager = useCallback(
@@ -691,7 +689,21 @@ export default function Editor({
           break;
         }
         case "/": {
-          actionMenuTriggerHandler();
+          if (
+            isActionMenuOpen.current ||
+            activeNode == null ||
+            activeNode.getAttribute("contenteditable") !== "true"
+          )
+            return;
+
+          const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
+          if (activeBlock != null) {
+            actionMenuTriggerHandler(
+              activeBlock,
+              activeNode as HTMLElement,
+              false,
+            );
+          }
           break;
         }
         case "arrowup": {
