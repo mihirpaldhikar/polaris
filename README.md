@@ -106,7 +106,7 @@ function exportBlobToHTML(blob) {
 Output
 
 ```html
-
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
