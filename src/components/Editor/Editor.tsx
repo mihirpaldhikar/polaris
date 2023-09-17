@@ -671,7 +671,7 @@ export default function Editor({
         }
       }
     },
-    [actionMenuTriggerHandler, popUpRoot],
+    [actionMenuTriggerHandler, masterBlocks, popUpRoot],
   );
 
   const keyboardManager = useCallback(
