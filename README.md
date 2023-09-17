@@ -29,7 +29,7 @@ npm install @mihirpaldhikar/polaris
 import {
   DEFAULT_POLARIS_CONFIG,
   Editor,
-  generateBlockId,
+  generateUUID,
 } from "@mihirpaldhikar/polaris";
 
 export default function MyApp(): JSX.Element {
@@ -38,13 +38,13 @@ export default function MyApp(): JSX.Element {
     name: "Polaris Doc",
     blocks: [
       {
-        id: generateBlockId(),
+        id: generateUUID(),
         role: "title",
         data: "Introducing Polaris",
         style: [],
       },
       {
-        id: generateBlockId(),
+        id: generateUUID(),
         role: "paragraph",
         data: "Polaris is a rich semantic content editor.",
         style: [],
@@ -77,20 +77,20 @@ export default function MyApp(): JSX.Element {
 #### Exporting Generated Blob to HTML
 
 ```ts
-import { generateBlockId, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
+import { generateUUID, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
 
 const blob: Blob = {
   id: "MB1624",
   name: "Polaris Doc",
   blocks: [
     {
-      id: generateBlockId(),
+      id: generateUUID(),
       role: "title",
       data: "Introducing Polaris",
       style: [],
     },
     {
-      id: generateBlockId(),
+      id: generateUUID(),
       role: "paragraph",
       data: "Polaris is a rich semantic content editor.",
       style: [],
@@ -106,29 +106,34 @@ function exportBlobToHTML(blob) {
 Output
 
 ```html
+
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
-    />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Polaris Doc</title>
-  </head>
-  <body>
-    <h1>Introducing Polaris</h1>
-    <p>Polaris is a rich semantic content editor.</p>
-    <script type="text/javascript">
-      window.onmessage = function (messageEvent) {
-        const height = messageEvent.data.height;
-        const gistFrame = document.getElementById(messageEvent.data.id);
-        if (gistFrame != null) {
-          gistFrame.style.height = height + "px";
-        }
-      };
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+  />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Polaris Doc</title>
+</head>
+<body>
+<h1 id="4da4d82a-4efc-45ac-bfdf-d78a06a392f6">
+  Introducing Polaris
+</h1>
+<p id="9b74c5a2-0807-4eaf-a1bd-33ea5ea74557">
+  Polaris is a rich semantic content editor.
+</p>
+<script type="text/javascript">
+  window.onmessage = function(messageEvent) {
+    const height = messageEvent.data.height;
+    const gistFrame = document.getElementById(messageEvent.data.id);
+    if (gistFrame != null) {
+      gistFrame.style.height = height + "px";
+    }
+  };
+</script>
+</body>
 </html>
 ```
 
