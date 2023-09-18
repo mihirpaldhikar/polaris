@@ -1,4 +1,4 @@
-## 0.7.1 (September 17, 2023)
+## 0.7.1 (September 18, 2023)
 
 ### Fixes:
 
