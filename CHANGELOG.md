@@ -1,3 +1,9 @@
+## 0.7.1 (September 17, 2023)
+
+### Fixes:
+
+- Fix an issue which was causing IndexSizeError when switching blocks with Block tools Action menu.
+
 ## 0.7.0 (September 17. 2023)
 
 ### New:
