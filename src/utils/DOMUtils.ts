@@ -823,7 +823,8 @@ export function getNodeIndex(
   targetNode: Node,
 ): number {
   const childNodes: Node[] = Array.from(parentElement.childNodes);
-  return childNodes.indexOf(targetNode);
+  const index = childNodes.indexOf(targetNode);
+  return parentElement.lastChild?.textContent === "" ? index - 1 : index;
 }
 
 export function openLinkInNewTab(event: MouseEvent): void {

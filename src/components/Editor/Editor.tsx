@@ -54,7 +54,6 @@ import {
   getNodeIndex,
   inlineSpecifierManager,
   nodeInViewPort,
-  nodeOffset,
   normalizeContent,
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
@@ -613,12 +612,10 @@ export default function Editor({
     (activeBlock: Block, activeNode: HTMLElement, isMobile: boolean) => {
       const caretOffset = getCaretOffset(activeNode);
       if (typeof activeBlock.data === "string") {
-        const computedCaretOffset = isMobile
-          ? caretOffset -
-            nodeOffset(activeNode, getNodeAt(activeNode, caretOffset)) -
-            1
-          : caretOffset -
-            nodeOffset(activeNode, getNodeAt(activeNode, caretOffset));
+        const nodeAtCaretOffset = getNodeAt(activeNode, caretOffset);
+        const computedCaretOffset = getCaretOffset(
+          nodeAtCaretOffset as HTMLElement,
+        );
 
         const filteredBlockTools = masterBlockTools.filter((menu) => {
           if (menu.allowedRoles !== undefined) {
@@ -628,14 +625,14 @@ export default function Editor({
         });
 
         actionKeyHandler(
-          getNodeIndex(activeNode, getNodeAt(activeNode, caretOffset)),
+          getNodeIndex(activeNode, nodeAtCaretOffset),
           activeBlock,
           !isMobile
             ? activeBlock.data
             : activeBlock.data
                 .substring(0, caretOffset - 1)
                 .concat(activeBlock.data.substring(caretOffset)),
-          computedCaretOffset,
+          isMobile ? computedCaretOffset - 1 : computedCaretOffset,
           filteredBlockTools,
         );
       }
