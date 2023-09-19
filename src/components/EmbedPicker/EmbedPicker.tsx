@@ -21,7 +21,6 @@
  */
 
 import { Fragment, type JSX, useContext } from "react";
-import { BLOCK_NODE } from "../../constants";
 import { DeleteIcon } from "../../assets";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { InputDialog } from "../InputDialog";
@@ -51,7 +50,6 @@ export default function EmbedPicker({
   const { dialogRoot } = useContext(RootContext);
   return (
     <div
-      data-type={BLOCK_NODE}
       id={id}
       data-parent-block-id={
         listMetadata === undefined ? null : listMetadata.parent.id

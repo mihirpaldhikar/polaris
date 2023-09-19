@@ -21,7 +21,6 @@
  */
 
 export const NODE_TYPE = "data-type";
-export const BLOCK_NODE = "block";
 export const INLINE_SPECIFIER_NODE = "inline-specifier";
 export const LINK_ATTRIBUTE = "data-link";
 export const REMOVE_LINK = "polaris://remove-link";

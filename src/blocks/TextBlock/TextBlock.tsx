@@ -41,7 +41,6 @@ import {
   subscribeToEditorEvent,
   unsubscribeFromEditorEvent,
 } from "../../utils";
-import { BLOCK_NODE } from "../../constants";
 import { type Block, type Table } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
@@ -366,7 +365,6 @@ export default function TextBlock({
   }
 
   return createElement(nodeTypeFromRole(block.role), {
-    "data-type": BLOCK_NODE,
     "data-parent-block-id":
       listMetadata === undefined ? null : listMetadata.parent.id,
     "data-child-block-index":

@@ -22,7 +22,6 @@
 
 import { type JSX } from "react";
 import { type Attachment, type Block } from "../../interfaces";
-import { BLOCK_NODE } from "../../constants";
 import { generateGitHubGistURL } from "../../utils";
 
 interface GitHubGistBlockProps {
@@ -67,7 +66,6 @@ export default function GitHubGistBlock({
   return (
     <iframe
       id={block.id}
-      data-type={BLOCK_NODE}
       data-parent-block-id={
         listMetadata === undefined ? null : listMetadata.parent.id
       }

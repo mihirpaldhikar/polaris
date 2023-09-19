@@ -29,7 +29,6 @@ import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { YouTubeVideoBlock } from "../YouTubeVideoBlock";
 import { AttachmentTools } from "../../assets/tools/AttachmentTools";
-import { BLOCK_NODE } from "../../constants";
 import { GitHubGistBlock } from "../GitHubGistBlock";
 
 interface AttachmentBlockProps {
@@ -225,7 +224,6 @@ export default function AttachmentBlock({
       >
         {createElement(nodeTypeFromRole(block.role), {
           id: block.id,
-          "data-type": BLOCK_NODE,
           "data-parent-block-id":
             listMetadata === undefined ? null : listMetadata.parent.id,
           "data-child-block-index":

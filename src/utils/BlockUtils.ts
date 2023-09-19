@@ -21,7 +21,6 @@
  */
 
 import { type Block, type PolarisConfig, type Style } from "../interfaces";
-import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase } from "lodash";
 import {
@@ -29,6 +28,7 @@ import {
   type ListBlockConfig,
   type TextBlockConfig,
 } from "../interfaces/PolarisConfig";
+import { NODE_TYPE } from "../constants";
 
 /**
  * @function nodeTypeFromRole
@@ -262,24 +262,6 @@ export function getPlaceholderFromRole(role: string): string {
     default:
       return "Press '/' for commands...";
   }
-}
-
-export function findBlockNodeFromNode(node: HTMLElement): HTMLElement | null {
-  if (node.getAttribute("data-type") === BLOCK_NODE) return node;
-  if (
-    (node.firstElementChild as HTMLElement).getAttribute("data-type") ===
-    BLOCK_NODE
-  )
-    return node.firstElementChild as HTMLElement;
-  const children = node.children;
-  for (let i = 0; i < children.length; i++) {
-    if (children[i].getAttribute("data-type") === BLOCK_NODE)
-      return children[i] as HTMLElement;
-    else if (children[i].childElementCount > 1) {
-      return findBlockNodeFromNode(children[i] as HTMLElement);
-    }
-  }
-  return null;
 }
 
 export function upsertStyle(arr: Style[], newObj: Style): Style[] {

@@ -30,7 +30,6 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { BLOCK_NODE } from "../../constants";
 import {
   type Block,
   type Coordinates,
@@ -374,7 +373,6 @@ export default function TableBlock({
     <table
       id={block.id}
       key={block.id}
-      data-type={BLOCK_NODE}
       className={"table-auto my-3 block overflow-x-auto w-full"}
     >
       <tbody>

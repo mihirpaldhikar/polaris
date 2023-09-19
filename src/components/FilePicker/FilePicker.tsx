@@ -21,7 +21,6 @@
  */
 
 import { type JSX } from "react";
-import { BLOCK_NODE } from "../../constants";
 import { DeleteIcon } from "../../assets";
 import { type Block } from "../../interfaces";
 
@@ -49,7 +48,6 @@ export default function FilePicker({
 }: FilePickerProps): JSX.Element {
   return (
     <div
-      data-type={BLOCK_NODE}
       id={id}
       className={
         "relative h-14 block my-2 w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50"

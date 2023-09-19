@@ -23,7 +23,6 @@
 import { type JSX } from "react";
 import { getYouTubeVideoID } from "../../utils";
 import { type Attachment, type Block } from "../../interfaces";
-import { BLOCK_NODE } from "../../constants";
 
 interface YouTubeVideoBlockProps {
   block: Block;
@@ -41,7 +40,6 @@ export default function YouTubeVideoBlock({
   return (
     <iframe
       id={block.id}
-      data-type={BLOCK_NODE}
       data-parent-block-id={
         listMetadata === undefined ? null : listMetadata.parent.id
       }

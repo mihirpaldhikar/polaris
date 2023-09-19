@@ -31,7 +31,6 @@ import {
   setNodeStyle,
 } from "../../utils";
 import { AttachmentBlock, TableBlock, TextBlock } from "../../blocks";
-import { BLOCK_NODE } from "../../constants";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 
@@ -152,7 +151,6 @@ export default function Composer({
     return createElement(
       nodeTypeFromRole(block.role),
       {
-        "data-type": BLOCK_NODE,
         "data-block-render-type": blockRenderTypeFromRole(block.role),
         id: block.id,
         disabled: !editable,
