@@ -921,8 +921,8 @@ export function splitBlocksAtCaretOffset(
   block.id = generateUUID();
   block.data = currentBlockContent;
   newBlock.data = newBlockContent;
-  newBlock.role = block.role;
-  newBlock.style = block.style;
+  newBlock.role = newBlockContent.length === 0 ? "paragraph" : block.role;
+  newBlock.style = newBlockContent.length === 0 ? [] : block.style;
 
   return [block, newBlock];
 }
