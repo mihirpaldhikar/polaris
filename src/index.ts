@@ -24,7 +24,7 @@ import "./styles/global.css";
 
 export type { Block, PolarisConfig } from "./interfaces";
 export { generateUUID } from "./utils";
-export { serializeBlobToHTML } from "./utils";
+export { serializeBlob } from "./utils";
 export {
   dispatchEditorEvent,
   subscribeToEditorEvent,

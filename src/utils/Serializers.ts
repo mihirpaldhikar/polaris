@@ -23,7 +23,7 @@
 import { type Blob } from "../interfaces";
 import { serializeBlock } from "./DOMUtils";
 
-export function serializeBlobToHTML(blob: Blob): string {
+export function serializeBlob(blob: Blob): string {
   if (
     window === undefined ||
     document === undefined ||

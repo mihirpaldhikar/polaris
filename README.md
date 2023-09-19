@@ -81,7 +81,7 @@ export default function MyApp(): JSX.Element {
 #### Exporting Generated Blob to HTML
 
 ```ts
-import { generateUUID, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
+import { generateUUID, serializeBlob } from "@mihirpaldhikar/polaris";
 
 const blob: Blob = {
   id: "MB1624",
@@ -105,7 +105,7 @@ const blob: Blob = {
 };
 
 function exportBlobToHTML(blob) {
-  console.log(serializeBlobToHTML(blob));
+  console.log(serializeBlob(blob));
 }
 ```
 
