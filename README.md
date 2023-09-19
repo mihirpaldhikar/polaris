@@ -26,30 +26,28 @@ npm install @mihirpaldhikar/polaris
 #### Creating an Editor
 
 ```tsx
-import {
-  DEFAULT_POLARIS_CONFIG,
-  Editor,
-  generateUUID,
-} from "@mihirpaldhikar/polaris";
+import { DEFAULT_POLARIS_CONFIG, Editor, generateUUID } from "@mihirpaldhikar/polaris";
 
 export default function MyApp(): JSX.Element {
   const blob: Blob = {
     id: "MB1624",
     name: "Polaris Doc",
+    description: "A basic Polaris Document",
+    author: "Mihir Paldhikar",
     blocks: [
       {
         id: generateUUID(),
         role: "title",
         data: "Introducing Polaris",
-        style: [],
+        style: []
       },
       {
         id: generateUUID(),
         role: "paragraph",
         data: "Polaris is a rich semantic content editor.",
-        style: [],
-      },
-    ],
+        style: []
+      }
+    ]
   };
 
   function attachmentHandler(data: File | string): string {
@@ -82,6 +80,8 @@ import { generateUUID, serializeBlobToHTML } from "@mihirpaldhikar/polaris";
 const blob: Blob = {
   id: "MB1624",
   name: "Polaris Doc",
+  description: "A basic Polaris Document",
+  author: "Mihir Paldhikar",
   blocks: [
     {
       id: generateUUID(),
@@ -115,6 +115,8 @@ Output
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
   />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="description" content="A basic Polaris Document">
+  <meta name="author" content="Mihir Paldhikar">
   <title>Polaris Doc</title>
 </head>
 <body>
