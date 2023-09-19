@@ -600,7 +600,6 @@ export default function Editor({
           )
             return;
           const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
-          console.log(activeBlock);
           if (activeBlock != null) {
             actionMenuTriggerHandler(
               activeBlock,
