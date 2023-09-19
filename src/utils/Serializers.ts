@@ -76,7 +76,7 @@ export function serializeBlob(blob: Blob): string {
   );
 }
 
-export async function serializeFileToBase64(file: File): Promise<string> {
+export async function serializeFile(file: File): Promise<string> {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);

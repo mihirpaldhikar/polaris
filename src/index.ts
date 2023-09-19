@@ -30,7 +30,7 @@ export {
   subscribeToEditorEvent,
   unsubscribeFromEditorEvent,
 } from "./utils";
-export { serializeFileToBase64 } from "./utils";
+export { serializeFile } from "./utils";
 export type { Blob } from "./interfaces";
 export { Editor } from "./components";
 export { DEFAULT_POLARIS_CONFIG } from "./constants";
