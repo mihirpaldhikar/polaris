@@ -3,6 +3,13 @@
 Polaris is a rich semantic content editor built on top of [React](https://react.dev) and Web APIs to create a rich
 content editing experience.
 
+The editing interface is created by creating an abstraction layer on the top of Browser.
+
+Instead of letting browser manage the DOM tree, Polaris acts as a middleware and intercepts the browser emitted events
+then perform operations over it and then instructs browser to re-render only updated nodes of the DOM tree.
+
+Polaris uses Virtual DOM to efficiently update, and manage the DOM tree.
+
 ## Features
 
 1. [x] Title, SubTitle, Heading, Subheading, Paragraphs and Blockquotes.
