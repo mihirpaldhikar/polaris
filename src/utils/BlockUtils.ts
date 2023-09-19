@@ -22,7 +22,7 @@
 
 import { type Role } from "../types";
 import { type Block, type PolarisConfig, type Style } from "../interfaces";
-import { BLOCK_NODE, NODE_TYPE } from "../constants";
+import { NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase } from "lodash";
 import {
@@ -135,20 +135,6 @@ export function getBlockNode(blockId: string): HTMLElement | null {
   return blockDOM;
 }
 
-/**
- * @function normalizeContent
- *
- * @param string
- *
- * @description Normalizes the text content by removing HTML specific HEX Codes.
- *
- * @author Mihir Paldhikar
- */
-
-export function normalizeContent(string: string): string {
-  return string.replaceAll(/&nbsp;|\u202F|\u00A0/g, " ");
-}
-
 export function blockRenderTypeFromRole(role: Role): RenderType {
   switch (role) {
     case "title":
@@ -164,36 +150,6 @@ export function blockRenderTypeFromRole(role: Role): RenderType {
     case "image":
     case "youtubeVideoEmbed":
     case "githubGistEmbed":
-      return RenderType.ATTACHMENT;
-    case "table":
-      return RenderType.TABLE;
-    default:
-      return RenderType.UNKNOWN;
-  }
-}
-
-export function blockRenderTypeFromNode(node: HTMLElement): RenderType {
-  if (
-    node.tagName.toLowerCase() === "div" &&
-    node.firstElementChild?.tagName.toLowerCase() === "input"
-  ) {
-    return RenderType.ATTACHMENT;
-  }
-  if (
-    node.parentElement?.tagName.toLowerCase() === "li" &&
-    node.tagName.toLowerCase() !== "table"
-  )
-    return RenderType.LIST;
-  switch (node.tagName.toLowerCase()) {
-    case "h1":
-    case "h2":
-    case "h3":
-    case "h4":
-    case "p":
-    case "blockquote":
-      return RenderType.TEXT;
-    case "img":
-    case "iframe":
       return RenderType.ATTACHMENT;
     case "table":
       return RenderType.TABLE;
@@ -272,21 +228,6 @@ export function traverseAndUpdateBelow(
   }
 }
 
-export function traverseAndFindBlockPosition(
-  masterBlocks: Block[],
-  targetBlock: Block,
-): number {
-  for (let i = 0; i < masterBlocks.length; i++) {
-    if (masterBlocks[i].id === targetBlock.id) {
-      return i;
-    }
-    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
-      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
-    }
-  }
-  return -1;
-}
-
 export function getEditorRoot(): HTMLElement {
   const blockDOM = Array.from(
     document.querySelectorAll(`[${NODE_TYPE}="editor-root"]`).values(),
@@ -307,24 +248,6 @@ export function getPlaceholderFromRole(role: Role): string {
     default:
       return "Press '/' for commands...";
   }
-}
-
-export function findBlockNodeFromNode(node: HTMLElement): HTMLElement | null {
-  if (node.getAttribute("data-type") === BLOCK_NODE) return node;
-  if (
-    (node.firstElementChild as HTMLElement).getAttribute("data-type") ===
-    BLOCK_NODE
-  )
-    return node.firstElementChild as HTMLElement;
-  const children = node.children;
-  for (let i = 0; i < children.length; i++) {
-    if (children[i].getAttribute("data-type") === BLOCK_NODE)
-      return children[i] as HTMLElement;
-    else if (children[i].childElementCount > 1) {
-      return findBlockNodeFromNode(children[i] as HTMLElement);
-    }
-  }
-  return null;
 }
 
 export function upsertStyle(arr: Style[], newObj: Style): Style[] {
