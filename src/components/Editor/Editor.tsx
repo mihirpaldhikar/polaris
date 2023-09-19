@@ -67,7 +67,7 @@ import {
 import { createRoot, type Root } from "react-dom/client";
 import { InlineToolbar } from "../InlineToolbar";
 import { MasterBlockTools, MasterInlineTools } from "../../assets";
-import { LINK_ATTRIBUTE } from "../../constants";
+import { DEFAULT_POLARIS_CONFIG, LINK_ATTRIBUTE } from "../../constants";
 import { BlockTools } from "../BlockTools";
 import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
@@ -78,7 +78,7 @@ import { Composer } from "../Composer";
 interface EditorProps {
   editable?: boolean;
   blob: Blob;
-  config: PolarisConfig;
+  config?: PolarisConfig;
   className?: string;
   inlineTools?: Menu[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
@@ -102,7 +102,7 @@ interface EditorProps {
 export default function Editor({
   editable = true,
   blob,
-  config,
+  config = DEFAULT_POLARIS_CONFIG,
   inlineTools,
   className,
   onAttachmentSelected,
