@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-import type Block from "./Block";
+import type { TextBlock } from "./Block";
 
 interface Table {
   rows: Array<{
     id: string;
-    columns: Block[];
+    columns: TextBlock[];
   }>;
 }
 

@@ -49,7 +49,15 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["subTitle", "heading", "subHeading", "paragraph", "quote"],
     execute: {
       type: "role",
-      args: "title",
+      args: {
+        role: "title",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: "",
+          style: [],
+          role: "title",
+        },
+      },
     },
   },
   {
@@ -60,7 +68,15 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["title", "heading", "subHeading", "paragraph", "quote"],
     execute: {
       type: "role",
-      args: "subTitle",
+      args: {
+        role: "subTitle",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: "",
+          style: [],
+          role: "subTitle",
+        },
+      },
     },
   },
   {
@@ -71,7 +87,15 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["title", "subTitle", "subHeading", "paragraph", "quote"],
     execute: {
       type: "role",
-      args: "heading",
+      args: {
+        role: "heading",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: "",
+          style: [],
+          role: "subHeading",
+        },
+      },
     },
   },
   {
@@ -82,7 +106,15 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["title", "subTitle", "heading", "paragraph", "quote"],
     execute: {
       type: "role",
-      args: "subHeading",
+      args: {
+        role: "subHeading",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: "",
+          style: [],
+          role: "subHeading",
+        },
+      },
     },
   },
   {
@@ -93,7 +125,15 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["title", "subTitle", "heading", "subHeading", "quote"],
     execute: {
       type: "role",
-      args: "paragraph",
+      args: {
+        role: "paragraph",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: "",
+          style: [],
+          role: "paragraph",
+        },
+      },
     },
   },
   {
@@ -104,7 +144,15 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "quote",
+      args: {
+        role: "quote",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: "",
+          style: [],
+          role: "quote",
+        },
+      },
     },
   },
   {
@@ -115,7 +163,134 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "table",
+      args: {
+        role: "table",
+        defaultTemplate: {
+          id: generateUUID(),
+          style: [],
+          role: "table",
+          data: {
+            rows: [
+              {
+                id: generateUUID(),
+                columns: [
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                ],
+              },
+              {
+                id: generateUUID(),
+                columns: [
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                ],
+              },
+              {
+                id: generateUUID(),
+                columns: [
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                ],
+              },
+              {
+                id: generateUUID(),
+                columns: [
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                  {
+                    id: generateUUID(),
+                    role: "paragraph",
+                    data: "",
+                    style: [],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
     },
   },
   {
@@ -126,7 +301,20 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "youtubeVideoEmbed",
+      args: {
+        role: "youtubeVideoEmbed",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: {
+            url: "",
+            description: "",
+            width: 300,
+            height: 500,
+          },
+          style: [],
+          role: "youtubeVideoEmbed",
+        },
+      },
     },
   },
   {
@@ -137,7 +325,20 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "githubGistEmbed",
+      args: {
+        role: "githubGistEmbed",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: {
+            url: "",
+            description: "",
+            width: 300,
+            height: 500,
+          },
+          style: [],
+          role: "githubGistEmbed",
+        },
+      },
     },
   },
   {
@@ -148,7 +349,22 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "bulletList",
+      args: {
+        role: "bulletList",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: [
+            {
+              id: generateUUID(),
+              role: "paragraph",
+              data: "",
+              style: [],
+            },
+          ],
+          style: [],
+          role: "bulletList",
+        },
+      },
     },
   },
   {
@@ -159,7 +375,22 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "numberedList",
+      args: {
+        role: "bulletList",
+        defaultTemplate: {
+          id: generateUUID(),
+          style: [],
+          role: "bulletList",
+          data: [
+            {
+              id: generateUUID(),
+              role: "paragraph",
+              data: "",
+              style: [],
+            },
+          ],
+        },
+      },
     },
   },
   {
@@ -170,7 +401,20 @@ const MasterBlockTools: readonly Menu[] = [
     allowedRoles: ["paragraph"],
     execute: {
       type: "role",
-      args: "image",
+      args: {
+        role: "githubGistEmbed",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: {
+            url: "",
+            description: "",
+            width: 300,
+            height: 500,
+          },
+          style: [],
+          role: "githubGistEmbed",
+        },
+      },
     },
   },
   {

@@ -20,16 +20,40 @@
  * SOFTWARE.
  */
 
-import type Style from "./Style";
-import type InputArgs from "./InputArgs";
-import { type BlockFunction } from "../types";
-import { type BlockExecutable } from "./index";
+import {
+  type AttachmentBlock,
+  type ListBlock,
+  type TableBlock,
+  type TextBlock,
+} from "./index";
 
-interface AnnotationExecutable {
-  type: "style" | "link" | "input" | "blockFunction";
-  args: Style[] | string | InputArgs | BlockFunction;
+interface TextBlockExecutable {
+  role: "title" | "subTitle" | "heading" | "subHeading" | "paragraph" | "quote";
+  defaultTemplate: TextBlock;
 }
 
-type Executable = BlockExecutable | AnnotationExecutable;
+interface AttachmentBlockExecutable {
+  role: "image" | "youtubeVideoEmbed" | "githubGistEmbed";
+  defaultTemplate: AttachmentBlock;
+}
 
-export default Executable;
+interface TableBlockExecutable {
+  role: "table";
+  defaultTemplate: TableBlock;
+}
+
+interface ListBlockExecutable {
+  role: "bulletList" | "numberedList";
+  defaultTemplate: ListBlock;
+}
+
+interface BlockExecutable {
+  type: "role";
+  args:
+    | TextBlockExecutable
+    | AttachmentBlockExecutable
+    | TableBlockExecutable
+    | ListBlockExecutable;
+}
+
+export default BlockExecutable;

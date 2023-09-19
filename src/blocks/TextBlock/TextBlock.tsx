@@ -29,7 +29,6 @@ import {
   useRef,
 } from "react";
 import {
-  blockRenderTypeFromRole,
   conditionalClassName,
   generateUUID,
   getBlockNode,
@@ -148,7 +147,11 @@ export default function TextBlock({
           listMetadata.parent.data = listData;
           onCreate(listMetadata.parent, newBlock);
 
-          if (remainingList.length > 0) {
+          if (
+            remainingList.length > 0 &&
+            (listMetadata.parent.role === "bulletList" ||
+              listMetadata.parent.role === "numberedList")
+          ) {
             const newListBlock: Block = {
               id: generateUUID(),
               role: listMetadata.parent.role,
@@ -225,11 +228,9 @@ export default function TextBlock({
               .data as Table;
             tableData.rows[tableData.rows.length - 1].columns[
               tableData.rows[tableData.rows.length - 1].columns.length - 1
-            ].data = (
-              tableData.rows[tableData.rows.length - 1].columns[
-                tableData.rows[tableData.rows.length - 1].columns.length - 1
-              ].data as string
-            ).concat(block.data as string);
+            ].data = tableData.rows[tableData.rows.length - 1].columns[
+              tableData.rows[tableData.rows.length - 1].columns.length - 1
+            ].data.concat(block.data as string);
             listData[listMetadata.currentIndex - 1].data = tableData;
             onDelete(
               block,
@@ -273,11 +274,9 @@ export default function TextBlock({
           const tableData = previousParentBlock.data as Table;
           tableData.rows[tableData.rows.length - 1].columns[
             tableData.rows[tableData.rows.length - 1].columns.length - 1
-          ].data = (
-            tableData.rows[tableData.rows.length - 1].columns[
-              tableData.rows[tableData.rows.length - 1].columns.length - 1
-            ].data as string
-          ).concat(block.data as string);
+          ].data = tableData.rows[tableData.rows.length - 1].columns[
+            tableData.rows[tableData.rows.length - 1].columns.length - 1
+          ].data.concat(block.data as string);
           previousParentBlock.data = tableData;
           onDelete(
             block,
@@ -368,7 +367,10 @@ export default function TextBlock({
 
   return createElement(nodeTypeFromRole(block.role), {
     "data-type": BLOCK_NODE,
-    "data-block-render-type": blockRenderTypeFromRole(block.role),
+    "data-parent-block-id":
+      listMetadata === undefined ? null : listMetadata.parent.id,
+    "data-child-block-index":
+      listMetadata === undefined ? null : listMetadata.currentIndex,
     id: block.id,
     disabled: !editable,
     contentEditable: editable,

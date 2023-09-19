@@ -20,24 +20,46 @@
  * SOFTWARE.
  */
 
-import { type Role } from "../types";
 import type Style from "./Style";
 import { type Attachment } from "./index";
 import type Table from "./Table";
 
+export interface TextBlock {
+  id: string;
+  role: "title" | "subTitle" | "heading" | "subHeading" | "paragraph" | "quote";
+  data: string;
+  style: Style[];
+}
+
+export interface AttachmentBlock {
+  id: string;
+  role: "image" | "youtubeVideoEmbed" | "githubGistEmbed";
+  data: Attachment;
+  style: Style[];
+}
+
+export interface TableBlock {
+  id: string;
+  role: "table";
+  data: Table;
+  style: Style[];
+}
+
+export interface ListBlock {
+  id: string;
+  role: "bulletList" | "numberedList";
+  data: Block[];
+  style: Style[];
+}
+
 /**
- * @interface Block
+ * @type Block
  *
  * @description Block is the smallest unit of document which contains all the information required by the parser to render DOM Node.
  *
  * @author Mihir Paldhikar
  */
 
-interface Block {
-  id: string;
-  role: Role;
-  data: string | Attachment | Block[] | Table;
-  style: Style[];
-}
+type Block = TextBlock | AttachmentBlock | TableBlock | ListBlock;
 
 export default Block;

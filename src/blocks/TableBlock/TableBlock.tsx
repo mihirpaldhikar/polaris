@@ -31,7 +31,12 @@ import {
   useRef,
 } from "react";
 import { BLOCK_NODE } from "../../constants";
-import { type Block, type Coordinates, type Table } from "../../interfaces";
+import {
+  type Block,
+  type Coordinates,
+  type Table,
+  type TextBlock,
+} from "../../interfaces";
 import {
   conditionalClassName,
   generateUUID,
@@ -270,7 +275,7 @@ export default function TableBlock({
           title={"Add row after current row"}
           className={"p-1 rounded-md hover:bg-gray-100 cursor-pointer"}
           onClick={() => {
-            const columns: Block[] = [];
+            const columns: TextBlock[] = [];
             for (let i = 0; i < totalColumns; i++) {
               columns.push({
                 id: generateUUID(),

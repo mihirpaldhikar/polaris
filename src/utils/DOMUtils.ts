@@ -25,7 +25,6 @@ import {
   type Block,
   type Coordinates,
   type Style,
-  type Table,
 } from "../interfaces";
 import {
   INLINE_SPECIFIER_NODE,
@@ -855,6 +854,16 @@ export function splitBlocksAtCaretOffset(
   block: Block,
   caretOffset: number,
 ): Block[] {
+  if (
+    block.role === "table" ||
+    block.role === "bulletList" ||
+    block.role === "numberedList" ||
+    block.role === "githubGistEmbed" ||
+    block.role === "youtubeVideoEmbed" ||
+    block.role === "image"
+  ) {
+    return [];
+  }
   const blockNode = getBlockNode(block.id) as HTMLElement;
   const nodeAtCaretOffset = getNodeAt(blockNode, caretOffset);
   const caretNodeOffset = nodeOffset(blockNode, nodeAtCaretOffset);
@@ -1062,7 +1071,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     node.style.setProperty("table-layout", "auto");
     node.style.setProperty("border-collapse", "collapse");
     node.style.setProperty("overflow-x", "auto");
-    const tableData = block.data as Table;
+    const tableData = block.data;
     const tableBody = document.createElement("tbody");
     for (let i = 0; i < tableData.rows.length; i++) {
       const row = document.createElement("tr");
@@ -1070,7 +1079,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       for (let j = 0; j < tableData.rows[i].columns.length; j++) {
         const cell = document.createElement(i === 0 ? "th" : "td");
         cell.id = tableData.rows[i].columns[j].id;
-        cell.innerHTML = tableData.rows[i].columns[j].data as string;
+        cell.innerHTML = tableData.rows[i].columns[j].data;
         for (const style of tableData.rows[i].columns[j].style) {
           cell.style.setProperty(kebabCase(style.name), kebabCase(style.value));
         }

@@ -29,7 +29,6 @@ import {
   useState,
 } from "react";
 import {
-  type Attachment,
   type Blob,
   type Block,
   type Coordinates,
@@ -54,7 +53,6 @@ import {
   getNodeIndex,
   inlineSpecifierManager,
   nodeInViewPort,
-  normalizeContent,
   removeEmptyInlineSpecifiers,
   rgbStringToHex,
   setCaretOffset,
@@ -66,7 +64,6 @@ import {
   traverseAndUpdateBelow,
   upsertStyle,
 } from "../../utils";
-import { type Role } from "../../types";
 import { createRoot, type Root } from "react-dom/client";
 import { InlineToolbar } from "../InlineToolbar";
 import { MasterBlockTools, MasterInlineTools } from "../../assets";
@@ -199,16 +196,23 @@ export default function Editor({
     ) => {
       const popupNode = window.document.getElementById(`popup-${blob.id}`);
       const editorNode = window.document.getElementById(`editor-${blob.id}`);
-      const currentNode = getBlockNode(block.id);
+      const activeNode = getBlockNode(block.id);
       if (
         popupNode == null ||
         editorNode == null ||
-        currentNode == null ||
+        activeNode == null ||
         popUpRoot === undefined ||
         typeof block.data !== "string"
       ) {
         return;
       }
+      const activeNodeParentId = activeNode.getAttribute(
+        "data-parent-block-id",
+      );
+
+      const activeNodeChildIndex = activeNode.getAttribute(
+        "data-child-block-index",
+      );
 
       if (popupNode.childElementCount !== 0) {
         popUpRoot.render(<Fragment />);
@@ -219,17 +223,16 @@ export default function Editor({
         return;
       }
 
-      if (!nodeInViewPort(currentNode)) {
-        currentNode.scrollIntoView();
+      if (!nodeInViewPort(activeNode)) {
+        activeNode.scrollIntoView();
       }
 
       const { x, y } = getCaretCoordinates(true);
       const actionMenuCoordinates: Coordinates = {
-        x: block.data.length === 0 ? currentNode.getBoundingClientRect().x : x,
+        x: block.data.length === 0 ? activeNode.getBoundingClientRect().x : x,
         y:
-          (block.data.length === 0
-            ? currentNode.getBoundingClientRect().y
-            : y) + 30,
+          (block.data.length === 0 ? activeNode.getBoundingClientRect().y : y) +
+          30,
       };
 
       dispatchEditorEvent("onActionMenu", {
@@ -258,319 +261,223 @@ export default function Editor({
             switch (execute.type) {
               case "role": {
                 let focusNode = block.id;
-                const newRole = execute.args as Role;
-                if (blockRenderTypeFromRole(newRole) === RenderType.TEXT) {
-                  block.role = newRole;
+                const newRole = execute.args.role;
+                const defaultTemplate = execute.args.defaultTemplate;
+
+                if (
+                  newRole === "title" ||
+                  newRole === "subTitle" ||
+                  newRole === "heading" ||
+                  newRole === "subHeading" ||
+                  newRole === "paragraph" ||
+                  newRole === "quote"
+                ) {
+                  block = defaultTemplate;
+                  block.id = focusNode;
                   block.data = previousContent;
                   traverseAndUpdate(masterBlocks, block);
                 } else if (
-                  blockRenderTypeFromRole(newRole) === RenderType.LIST
+                  newRole === "image" ||
+                  newRole === "youtubeVideoEmbed" ||
+                  newRole === "githubGistEmbed"
                 ) {
-                  block.role = newRole;
-                  focusNode = generateUUID();
-                  block.data = [
-                    {
-                      id: focusNode,
-                      data: previousContent,
-                      style: block.style,
-                      role: "paragraph",
-                    },
-                  ];
-                  traverseAndUpdate(masterBlocks, block);
-                } else if (
-                  blockRenderTypeFromRole(newRole) === RenderType.ATTACHMENT
-                ) {
-                  let imageBlock: Block = {
-                    id: generateUUID(),
-                    data: {
-                      url: "",
-                      description: "",
-                      width: 500,
-                      height: 300,
-                    },
-                    style: [],
-                    role: newRole,
-                  };
-                  block.data = previousContent;
-                  if (
-                    blockRenderTypeFromNode(currentNode) === RenderType.LIST
-                  ) {
-                    const parentNode = currentNode?.parentElement
-                      ?.parentElement as HTMLElement;
-                    const parentBlock = traverseAndFind(
-                      masterBlocks,
-                      parentNode.id,
-                    ) as Block;
-
-                    if (previousContent === "") {
-                      block.data = imageBlock.data;
-                      block.role = imageBlock.role;
-                      block.style = imageBlock.style;
-                      imageBlock = block;
-                    }
-                    traverseAndUpdate(parentBlock.data as Block[], block);
-                    if (previousContent !== "") {
-                      traverseAndUpdateBelow(
-                        parentBlock.data as Block[],
-                        block,
-                        imageBlock,
-                      );
-                    }
-                    traverseAndUpdate(masterBlocks, parentBlock);
-                    const newBlockIndex = traverseAndFindBlockPosition(
-                      parentBlock.data as Block[],
-                      imageBlock,
-                    );
-
+                  if (previousContent.length === 0) {
+                    block = defaultTemplate;
+                    block.id = focusNode;
                     if (
-                      newBlockIndex ===
-                      (parentBlock.data as Block[]).length - 1
+                      activeNodeParentId != null &&
+                      activeNodeChildIndex != null
                     ) {
-                      const emptyBlock: Block = {
-                        id: generateUUID(),
-                        data: "",
-                        role: "paragraph",
-                        style: [],
-                      };
-                      traverseAndUpdateBelow(
-                        parentBlock.data as Block[],
-                        imageBlock,
-                        emptyBlock,
+                      const parentBlock = traverseAndFind(
+                        masterBlocks,
+                        activeNodeParentId,
                       );
+                      if (parentBlock != null) {
+                        const listData = parentBlock.data as Block[];
+                        traverseAndUpdate(listData, block);
+                        const blockIndex = parseInt(activeNodeChildIndex);
+                        if (blockIndex === listData.length - 1) {
+                          const emptyBlock: Block = {
+                            id: generateUUID(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          };
+                          traverseAndUpdateBelow(listData, block, emptyBlock);
+                        }
+                      }
+                    } else {
+                      traverseAndUpdate(masterBlocks, block);
+                      const blockIndex = traverseAndFindBlockPosition(
+                        masterBlocks,
+                        block,
+                      );
+                      if (blockIndex === masterBlocks.length - 1) {
+                        const emptyBlock: Block = {
+                          id: generateUUID(),
+                          role: "paragraph",
+                          data: "",
+                          style: [],
+                        };
+                        traverseAndUpdateBelow(masterBlocks, block, emptyBlock);
+                      }
                     }
                   } else {
-                    if (previousContent === "") {
-                      block.data = imageBlock.data;
-                      block.role = imageBlock.role;
-                      block.style = imageBlock.style;
-                      imageBlock = block;
-                    }
-                    traverseAndUpdate(masterBlocks, block);
-                    if (previousContent !== "") {
-                      traverseAndUpdateBelow(masterBlocks, block, imageBlock);
-                    }
-                    const newBlockIndex = traverseAndFindBlockPosition(
-                      masterBlocks,
-                      imageBlock,
-                    );
-                    if (newBlockIndex === masterBlocks.length - 1) {
-                      const emptyBlock: Block = {
-                        id: generateUUID(),
-                        data: "",
-                        role: "paragraph",
-                        style: [],
-                      };
-                      traverseAndUpdateBelow(
+                    block.data = previousContent;
+                    const imageBlock = defaultTemplate;
+                    if (
+                      activeNodeParentId != null &&
+                      activeNodeChildIndex != null
+                    ) {
+                      const parentBlock = traverseAndFind(
                         masterBlocks,
-                        imageBlock,
-                        emptyBlock,
+                        activeNodeParentId,
                       );
+                      if (parentBlock != null) {
+                        const listData = parentBlock.data as Block[];
+                        traverseAndUpdate(listData, block);
+                        traverseAndUpdateBelow(listData, block, imageBlock);
+                        const blockIndex = parseInt(activeNodeChildIndex);
+                        if (blockIndex + 1 === listData.length - 1) {
+                          const emptyBlock: Block = {
+                            id: generateUUID(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          };
+                          traverseAndUpdateBelow(
+                            listData,
+                            imageBlock,
+                            emptyBlock,
+                          );
+                        }
+                      }
+                    } else {
+                      traverseAndUpdate(masterBlocks, block);
+                      traverseAndUpdateBelow(masterBlocks, block, imageBlock);
+                      const blockIndex = traverseAndFindBlockPosition(
+                        masterBlocks,
+                        block,
+                      );
+                      if (blockIndex + 1 === masterBlocks.length - 1) {
+                        const emptyBlock: Block = {
+                          id: generateUUID(),
+                          role: "paragraph",
+                          data: "",
+                          style: [],
+                        };
+                        traverseAndUpdateBelow(
+                          masterBlocks,
+                          imageBlock,
+                          emptyBlock,
+                        );
+                      }
                     }
                   }
                 } else if (
-                  blockRenderTypeFromRole(newRole) === RenderType.TABLE
+                  newRole === "bulletList" ||
+                  newRole === "numberedList"
                 ) {
-                  let tableBlock: Block = {
-                    id: generateUUID(),
-                    role: newRole,
-                    style: [],
-                    data: {
-                      rows: [
-                        {
-                          id: generateUUID(),
-                          columns: [
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                          ],
-                        },
-                        {
-                          id: generateUUID(),
-                          columns: [
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                          ],
-                        },
-                        {
-                          id: generateUUID(),
-                          columns: [
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                          ],
-                        },
-                        {
-                          id: generateUUID(),
-                          columns: [
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                            {
-                              id: generateUUID(),
-                              role: "paragraph",
-                              data: "",
-                              style: [],
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  };
-                  block.data = previousContent;
-                  focusNode = (tableBlock.data as Table).rows[0].columns[0].id;
-
-                  if (
-                    blockRenderTypeFromNode(currentNode) === RenderType.LIST
-                  ) {
-                    const parentNode = currentNode?.parentElement
-                      ?.parentElement as HTMLElement;
-                    const parentBlock = traverseAndFind(
-                      masterBlocks,
-                      parentNode.id,
-                    ) as Block;
-
-                    if (previousContent === "") {
-                      block.data = tableBlock.data;
-                      block.role = tableBlock.role;
-                      block.style = tableBlock.style;
-                      tableBlock = block;
-                    }
-                    traverseAndUpdate(parentBlock.data as Block[], block);
-                    if (previousContent !== "") {
-                      traverseAndUpdateBelow(
-                        parentBlock.data as Block[],
-                        block,
-                        tableBlock,
-                      );
-                    }
-                    traverseAndUpdate(masterBlocks, parentBlock);
-                    const newBlockIndex = traverseAndFindBlockPosition(
-                      parentBlock.data as Block[],
-                      tableBlock,
-                    );
-
+                  block = defaultTemplate;
+                  block.id = focusNode;
+                  focusNode = (defaultTemplate.data as Block[])[0].id;
+                  traverseAndUpdate(masterBlocks, block);
+                } else if (newRole === "table") {
+                  if (previousContent.length === 0) {
+                    block = defaultTemplate;
+                    block.id = focusNode;
+                    focusNode = (defaultTemplate.data as Table).rows[0]
+                      .columns[0].id;
                     if (
-                      newBlockIndex ===
-                      (parentBlock.data as Block[]).length - 1
+                      activeNodeParentId != null &&
+                      activeNodeChildIndex != null
                     ) {
-                      const emptyBlock: Block = {
-                        id: generateUUID(),
-                        data: "",
-                        role: "paragraph",
-                        style: [],
-                      };
-                      traverseAndUpdateBelow(
-                        parentBlock.data as Block[],
-                        tableBlock,
-                        emptyBlock,
+                      const parentBlock = traverseAndFind(
+                        masterBlocks,
+                        activeNodeParentId,
                       );
+                      if (parentBlock != null) {
+                        const listData = parentBlock.data as Block[];
+                        traverseAndUpdate(listData, block);
+                        const blockIndex = parseInt(activeNodeChildIndex);
+                        if (blockIndex === listData.length - 1) {
+                          const emptyBlock: Block = {
+                            id: generateUUID(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          };
+                          traverseAndUpdateBelow(listData, block, emptyBlock);
+                        }
+                      }
+                    } else {
+                      traverseAndUpdate(masterBlocks, block);
+                      const blockIndex = traverseAndFindBlockPosition(
+                        masterBlocks,
+                        block,
+                      );
+                      if (blockIndex === masterBlocks.length - 1) {
+                        const emptyBlock: Block = {
+                          id: generateUUID(),
+                          role: "paragraph",
+                          data: "",
+                          style: [],
+                        };
+                        traverseAndUpdateBelow(masterBlocks, block, emptyBlock);
+                      }
                     }
                   } else {
-                    if (previousContent === "") {
-                      block.data = tableBlock.data;
-                      block.role = tableBlock.role;
-                      block.style = tableBlock.style;
-                      tableBlock = block;
-                    }
-                    traverseAndUpdate(masterBlocks, block);
-                    if (previousContent !== "") {
-                      traverseAndUpdateBelow(masterBlocks, block, tableBlock);
-                    }
-                    const newBlockIndex = traverseAndFindBlockPosition(
-                      masterBlocks,
-                      tableBlock,
-                    );
-                    if (newBlockIndex === masterBlocks.length - 1) {
-                      const emptyBlock: Block = {
-                        id: generateUUID(),
-                        data: "",
-                        role: "paragraph",
-                        style: [],
-                      };
-                      traverseAndUpdateBelow(
+                    block.data = previousContent;
+                    const tableBlock = defaultTemplate;
+                    focusNode = (tableBlock.data as Table).rows[0].columns[0]
+                      .id;
+                    if (
+                      activeNodeParentId != null &&
+                      activeNodeChildIndex != null
+                    ) {
+                      const parentBlock = traverseAndFind(
                         masterBlocks,
-                        tableBlock,
-                        emptyBlock,
+                        activeNodeParentId,
                       );
+                      if (parentBlock != null) {
+                        const listData = parentBlock.data as Block[];
+                        traverseAndUpdate(listData, block);
+                        traverseAndUpdateBelow(listData, block, tableBlock);
+                        const blockIndex = parseInt(activeNodeChildIndex);
+                        if (blockIndex + 1 === listData.length - 1) {
+                          const emptyBlock: Block = {
+                            id: generateUUID(),
+                            role: "paragraph",
+                            data: "",
+                            style: [],
+                          };
+                          traverseAndUpdateBelow(
+                            listData,
+                            tableBlock,
+                            emptyBlock,
+                          );
+                        }
+                      }
+                    } else {
+                      traverseAndUpdate(masterBlocks, block);
+                      traverseAndUpdateBelow(masterBlocks, block, tableBlock);
+                      const blockIndex = traverseAndFindBlockPosition(
+                        masterBlocks,
+                        block,
+                      );
+                      if (blockIndex + 1 === masterBlocks.length - 1) {
+                        const emptyBlock: Block = {
+                          id: generateUUID(),
+                          role: "paragraph",
+                          data: "",
+                          style: [],
+                        };
+                        traverseAndUpdateBelow(
+                          masterBlocks,
+                          tableBlock,
+                          emptyBlock,
+                        );
+                      }
                     }
                   }
                 }
@@ -692,8 +599,8 @@ export default function Editor({
             activeNode.getAttribute("contenteditable") !== "true"
           )
             return;
-
           const activeBlock = traverseAndFind(masterBlocks, activeNode.id);
+          console.log(activeBlock);
           if (activeBlock != null) {
             actionMenuTriggerHandler(
               activeBlock,
@@ -1018,76 +925,6 @@ export default function Editor({
     });
   }
 
-  function pasteHandler(
-    block: Block,
-    data: string | string[],
-    caretOffset: number,
-  ): void {
-    if (typeof block.data !== "string") return;
-    const blockIndex = masterBlocks.indexOf(block);
-    block.data = normalizeContent(block.data);
-    const contentLengthAfterCaretOffset =
-      block.data.substring(caretOffset).length;
-
-    if (
-      blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-      Array.isArray(data)
-    ) {
-      const pasteBlocks: Block[] = data.map((copiedText, index) => {
-        return {
-          id: generateUUID(),
-          role: block.role,
-          style: block.style,
-          data:
-            index === 0
-              ? (block.data as string)
-                  .substring(0, caretOffset)
-                  .concat(copiedText)
-              : index === data.length - 1
-              ? copiedText.concat((block.data as string).substring(caretOffset))
-              : copiedText,
-        };
-      });
-      masterBlocks.splice(blockIndex, 1, ...pasteBlocks);
-
-      const pasteContentLength = normalizeContent(
-        pasteBlocks[pasteBlocks.length - 1].data as string,
-      ).length;
-
-      const computedCaretOffset: number =
-        pasteContentLength - contentLengthAfterCaretOffset < 0
-          ? contentLengthAfterCaretOffset - pasteContentLength
-          : pasteContentLength - contentLengthAfterCaretOffset;
-
-      propagateChanges(masterBlocks, {
-        nodeId: pasteBlocks[pasteBlocks.length - 1].id,
-        caretOffset: computedCaretOffset,
-      });
-    } else if (
-      blockRenderTypeFromRole(block.role) === RenderType.TEXT &&
-      typeof data === "string"
-    ) {
-      masterBlocks[blockIndex].data = (masterBlocks[blockIndex].data as string)
-        .substring(0, caretOffset)
-        .concat(data)
-        .concat(
-          (masterBlocks[blockIndex].data as string).substring(caretOffset),
-        );
-
-      const pasteContentLength = normalizeContent(block.data).length;
-
-      const computedCaretOffset: number =
-        pasteContentLength - contentLengthAfterCaretOffset < 0
-          ? contentLengthAfterCaretOffset - pasteContentLength
-          : pasteContentLength - contentLengthAfterCaretOffset;
-
-      propagateChanges(masterBlocks, {
-        nodeId: block.id,
-        caretOffset: computedCaretOffset,
-      });
-    }
-  }
-
   function selectionHandler(block: Block): void {
     const selection = window.getSelection();
 
@@ -1232,7 +1069,7 @@ export default function Editor({
     }
 
     void onAttachmentSelected(data).then((str) => {
-      (block.data as Attachment).url = str;
+      block.data.url = str;
       const blockIndex = masterBlocks.indexOf(block);
       if (blockIndex === -1) {
         const blockNode = getBlockNode(block.id) as HTMLElement;
@@ -1303,7 +1140,6 @@ export default function Editor({
               }, 260)}
               onCreate={createHandler}
               onDelete={deletionHandler}
-              onPaste={pasteHandler}
               onSelect={debounce((block) => {
                 selectionHandler(block);
               }, 260)}

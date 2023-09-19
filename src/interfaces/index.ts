@@ -21,7 +21,13 @@
  */
 
 export type { default as Style } from "./Style";
-export type { default as Block } from "./Block";
+export type {
+  default as Block,
+  TextBlock,
+  AttachmentBlock,
+  TableBlock,
+  ListBlock,
+} from "./Block";
 export type { default as Coordinates } from "./Coordinates";
 export type { default as Blob } from "./Blob";
 export type { default as Menu } from "./Menu";
@@ -30,3 +36,4 @@ export type { default as InputArgs } from "./InputArgs";
 export type { default as Attachment } from "./Attachment";
 export type { default as PolarisConfig } from "./PolarisConfig";
 export type { default as Table } from "./Table";
+export type { default as BlockExecutable } from "./BlockExecutable";

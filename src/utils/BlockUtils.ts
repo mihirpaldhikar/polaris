@@ -336,7 +336,7 @@ export function findPreviousTextNode(
     }
   } else if (previousNodeId === "null") {
     const parentNodeId = node.getAttribute("data-parent-block-id");
-    if (parentNodeId != null) {
+    if (parentNodeId != null && parentNodeId !== "null") {
       const parentNode = getBlockNode(parentNodeId);
       if (parentNode?.previousElementSibling != null)
         return parentNode.previousElementSibling as HTMLElement;
@@ -367,7 +367,7 @@ export function findNextTextNode(
     }
   } else if (nextNodeId === "null") {
     const parentNodeId = node.getAttribute("data-parent-block-id");
-    if (parentNodeId != null) {
+    if (parentNodeId != null && parentNodeId !== "null") {
       const parentNode = getBlockNode(parentNodeId);
       if (parentNode?.nextElementSibling != null)
         return parentNode.nextElementSibling as HTMLElement;

@@ -30,7 +30,6 @@ import {
   openLinkInNewTab,
   setNodeStyle,
 } from "../../utils";
-import RenderType from "../../enums/RenderType";
 import { AttachmentBlock, TableBlock, TextBlock } from "../../blocks";
 import { BLOCK_NODE } from "../../constants";
 import RootContext from "../../contexts/RootContext/RootContext";
@@ -62,7 +61,6 @@ interface ComposerProps {
     setCursorToStart?: boolean,
     holder?: Block[],
   ) => void;
-  onPaste: (block: Block, data: string | string[], caretOffset: number) => void;
   onSelect: (block: Block) => void;
   onAttachmentRequest: (block: Block, data: File | string) => void;
   onMarkdown: (block: Block) => void;
@@ -76,7 +74,6 @@ interface ComposerProps {
  * @param onChange
  * @param onEnter
  * @param onDelete
- * @param onPaste
  * @param onSelect
  * @returns JSX.Element
  *
@@ -93,14 +90,20 @@ export default function Composer({
   onChange,
   onCreate,
   onDelete,
-  onPaste,
   onSelect,
   onAttachmentRequest,
   onMarkdown,
 }: ComposerProps): JSX.Element {
   const { config } = useContext(RootContext);
 
-  if (blockRenderTypeFromRole(block.role) === RenderType.TEXT) {
+  if (
+    block.role === "title" ||
+    block.role === "subTitle" ||
+    block.role === "heading" ||
+    block.role === "subHeading" ||
+    block.role === "paragraph" ||
+    block.role === "quote"
+  ) {
     return (
       <TextBlock
         listMetadata={listMetadata}
@@ -115,9 +118,11 @@ export default function Composer({
         onMarkdown={onMarkdown}
       />
     );
-  }
-
-  if (blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT) {
+  } else if (
+    block.role === "image" ||
+    block.role === "youtubeVideoEmbed" ||
+    block.role === "githubGistEmbed"
+  ) {
     return (
       <AttachmentBlock
         block={block}
@@ -129,9 +134,7 @@ export default function Composer({
         onDelete={onDelete}
       />
     );
-  }
-
-  if (blockRenderTypeFromRole(block.role) === RenderType.TABLE) {
+  } else if (block.role === "table") {
     return (
       <TableBlock
         block={block}
@@ -145,12 +148,7 @@ export default function Composer({
         onCreate={onCreate}
       />
     );
-  }
-
-  if (
-    blockRenderTypeFromRole(block.role) === RenderType.LIST &&
-    Array.isArray(block.data)
-  ) {
+  } else if (block.role === "numberedList" || block.role === "bulletList") {
     return createElement(
       nodeTypeFromRole(block.role),
       {
@@ -191,7 +189,6 @@ export default function Composer({
               onChange={onChange}
               onCreate={onCreate}
               onDelete={onDelete}
-              onPaste={onPaste}
               onSelect={onSelect}
               onAttachmentRequest={onAttachmentRequest}
               onMarkdown={onMarkdown}
@@ -201,6 +198,5 @@ export default function Composer({
       }),
     );
   }
-
-  throw Error(`Block with role '${block.role}' is not a valid block.`);
+  return <Fragment />;
 }
