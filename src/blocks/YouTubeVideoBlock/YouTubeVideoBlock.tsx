@@ -42,7 +42,6 @@ export default function YouTubeVideoBlock({
     <iframe
       id={block.id}
       data-type={BLOCK_NODE}
-      data-block-render-type={"youtubeVideo"}
       data-parent-block-id={
         listMetadata === undefined ? null : listMetadata.parent.id
       }

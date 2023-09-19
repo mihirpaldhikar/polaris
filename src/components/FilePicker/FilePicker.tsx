@@ -50,7 +50,6 @@ export default function FilePicker({
   return (
     <div
       data-type={BLOCK_NODE}
-      data-block-render-type={"attachment-placeholder"}
       id={id}
       className={
         "relative h-14 block my-2 w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50"

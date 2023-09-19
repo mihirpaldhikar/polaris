@@ -53,7 +53,6 @@ export default function EmbedPicker({
     <div
       data-type={BLOCK_NODE}
       id={id}
-      data-block-render-type={"attachment-placeholder"}
       data-parent-block-id={
         listMetadata === undefined ? null : listMetadata.parent.id
       }

@@ -21,11 +21,7 @@
  */
 
 import { createElement, Fragment, type JSX } from "react";
-import {
-  blockRenderTypeFromRole,
-  generateUUID,
-  nodeTypeFromRole,
-} from "../../utils";
+import { generateUUID, nodeTypeFromRole } from "../../utils";
 import { type Attachment, type Block } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
 import { GitHubIcon, ImageIcon, YouTubeIcon } from "../../assets";
@@ -230,7 +226,6 @@ export default function AttachmentBlock({
         {createElement(nodeTypeFromRole(block.role), {
           id: block.id,
           "data-type": BLOCK_NODE,
-          "data-block-render-type": blockRenderTypeFromRole(block.role),
           "data-parent-block-id":
             listMetadata === undefined ? null : listMetadata.parent.id,
           "data-child-block-index":

@@ -68,7 +68,6 @@ export default function GitHubGistBlock({
     <iframe
       id={block.id}
       data-type={BLOCK_NODE}
-      data-block-render-type={"githubGist"}
       data-parent-block-id={
         listMetadata === undefined ? null : listMetadata.parent.id
       }
