@@ -295,6 +295,30 @@ const MasterBlockTools: readonly Menu[] = [
   },
   {
     id: generateUUID(),
+    name: "Image",
+    description: `Add an image`,
+    icon: <ImageIcon size={32} />,
+    allowedRoles: ["paragraph"],
+    execute: {
+      type: "role",
+      args: {
+        role: "image",
+        defaultTemplate: {
+          id: generateUUID(),
+          data: {
+            url: "",
+            description: "",
+            width: 500,
+            height: 300,
+          },
+          style: [],
+          role: "image",
+        },
+      },
+    },
+  },
+  {
+    id: generateUUID(),
     name: "Youtube Video",
     description: `Add YouTube video.`,
     icon: <YouTubeIcon size={30} />,
@@ -308,8 +332,8 @@ const MasterBlockTools: readonly Menu[] = [
           data: {
             url: "",
             description: "",
-            width: 300,
-            height: 500,
+            width: 500,
+            height: 300,
           },
           style: [],
           role: "youtubeVideoEmbed",
@@ -332,8 +356,8 @@ const MasterBlockTools: readonly Menu[] = [
           data: {
             url: "",
             description: "",
-            width: 300,
-            height: 500,
+            width: 500,
+            height: 300,
           },
           style: [],
           role: "githubGistEmbed",
@@ -389,30 +413,6 @@ const MasterBlockTools: readonly Menu[] = [
               style: [],
             },
           ],
-        },
-      },
-    },
-  },
-  {
-    id: generateUUID(),
-    name: "Image",
-    description: `Add an image`,
-    icon: <ImageIcon size={32} />,
-    allowedRoles: ["paragraph"],
-    execute: {
-      type: "role",
-      args: {
-        role: "image",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: {
-            url: "",
-            description: "",
-            width: 300,
-            height: 500,
-          },
-          style: [],
-          role: "image",
         },
       },
     },
