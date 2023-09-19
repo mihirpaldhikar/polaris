@@ -26,12 +26,16 @@ import { DeleteIcon } from "../../assets";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { InputDialog } from "../InputDialog";
 import { getBlockNode } from "../../utils";
-import { type Coordinates } from "../../interfaces";
+import { type Block, type Coordinates } from "../../interfaces";
 
 interface EmbedPickerProps {
   id: string;
   message: string;
   icon: JSX.Element;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
   onEmbedPicked: (url: string) => void;
   onDelete: () => void;
 }
@@ -41,6 +45,7 @@ export default function EmbedPicker({
   message,
   icon,
   onEmbedPicked,
+  listMetadata,
   onDelete,
 }: EmbedPickerProps): JSX.Element {
   const { dialogRoot } = useContext(RootContext);
@@ -49,6 +54,12 @@ export default function EmbedPicker({
       data-type={BLOCK_NODE}
       id={id}
       data-block-render-type={"attachment-placeholder"}
+      data-parent-block-id={
+        listMetadata === undefined ? null : listMetadata.parent.id
+      }
+      data-child-block-index={
+        listMetadata === undefined ? null : listMetadata.currentIndex
+      }
       className={
         "relative h-14 block my-2 w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50"
       }

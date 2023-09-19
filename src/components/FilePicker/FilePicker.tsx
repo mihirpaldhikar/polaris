@@ -23,9 +23,14 @@
 import { type JSX } from "react";
 import { BLOCK_NODE } from "../../constants";
 import { DeleteIcon } from "../../assets";
+import { type Block } from "../../interfaces";
 
 interface FilePickerProps {
   id: string;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
   message: string;
   accept: string;
   fileIcon: JSX.Element;
@@ -35,6 +40,7 @@ interface FilePickerProps {
 
 export default function FilePicker({
   id,
+  listMetadata,
   message,
   fileIcon,
   accept,
@@ -48,6 +54,12 @@ export default function FilePicker({
       id={id}
       className={
         "relative h-14 block my-2 w-full cursor-pointer rounded-md border border-gray-300 bg-gray-50"
+      }
+      data-parent-block-id={
+        listMetadata === undefined ? null : listMetadata.parent.id
+      }
+      data-child-block-index={
+        listMetadata === undefined ? null : listMetadata.currentIndex
       }
     >
       <input

@@ -27,10 +27,15 @@ import { generateGitHubGistURL } from "../../utils";
 
 interface GitHubGistBlockProps {
   block: Block;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
 }
 
 export default function GitHubGistBlock({
   block,
+  listMetadata,
 }: GitHubGistBlockProps): JSX.Element {
   const attachment: Attachment = block.data as Attachment;
 
@@ -64,6 +69,12 @@ export default function GitHubGistBlock({
       id={block.id}
       data-type={BLOCK_NODE}
       data-block-render-type={"githubGist"}
+      data-parent-block-id={
+        listMetadata === undefined ? null : listMetadata.parent.id
+      }
+      data-child-block-index={
+        listMetadata === undefined ? null : listMetadata.currentIndex
+      }
       data-block-url={attachment.url}
       className={"w-full"}
       style={{

@@ -27,10 +27,15 @@ import { BLOCK_NODE } from "../../constants";
 
 interface YouTubeVideoBlockProps {
   block: Block;
+  listMetadata?: {
+    parent: Block;
+    currentIndex: number;
+  };
 }
 
 export default function YouTubeVideoBlock({
   block,
+  listMetadata,
 }: YouTubeVideoBlockProps): JSX.Element {
   const attachment = block.data as Attachment;
   return (
@@ -38,6 +43,12 @@ export default function YouTubeVideoBlock({
       id={block.id}
       data-type={BLOCK_NODE}
       data-block-render-type={"youtubeVideo"}
+      data-parent-block-id={
+        listMetadata === undefined ? null : listMetadata.parent.id
+      }
+      data-child-block-index={
+        listMetadata === undefined ? null : listMetadata.currentIndex
+      }
       data-block-url={attachment.url}
       width={attachment.width}
       height={attachment.height}

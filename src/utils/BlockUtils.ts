@@ -232,7 +232,9 @@ export function traverseAndFind(
   }
 
   for (const listBlock of listBlocks) {
-    traverseAndFind(listBlock.data as Block[], blockId);
+    if (Array.isArray(listBlock.data)) {
+      return traverseAndFind(listBlock.data, blockId);
+    }
   }
   return null;
 }
@@ -390,4 +392,21 @@ export function findNextTextNode(
   else {
     return textElements[blockDOMIndex + 1] as HTMLElement;
   }
+}
+
+export function getListMetadata(node: HTMLElement): {
+  parentId: string;
+  childIndex: number;
+} | null {
+  const nodeParentId = node.getAttribute("data-parent-block-id");
+  const nodeChildIndex = node.getAttribute("data-child-block-index");
+
+  if (nodeParentId != null && nodeChildIndex != null) {
+    return {
+      parentId: nodeParentId,
+      childIndex: parseInt(nodeChildIndex),
+    };
+  }
+
+  return null;
 }

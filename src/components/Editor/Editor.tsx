@@ -39,7 +39,6 @@ import {
   type Table,
 } from "../../interfaces";
 import {
-  blockRenderTypeFromNode,
   blockRenderTypeFromRole,
   dispatchEditorEvent,
   elementContainsStyle,
@@ -49,6 +48,7 @@ import {
   getBlockNode,
   getCaretCoordinates,
   getCaretOffset,
+  getListMetadata,
   getNodeAt,
   getNodeIndex,
   inlineSpecifierManager,
@@ -206,13 +206,8 @@ export default function Editor({
       ) {
         return;
       }
-      const activeNodeParentId = activeNode.getAttribute(
-        "data-parent-block-id",
-      );
 
-      const activeNodeChildIndex = activeNode.getAttribute(
-        "data-child-block-index",
-      );
+      const listMetadata = getListMetadata(activeNode);
 
       if (popupNode.childElementCount !== 0) {
         popUpRoot.render(<Fragment />);
@@ -284,18 +279,15 @@ export default function Editor({
                   if (previousContent.length === 0) {
                     block = defaultTemplate;
                     block.id = focusNode;
-                    if (
-                      activeNodeParentId != null &&
-                      activeNodeChildIndex != null
-                    ) {
+                    if (listMetadata != null) {
                       const parentBlock = traverseAndFind(
                         masterBlocks,
-                        activeNodeParentId,
+                        listMetadata.parentId,
                       );
                       if (parentBlock != null) {
                         const listData = parentBlock.data as Block[];
                         traverseAndUpdate(listData, block);
-                        const blockIndex = parseInt(activeNodeChildIndex);
+                        const blockIndex = listMetadata.childIndex;
                         if (blockIndex === listData.length - 1) {
                           const emptyBlock: Block = {
                             id: generateUUID(),
@@ -325,19 +317,16 @@ export default function Editor({
                   } else {
                     block.data = previousContent;
                     const imageBlock = defaultTemplate;
-                    if (
-                      activeNodeParentId != null &&
-                      activeNodeChildIndex != null
-                    ) {
+                    if (listMetadata != null) {
                       const parentBlock = traverseAndFind(
                         masterBlocks,
-                        activeNodeParentId,
+                        listMetadata.parentId,
                       );
                       if (parentBlock != null) {
                         const listData = parentBlock.data as Block[];
                         traverseAndUpdate(listData, block);
                         traverseAndUpdateBelow(listData, block, imageBlock);
-                        const blockIndex = parseInt(activeNodeChildIndex);
+                        const blockIndex = listMetadata.childIndex;
                         if (blockIndex + 1 === listData.length - 1) {
                           const emptyBlock: Block = {
                             id: generateUUID(),
@@ -388,18 +377,15 @@ export default function Editor({
                     block.id = focusNode;
                     focusNode = (defaultTemplate.data as Table).rows[0]
                       .columns[0].id;
-                    if (
-                      activeNodeParentId != null &&
-                      activeNodeChildIndex != null
-                    ) {
+                    if (listMetadata != null) {
                       const parentBlock = traverseAndFind(
                         masterBlocks,
-                        activeNodeParentId,
+                        listMetadata.parentId,
                       );
                       if (parentBlock != null) {
                         const listData = parentBlock.data as Block[];
                         traverseAndUpdate(listData, block);
-                        const blockIndex = parseInt(activeNodeChildIndex);
+                        const blockIndex = listMetadata.childIndex;
                         if (blockIndex === listData.length - 1) {
                           const emptyBlock: Block = {
                             id: generateUUID(),
@@ -431,19 +417,16 @@ export default function Editor({
                     const tableBlock = defaultTemplate;
                     focusNode = (tableBlock.data as Table).rows[0].columns[0]
                       .id;
-                    if (
-                      activeNodeParentId != null &&
-                      activeNodeChildIndex != null
-                    ) {
+                    if (listMetadata != null) {
                       const parentBlock = traverseAndFind(
                         masterBlocks,
-                        activeNodeParentId,
+                        listMetadata.parentId,
                       );
                       if (parentBlock != null) {
                         const listData = parentBlock.data as Block[];
                         traverseAndUpdate(listData, block);
                         traverseAndUpdateBelow(listData, block, tableBlock);
-                        const blockIndex = parseInt(activeNodeChildIndex);
+                        const blockIndex = listMetadata.childIndex;
                         if (blockIndex + 1 === listData.length - 1) {
                           const emptyBlock: Block = {
                             id: generateUUID(),
@@ -1071,14 +1054,14 @@ export default function Editor({
       block.data.url = str;
       const blockIndex = masterBlocks.indexOf(block);
       if (blockIndex === -1) {
-        const blockNode = getBlockNode(block.id) as HTMLElement;
-        if (blockRenderTypeFromNode(blockNode) === RenderType.LIST) {
+        const activeNode = getBlockNode(block.id) as HTMLElement;
+        const listMetadata = getListMetadata(activeNode);
+        if (listMetadata != null) {
           const parentBlock = traverseAndFind(
             masterBlocks,
-            (blockNode.parentElement?.parentElement as HTMLElement).id,
+            listMetadata.parentId,
           ) as Block;
           traverseAndUpdate(parentBlock.data as Block[], block);
-          traverseAndUpdate(masterBlocks, parentBlock);
         } else {
           traverseAndUpdate(masterBlocks, block);
         }

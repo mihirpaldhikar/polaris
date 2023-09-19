@@ -387,6 +387,10 @@ export default function TableBlock({
                   key: cell.id,
                   "data-block-type": "tableCell",
                   "data-parent-block-id": block.id,
+                  "data-child-block-index":
+                    listMetadata === undefined
+                      ? null
+                      : listMetadata.currentIndex,
                   "data-top-node-id":
                     rowIndex === 0
                       ? "null"

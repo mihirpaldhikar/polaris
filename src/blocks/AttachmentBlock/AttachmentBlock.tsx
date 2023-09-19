@@ -152,6 +152,7 @@ export default function AttachmentBlock({
       <FilePicker
         id={block.id}
         fileIcon={<ImageIcon />}
+        listMetadata={listMetadata}
         message={"Drag or click here to add an image."}
         accept={"image/png, image/jpg, image/jpeg, image/svg+xml, image/gif"}
         onFilePicked={(file) => {
@@ -171,6 +172,7 @@ export default function AttachmentBlock({
     return (
       <EmbedPicker
         id={block.id}
+        listMetadata={listMetadata}
         icon={
           block.role === "youtubeVideoEmbed" ? (
             <YouTubeIcon size={25} />
@@ -201,7 +203,7 @@ export default function AttachmentBlock({
         onDelete={deleteHandler}
         onChange={onChange}
       >
-        <YouTubeVideoBlock block={block} />
+        <YouTubeVideoBlock block={block} listMetadata={listMetadata} />
       </AttachmentHolder>
     );
 
@@ -213,7 +215,7 @@ export default function AttachmentBlock({
         onDelete={deleteHandler}
         onChange={onChange}
       >
-        <GitHubGistBlock block={block} />
+        <GitHubGistBlock block={block} listMetadata={listMetadata} />
       </AttachmentHolder>
     );
 
@@ -229,6 +231,10 @@ export default function AttachmentBlock({
           id: block.id,
           "data-type": BLOCK_NODE,
           "data-block-render-type": blockRenderTypeFromRole(block.role),
+          "data-parent-block-id":
+            listMetadata === undefined ? null : listMetadata.parent.id,
+          "data-child-block-index":
+            listMetadata === undefined ? null : listMetadata.currentIndex,
           draggable: false,
           src: attachment.url,
           alt: attachment.description,
