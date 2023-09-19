@@ -20,9 +20,8 @@
  * SOFTWARE.
  */
 
-import { type Role } from "../types";
 import { type Block, type PolarisConfig, type Style } from "../interfaces";
-import { NODE_TYPE } from "../constants";
+import { BLOCK_NODE, NODE_TYPE } from "../constants";
 import RenderType from "../enums/RenderType";
 import { camelCase } from "lodash";
 import {
@@ -42,7 +41,7 @@ import {
  * @author Mihir Paldhikar
  */
 
-export function nodeTypeFromRole(role: Role): string {
+export function nodeTypeFromRole(role: string): string {
   switch (role) {
     case "title":
       return "h1";
@@ -70,7 +69,7 @@ export function nodeTypeFromRole(role: Role): string {
 }
 
 export function getConfigFromRole(
-  role: Role,
+  role: string,
   config: PolarisConfig,
 ): TextBlockConfig | AttachmentBlockConfig | ListBlockConfig | null {
   switch (role) {
@@ -135,7 +134,7 @@ export function getBlockNode(blockId: string): HTMLElement | null {
   return blockDOM;
 }
 
-export function blockRenderTypeFromRole(role: Role): RenderType {
+export function blockRenderTypeFromRole(role: string): RenderType {
   switch (role) {
     case "title":
     case "subTitle":
@@ -228,6 +227,21 @@ export function traverseAndUpdateBelow(
   }
 }
 
+export function traverseAndFindBlockPosition(
+  masterBlocks: Block[],
+  targetBlock: Block,
+): number {
+  for (let i = 0; i < masterBlocks.length; i++) {
+    if (masterBlocks[i].id === targetBlock.id) {
+      return i;
+    }
+    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
+    }
+  }
+  return -1;
+}
+
 export function getEditorRoot(): HTMLElement {
   const blockDOM = Array.from(
     document.querySelectorAll(`[${NODE_TYPE}="editor-root"]`).values(),
@@ -235,7 +249,7 @@ export function getEditorRoot(): HTMLElement {
   return blockDOM[0] as HTMLElement;
 }
 
-export function getPlaceholderFromRole(role: Role): string {
+export function getPlaceholderFromRole(role: string): string {
   switch (role) {
     case "title":
       return "Title...";
@@ -248,6 +262,24 @@ export function getPlaceholderFromRole(role: Role): string {
     default:
       return "Press '/' for commands...";
   }
+}
+
+export function findBlockNodeFromNode(node: HTMLElement): HTMLElement | null {
+  if (node.getAttribute("data-type") === BLOCK_NODE) return node;
+  if (
+    (node.firstElementChild as HTMLElement).getAttribute("data-type") ===
+    BLOCK_NODE
+  )
+    return node.firstElementChild as HTMLElement;
+  const children = node.children;
+  for (let i = 0; i < children.length; i++) {
+    if (children[i].getAttribute("data-type") === BLOCK_NODE)
+      return children[i] as HTMLElement;
+    else if (children[i].childElementCount > 1) {
+      return findBlockNodeFromNode(children[i] as HTMLElement);
+    }
+  }
+  return null;
 }
 
 export function upsertStyle(arr: Style[], newObj: Style): Style[] {

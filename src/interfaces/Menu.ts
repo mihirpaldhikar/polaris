@@ -22,7 +22,6 @@
 
 import { type JSX } from "react";
 import { type Executable } from "./index";
-import { type Role } from "../types";
 
 interface Menu {
   separator?: boolean;
@@ -31,7 +30,7 @@ interface Menu {
   description?: string;
   icon?: JSX.Element;
   active?: boolean;
-  allowedRoles?: Role[];
+  allowedRoles?: string[];
   execute: Executable;
 }
 
