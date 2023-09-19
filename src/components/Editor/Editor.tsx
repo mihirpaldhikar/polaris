@@ -79,6 +79,7 @@ interface EditorProps {
   editable?: boolean;
   blob: Blob;
   config: PolarisConfig;
+  className?: string;
   inlineTools?: Menu[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
 }
@@ -89,8 +90,8 @@ interface EditorProps {
  * @param editable
  * @param blob
  * @param config
- * @param config
  * @param onAttachmentSelected
+ * @param className
  * @param inlineTools
  *
  * @description An Editor  manages all the blocks of the blob. Editor also handles user interactions and updates the re-renders the DOM accordingly.
@@ -103,6 +104,7 @@ export default function Editor({
   blob,
   config,
   inlineTools,
+  className,
   onAttachmentSelected,
 }: EditorProps): JSX.Element {
   let masterInlineTools: readonly Menu[] = cloneDeep(MasterInlineTools).concat(
@@ -1109,7 +1111,7 @@ export default function Editor({
       <div
         data-node-type={"editor-root"}
         id={`editor-${blob.id}`}
-        className={"block editor"}
+        className={"block editor".concat(" ").concat(className ?? "")}
         onContextMenu={(event) => {
           event.preventDefault();
         }}
