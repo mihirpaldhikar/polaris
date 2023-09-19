@@ -23,7 +23,6 @@
 import { createElement, Fragment, type JSX, useContext } from "react";
 import { type Block } from "../../interfaces";
 import {
-  blockRenderTypeFromRole,
   conditionalClassName,
   getConfigFromRole,
   nodeTypeFromRole,
@@ -151,7 +150,6 @@ export default function Composer({
     return createElement(
       nodeTypeFromRole(block.role),
       {
-        "data-block-render-type": blockRenderTypeFromRole(block.role),
         id: block.id,
         disabled: !editable,
         style: setNodeStyle(block.style),
