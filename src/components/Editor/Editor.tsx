@@ -1103,7 +1103,7 @@ export default function Editor({
       ></div>
       <div id={`dialog-${blob.id}`} className={"select-none"}></div>
       <div
-        data-type={"editor-root"}
+        data-node-type={"editor-root"}
         id={`editor-${blob.id}`}
         className={"block editor"}
         onContextMenu={(event) => {

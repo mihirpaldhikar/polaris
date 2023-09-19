@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-export const NODE_TYPE = "data-type";
+export const NODE_TYPE = "data-node-type";
 export const INLINE_SPECIFIER_NODE = "inline-specifier";
 export const LINK_ATTRIBUTE = "data-link";
 export const REMOVE_LINK = "polaris://remove-link";
