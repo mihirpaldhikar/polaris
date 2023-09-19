@@ -228,7 +228,7 @@ export function splitElement(
  * @param endOffset
  * @param targetNode
  *
- * @description Generates a HTML String from the Target Node.
+ * @description Generates an HTML String from the Target Node.
  *
  * @author Mihir Paldhikar
  */
@@ -315,7 +315,7 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
 
 /**
  *
- * @function generateInlineSpecifierString
+ * @function generateInlineAnnotationsString
  *
  * @param htmlFragment
  * @param style
@@ -326,13 +326,13 @@ export function generateNodesFromHTMLFragment(htmlFragment: string): Node[] {
  * @author Mihir Paldhikar
  */
 
-export function generateInlineSpecifierString(
+export function generateInlineAnnotationsString(
   htmlFragment: string,
   style: Style[],
   link?: string,
 ): string {
   const nodeFragments = generateNodesFromHTMLFragment(htmlFragment);
-  let inlineSpecifierString = "";
+  let inlineAnnotationsString = "";
   for (let i = 0; i < nodeFragments.length; i++) {
     const tempNode =
       nodeFragments[i].nodeType === Node.ELEMENT_NODE
@@ -356,7 +356,7 @@ export function generateInlineSpecifierString(
       tempNode.removeAttribute(LINK_ATTRIBUTE);
     }
 
-    inlineSpecifierString = inlineSpecifierString.concat(
+    inlineAnnotationsString = inlineAnnotationsString.concat(
       (tempNode.getAttribute("style") == null ||
         tempNode.getAttribute("style") === "") &&
         (link === undefined || link === REMOVE_LINK)
@@ -364,11 +364,11 @@ export function generateInlineSpecifierString(
         : tempNode.outerHTML,
     );
   }
-  return inlineSpecifierString;
+  return inlineAnnotationsString;
 }
 
 /**
- * @function generateInlineSpecifiers
+ * @function generateInlineAnnotations
  *
  * @param targetElement
  * @param selection
@@ -380,7 +380,7 @@ export function generateInlineSpecifierString(
  * @author Mihir Paldhikar
  */
 
-export function generateInlineSpecifiers(
+export function generateInlineAnnotations(
   targetElement: HTMLElement,
   selection: Selection | null,
   style: Style[],
@@ -396,7 +396,7 @@ export function generateInlineSpecifiers(
 
   const range = selection.getRangeAt(0);
 
-  let inlineSpecifiers: string = "";
+  let inlineAnnotations: string = "";
 
   let deleteRangeContents: boolean = true;
 
@@ -413,7 +413,7 @@ export function generateInlineSpecifiers(
       range.endContainer.parentElement.getAttribute(NODE_TYPE) !==
         INLINE_ANNOTATIONS_NODE
     ) {
-      inlineSpecifiers = generateInlineSpecifierString(
+      inlineAnnotations = generateInlineAnnotationsString(
         generateHTMLFragment(
           range.startContainer,
           range.startOffset,
@@ -437,11 +437,13 @@ export function generateInlineSpecifiers(
 
       tempNode.innerText = selection.toString();
 
-      inlineSpecifiers = splitElement(
+      inlineAnnotations = splitElement(
         range.startContainer.parentElement,
         range.startOffset,
       )[0]
-        .concat(generateInlineSpecifierString(tempNode.outerHTML, style, link))
+        .concat(
+          generateInlineAnnotationsString(tempNode.outerHTML, style, link),
+        )
         .concat(
           splitElement(range.endContainer.parentElement, range.endOffset)[1],
         );
@@ -464,7 +466,7 @@ export function generateInlineSpecifiers(
       range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
         INLINE_ANNOTATIONS_NODE
     ) {
-      inlineSpecifiers = generateHTMLFragment(
+      inlineAnnotations = generateHTMLFragment(
         range.startContainer.parentElement,
         range.startOffset,
         range.endContainer.parentElement,
@@ -472,13 +474,13 @@ export function generateInlineSpecifiers(
         targetElement,
       );
 
-      const generatedInlineStyling = generateInlineSpecifierString(
-        inlineSpecifiers,
+      const generatedInlineStyling = generateInlineAnnotationsString(
+        inlineAnnotations,
         style,
         link,
       );
 
-      inlineSpecifiers = splitElement(
+      inlineAnnotations = splitElement(
         range.startContainer.parentElement,
         range.startOffset,
       )[0]
@@ -500,7 +502,7 @@ export function generateInlineSpecifiers(
       range.endContainer.parentElement.getAttribute(NODE_TYPE) !==
         INLINE_ANNOTATIONS_NODE
     ) {
-      inlineSpecifiers = generateHTMLFragment(
+      inlineAnnotations = generateHTMLFragment(
         range.startContainer.parentElement,
         range.startOffset,
         range.endContainer,
@@ -508,13 +510,13 @@ export function generateInlineSpecifiers(
         targetElement,
       );
 
-      const generatedInlineStyling = generateInlineSpecifierString(
-        inlineSpecifiers,
+      const generatedInlineStyling = generateInlineAnnotationsString(
+        inlineAnnotations,
         style,
         link,
       );
 
-      inlineSpecifiers = splitElement(
+      inlineAnnotations = splitElement(
         range.startContainer.parentElement,
         range.startOffset,
       )[0].concat(generatedInlineStyling);
@@ -532,7 +534,7 @@ export function generateInlineSpecifiers(
       range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
         INLINE_ANNOTATIONS_NODE
     ) {
-      inlineSpecifiers = generateHTMLFragment(
+      inlineAnnotations = generateHTMLFragment(
         range.startContainer,
         range.startOffset,
         range.endContainer.parentElement,
@@ -540,13 +542,13 @@ export function generateInlineSpecifiers(
         targetElement,
       );
 
-      const generatedInlineStyling = generateInlineSpecifierString(
-        inlineSpecifiers,
+      const generatedInlineStyling = generateInlineAnnotationsString(
+        inlineAnnotations,
         style,
         link,
       );
 
-      inlineSpecifiers = generatedInlineStyling.concat(
+      inlineAnnotations = generatedInlineStyling.concat(
         splitElement(range.endContainer.parentElement, range.endOffset)[1],
       );
 
@@ -560,7 +562,7 @@ export function generateInlineSpecifiers(
       range.startContainer.nodeType === Node.TEXT_NODE &&
       range.endContainer.nodeType === Node.TEXT_NODE
     ) {
-      inlineSpecifiers = generateInlineSpecifierString(
+      inlineAnnotations = generateInlineAnnotationsString(
         targetElement.innerHTML.substring(
           nodeOffset(targetElement, range.startContainer, {
             includeInnerHTML: true,
@@ -581,10 +583,10 @@ export function generateInlineSpecifiers(
     range.deleteContents();
   }
   range.insertNode(placeholderNode);
-  placeholderNode.insertAdjacentHTML("afterend", inlineSpecifiers);
+  placeholderNode.insertAdjacentHTML("afterend", inlineAnnotations);
   targetElement.removeChild(placeholderNode);
   selection.removeAllRanges();
-  removeEmptyInlineSpecifiers(targetElement);
+  removeEmptyInlineAnnotations(targetElement);
 }
 
 /**
@@ -601,7 +603,7 @@ export function elementContainsStyle(
   element: HTMLElement,
   style: Style[] | Style,
 ): boolean {
-  if (!isInlineSpecifierNode(element)) {
+  if (!isInlineAnnotationsNode(element)) {
     return false;
   }
 
@@ -621,17 +623,17 @@ export function elementContainsStyle(
 }
 
 /**
- * @function inlineSpecifierLink
+ * @function inlineAnnotationsLink
  *
  * @description Returns link of the inline specifier has a link embedded.
  *
  * @author Mihir Paldhikar
  */
 
-export function inlineSpecifierLink(
+export function inlineAnnotationsLink(
   specifier?: HTMLElement,
 ): string | undefined {
-  if (specifier !== undefined && isInlineSpecifierNode(specifier)) {
+  if (specifier !== undefined && isInlineAnnotationsNode(specifier)) {
     return specifier.getAttribute(LINK_ATTRIBUTE) ?? undefined;
   }
   const selection = window.getSelection();
@@ -642,8 +644,8 @@ export function inlineSpecifierLink(
   const endContainer = range.endContainer.parentElement as HTMLElement;
 
   if (
-    !isInlineSpecifierNode(startContainer) ||
-    !isInlineSpecifierNode(endContainer) ||
+    !isInlineAnnotationsNode(startContainer) ||
+    !isInlineAnnotationsNode(endContainer) ||
     startContainer.getAttribute(LINK_ATTRIBUTE) == null ||
     endContainer.getAttribute(LINK_ATTRIBUTE) == null ||
     startContainer.getAttribute(LINK_ATTRIBUTE) !==
@@ -668,25 +670,25 @@ export function getNodeAt(parentNode: Node, offset: number): Node {
   return node;
 }
 
-export function isInlineSpecifierNode(node: Node): boolean {
+export function isInlineAnnotationsNode(node: Node): boolean {
   return (
     node.nodeType === Node.ELEMENT_NODE &&
     (node as HTMLElement).getAttribute(NODE_TYPE) === INLINE_ANNOTATIONS_NODE
   );
 }
 
-export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
-  const inlineSpecifierNodes = parentElement.querySelectorAll(
+export function removeEmptyInlineAnnotations(parentElement: HTMLElement): void {
+  const inlineAnnotationsNodes = parentElement.querySelectorAll(
     `[${NODE_TYPE}="${INLINE_ANNOTATIONS_NODE}"]`,
   );
-  for (let i = 0; i < inlineSpecifierNodes.length; i++) {
-    if (inlineSpecifierNodes[i].textContent?.length === 0) {
-      inlineSpecifierNodes[i].remove();
+  for (let i = 0; i < inlineAnnotationsNodes.length; i++) {
+    if (inlineAnnotationsNodes[i].textContent?.length === 0) {
+      inlineAnnotationsNodes[i].remove();
     }
   }
 }
 
-export function inlineSpecifierManager(
+export function inlineAnnotationsManager(
   targetElement: HTMLElement,
   style: Style[],
   link?: string,
@@ -722,24 +724,24 @@ export function inlineSpecifierManager(
   }
 
   if (
-    inlineSpecifierLink(startContainerParent) ===
-    inlineSpecifierLink(endContainerParent)
+    inlineAnnotationsLink(startContainerParent) ===
+    inlineAnnotationsLink(endContainerParent)
   ) {
     if (
       link === undefined &&
-      inlineSpecifierLink(startContainerParent) !== undefined
+      inlineAnnotationsLink(startContainerParent) !== undefined
     ) {
-      link = inlineSpecifierLink(startContainerParent);
+      link = inlineAnnotationsLink(startContainerParent);
     } else if (
       link === undefined &&
-      inlineSpecifierLink(startContainerParent) === undefined
+      inlineAnnotationsLink(startContainerParent) === undefined
     ) {
       link = undefined;
     } else if (
       link !== undefined &&
       link === REMOVE_LINK &&
-      (inlineSpecifierLink(startContainerParent) === undefined ||
-        inlineSpecifierLink(startContainerParent) !== undefined)
+      (inlineAnnotationsLink(startContainerParent) === undefined ||
+        inlineAnnotationsLink(startContainerParent) !== undefined)
     ) {
       link = undefined;
     }
@@ -757,7 +759,7 @@ export function inlineSpecifierManager(
     );
   }
 
-  generateInlineSpecifiers(targetElement, selection, style, link);
+  generateInlineAnnotations(targetElement, selection, style, link);
 }
 
 export function RGBToHex(r: number, g: number, b: number): string {
@@ -897,7 +899,7 @@ export function splitBlocksAtCaretOffset(
       caretNodeOffsetWithInnerHTML,
     );
 
-    if (isInlineSpecifierNode(nodeAtCaretOffset)) {
+    if (isInlineAnnotationsNode(nodeAtCaretOffset)) {
       const caretNodeFragments = splitElement(
         nodeAtCaretOffset as HTMLElement,
         caretOffset - caretNodeOffset,
@@ -961,7 +963,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
     node.id = block.id;
     node.innerHTML = block.data;
     for (const childNode of node.childNodes) {
-      if (isInlineSpecifierNode(childNode)) {
+      if (isInlineAnnotationsNode(childNode)) {
         const element = childNode as HTMLElement;
         if (element.getAttribute(LINK_ATTRIBUTE) !== null) {
           const anchorNode = document.createElement("a");
@@ -1089,7 +1091,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
         cell.style.setProperty("padding-bottom", "0.5rem");
         cell.style.setProperty("border", "1px solid #d1d5db");
         for (const childNode of cell.childNodes) {
-          if (isInlineSpecifierNode(childNode)) {
+          if (isInlineAnnotationsNode(childNode)) {
             const element = childNode as HTMLElement;
             if (element.getAttribute(LINK_ATTRIBUTE) !== null) {
               const anchorNode = document.createElement("a");

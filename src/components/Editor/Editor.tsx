@@ -51,9 +51,9 @@ import {
   getListMetadata,
   getNodeAt,
   getNodeIndex,
-  inlineSpecifierManager,
+  inlineAnnotationsManager,
   nodeInViewPort,
-  removeEmptyInlineSpecifiers,
+  removeEmptyInlineAnnotations,
   rgbStringToHex,
   setCaretOffset,
   subscribeToEditorEvent,
@@ -757,7 +757,7 @@ export default function Editor({
               },
             ];
 
-            inlineSpecifierManager(activeNode as HTMLElement, style);
+            inlineAnnotationsManager(activeNode as HTMLElement, style);
 
             activeBlock.data = activeNode.innerHTML;
             changeHandler(activeBlock);
@@ -779,7 +779,7 @@ export default function Editor({
               },
             ];
 
-            inlineSpecifierManager(activeNode as HTMLElement, style);
+            inlineAnnotationsManager(activeNode as HTMLElement, style);
             activeBlock.data = activeNode.innerHTML;
             changeHandler(activeBlock);
           }
@@ -800,7 +800,7 @@ export default function Editor({
               },
             ];
 
-            inlineSpecifierManager(activeNode as HTMLElement, style);
+            inlineAnnotationsManager(activeNode as HTMLElement, style);
             activeBlock.data = activeNode.innerHTML;
             changeHandler(activeBlock);
           }
@@ -843,7 +843,7 @@ export default function Editor({
             : computedNode;
 
         setCaretOffset(jumpNode, caretOffset);
-        removeEmptyInlineSpecifiers(node);
+        removeEmptyInlineAnnotations(node);
       }
     }
   }, [focusedNode]);
@@ -1001,13 +1001,17 @@ export default function Editor({
           selection.addRange(range);
           switch (executable.type) {
             case "style": {
-              inlineSpecifierManager(blockNode, executable.args as Style[]);
+              inlineAnnotationsManager(blockNode, executable.args as Style[]);
               block.data = blockNode.innerHTML;
               changeHandler(block);
               break;
             }
             case "link": {
-              inlineSpecifierManager(blockNode, [], executable.args as string);
+              inlineAnnotationsManager(
+                blockNode,
+                [],
+                executable.args as string,
+              );
               block.data = blockNode.innerHTML;
               changeHandler(block);
               break;
