@@ -938,7 +938,7 @@ export function splitBlocksAtCaretOffset(
   return [block, newBlock];
 }
 
-export function serializeBlockToNode(block: Block): HTMLElement | null {
+export function serializeBlock(block: Block): HTMLElement | null {
   if (
     window === undefined ||
     document === undefined ||
@@ -1061,7 +1061,7 @@ export function serializeBlockToNode(block: Block): HTMLElement | null {
       const listNode = document.createElement("li");
       listNode.style.setProperty("margin-left", "3px");
       listNode.style.setProperty("margin-right", "3px");
-      const listChild = serializeBlockToNode(block.data[i]);
+      const listChild = serializeBlock(block.data[i]);
       if (listChild !== null) {
         listNode.innerHTML = listChild.outerHTML;
       }

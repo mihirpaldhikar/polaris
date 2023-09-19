@@ -21,7 +21,7 @@
  */
 
 import { type Blob } from "../interfaces";
-import { serializeBlockToNode } from "./DOMUtils";
+import { serializeBlock } from "./DOMUtils";
 
 export function serializeBlobToHTML(blob: Blob): string {
   if (
@@ -34,7 +34,7 @@ export function serializeBlobToHTML(blob: Blob): string {
   const master = document.createElement("html");
   const masterBody = document.createElement("body");
   for (const block of blob.blocks) {
-    const node = serializeBlockToNode(block);
+    const node = serializeBlock(block);
     if (node !== null) {
       masterBody.appendChild(node);
     }
