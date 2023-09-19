@@ -33,7 +33,7 @@ npm install @mihirpaldhikar/polaris
 #### Creating an Editor
 
 ```tsx
-import { DEFAULT_POLARIS_CONFIG, Editor, generateUUID } from "@mihirpaldhikar/polaris";
+import { Editor, generateUUID } from "@mihirpaldhikar/polaris";
 
 export default function MyApp(): JSX.Element {
   const blob: Blob = {
@@ -69,7 +69,6 @@ export default function MyApp(): JSX.Element {
     <Fragment>
       <Editor
         blob={blob}
-        config={DEFAULT_POLARIS_CONFIG}
         onAttachmentSelected={(data) => {
           return attachmentHandler(data);
         }}
