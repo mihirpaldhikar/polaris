@@ -31,6 +31,7 @@ import type Block from "./Block";
 interface Blob {
   id: string;
   name?: string;
+  description?: string;
   blocks: Block[];
 }
 
