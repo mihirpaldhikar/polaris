@@ -402,7 +402,7 @@ const MasterBlockTools: readonly Menu[] = [
     execute: {
       type: "role",
       args: {
-        role: "githubGistEmbed",
+        role: "image",
         defaultTemplate: {
           id: generateUUID(),
           data: {
@@ -412,7 +412,7 @@ const MasterBlockTools: readonly Menu[] = [
             height: 500,
           },
           style: [],
-          role: "githubGistEmbed",
+          role: "image",
         },
       },
     },
