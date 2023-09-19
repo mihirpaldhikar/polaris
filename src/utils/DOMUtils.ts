@@ -27,7 +27,7 @@ import {
   type Style,
 } from "../interfaces";
 import {
-  INLINE_SPECIFIER_NODE,
+  INLINE_ANNOTATIONS_NODE,
   LINK_ATTRIBUTE,
   NODE_TYPE,
   REMOVE_LINK,
@@ -339,7 +339,7 @@ export function generateInlineSpecifierString(
         ? (nodeFragments[i] as HTMLElement)
         : document.createElement("span");
 
-    tempNode.setAttribute(NODE_TYPE, INLINE_SPECIFIER_NODE);
+    tempNode.setAttribute(NODE_TYPE, INLINE_ANNOTATIONS_NODE);
     tempNode.innerText = nodeFragments[i].textContent as string;
 
     for (let i = 0; i < style.length; i++) {
@@ -409,9 +409,9 @@ export function generateInlineSpecifiers(
       range.startContainer.parentElement.isEqualNode(targetElement) &&
       range.endContainer.parentElement.isEqualNode(targetElement) &&
       range.startContainer.parentElement.getAttribute(NODE_TYPE) !==
-        INLINE_SPECIFIER_NODE &&
+        INLINE_ANNOTATIONS_NODE &&
       range.endContainer.parentElement.getAttribute(NODE_TYPE) !==
-        INLINE_SPECIFIER_NODE
+        INLINE_ANNOTATIONS_NODE
     ) {
       inlineSpecifiers = generateInlineSpecifierString(
         generateHTMLFragment(
@@ -427,9 +427,9 @@ export function generateInlineSpecifiers(
     }
     if (
       range.startContainer.parentElement.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE &&
+        INLINE_ANNOTATIONS_NODE &&
       range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE
+        INLINE_ANNOTATIONS_NODE
     ) {
       const tempNode = generateNodesFromHTMLFragment(
         splitElement(range.startContainer.parentElement, range.startOffset)[1],
@@ -460,9 +460,9 @@ export function generateInlineSpecifiers(
       !range.startContainer.parentElement.isEqualNode(targetElement) &&
       !range.endContainer.parentElement.isEqualNode(targetElement) &&
       range.startContainer.parentElement.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE &&
+        INLINE_ANNOTATIONS_NODE &&
       range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE
+        INLINE_ANNOTATIONS_NODE
     ) {
       inlineSpecifiers = generateHTMLFragment(
         range.startContainer.parentElement,
@@ -496,9 +496,9 @@ export function generateInlineSpecifiers(
       !range.startContainer.parentElement.isEqualNode(targetElement) &&
       range.endContainer.parentElement.isEqualNode(targetElement) &&
       range.startContainer.parentElement.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE &&
+        INLINE_ANNOTATIONS_NODE &&
       range.endContainer.parentElement.getAttribute(NODE_TYPE) !==
-        INLINE_SPECIFIER_NODE
+        INLINE_ANNOTATIONS_NODE
     ) {
       inlineSpecifiers = generateHTMLFragment(
         range.startContainer.parentElement,
@@ -528,9 +528,9 @@ export function generateInlineSpecifiers(
       range.startContainer.parentElement.isEqualNode(targetElement) &&
       !range.endContainer.parentElement.isEqualNode(targetElement) &&
       range.startContainer.parentElement.getAttribute(NODE_TYPE) !==
-        INLINE_SPECIFIER_NODE &&
+        INLINE_ANNOTATIONS_NODE &&
       range.endContainer.parentElement.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE
+        INLINE_ANNOTATIONS_NODE
     ) {
       inlineSpecifiers = generateHTMLFragment(
         range.startContainer,
@@ -671,13 +671,13 @@ export function getNodeAt(parentNode: Node, offset: number): Node {
 export function isInlineSpecifierNode(node: Node): boolean {
   return (
     node.nodeType === Node.ELEMENT_NODE &&
-    (node as HTMLElement).getAttribute(NODE_TYPE) === INLINE_SPECIFIER_NODE
+    (node as HTMLElement).getAttribute(NODE_TYPE) === INLINE_ANNOTATIONS_NODE
   );
 }
 
 export function removeEmptyInlineSpecifiers(parentElement: HTMLElement): void {
   const inlineSpecifierNodes = parentElement.querySelectorAll(
-    `[${NODE_TYPE}="${INLINE_SPECIFIER_NODE}"]`,
+    `[${NODE_TYPE}="${INLINE_ANNOTATIONS_NODE}"]`,
   );
   for (let i = 0; i < inlineSpecifierNodes.length; i++) {
     if (inlineSpecifierNodes[i].textContent?.length === 0) {
@@ -837,7 +837,7 @@ export function openLinkInNewTab(event: MouseEvent): void {
 
     if (
       nodeAtMouseCoordinates.getAttribute(NODE_TYPE) ===
-        INLINE_SPECIFIER_NODE &&
+        INLINE_ANNOTATIONS_NODE &&
       nodeAtMouseCoordinates.getAttribute(LINK_ATTRIBUTE) != null
     ) {
       setTimeout(() => {
