@@ -27,21 +27,27 @@ export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
     text: {
       title: {
         fontSize: 2.25,
+        fontWight: 800,
       },
       subTitle: {
         fontSize: 1.875,
+        fontWight: 700,
       },
       heading: {
         fontSize: 1.5,
+        fontWight: 600,
       },
       subHeading: {
         fontSize: 1.25,
+        fontWight: 500,
       },
       paragraph: {
         fontSize: 1,
+        fontWight: 400,
       },
       quote: {
         fontSize: 1,
+        fontWight: 500,
       },
     },
     attachment: {

@@ -377,6 +377,8 @@ export default function TextBlock({
       fontSize: `${
         (getConfigFromRole(block.role, config) as TextBlockConfig).fontSize
       }rem`,
+      fontWeight: (getConfigFromRole(block.role, config) as TextBlockConfig)
+        .fontWight,
       ...setNodeStyle(block.style),
     },
     placeholder: getPlaceholderFromRole(block.role),
