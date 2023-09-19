@@ -59,6 +59,7 @@ export function serializeBlobToHTML(blob: Blob): string {
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="description" content="${blob.description ?? ""}">
+    <meta name="author" content="${blob.author ?? ""}">
     <title>${blob.name ?? ""}</title>
   `;
   master.lang = "en";

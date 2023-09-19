@@ -32,6 +32,7 @@ interface Blob {
   id: string;
   name?: string;
   description?: string;
+  author?: string;
   blocks: Block[];
 }
 
