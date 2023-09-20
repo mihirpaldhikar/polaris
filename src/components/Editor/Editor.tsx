@@ -65,7 +65,7 @@ import {
   upsertStyle,
 } from "../../utils";
 import { createRoot, type Root } from "react-dom/client";
-import { InlineToolbar } from "../InlineToolbar";
+import { AnnotationToolbar } from "../AnnotationToolbar";
 import { DEFAULT_POLARIS_CONFIG, LINK_ATTRIBUTE } from "../../constants";
 import { BlockTools } from "../BlockTools";
 import RenderType from "../../enums/RenderType";
@@ -73,14 +73,14 @@ import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
 import { cloneDeep } from "lodash";
 import { Composer } from "../Composer";
-import { BlockActions, InlineActions } from "../../assets/index";
+import { AnnotationActions, BlockActions } from "../../assets/index";
 
 interface EditorProps {
   editable?: boolean;
   blob: Blob;
   config?: PolarisConfig;
   className?: string;
-  inlineActions?: Action[];
+  annotationActions?: Action[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
 }
 
@@ -92,7 +92,7 @@ interface EditorProps {
  * @param config
  * @param onAttachmentSelected
  * @param className
- * @param inlineTools
+ * @param annotationActions
  *
  * @description An Editor  manages all the blocks of the blob. Editor also handles user interactions and updates the re-renders the DOM accordingly.
  *
@@ -103,13 +103,13 @@ export default function Editor({
   editable = true,
   blob,
   config = DEFAULT_POLARIS_CONFIG,
-  inlineActions,
+  annotationActions,
   className,
   onAttachmentSelected,
 }: EditorProps): JSX.Element {
-  let defaultInlineActions: readonly Action[] = cloneDeep(InlineActions).concat(
-    ...(inlineActions ?? []),
-  );
+  let defaultAnnotationActions: readonly Action[] = cloneDeep(
+    AnnotationActions,
+  ).concat(...(annotationActions ?? []));
   const defaultBlockActions: readonly Action[] = cloneDeep(BlockActions);
 
   const isActionMenuOpen = useRef<boolean>(false);
@@ -909,7 +909,7 @@ export default function Editor({
     });
   }
 
-  function selectionHandler(block: Block): void {
+  function annotationsHandler(block: Block): void {
     const selection = window.getSelection();
 
     const popupNode = window.document.getElementById(`popup-${blob.id}`);
@@ -943,7 +943,7 @@ export default function Editor({
       return;
     }
 
-    for (const action of defaultInlineActions) {
+    for (const action of defaultAnnotationActions) {
       if (
         action.execute.type === "style" &&
         Array.isArray(action.execute.args)
@@ -991,14 +991,14 @@ export default function Editor({
     }
 
     popUpRoot.render(
-      <InlineToolbar
+      <AnnotationToolbar
         dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
-        actions={defaultInlineActions}
+        actions={defaultAnnotationActions}
         onClose={() => {
           popUpRoot.render(<Fragment />);
-          defaultInlineActions = cloneDeep(InlineActions).concat(
-            ...(defaultInlineActions ?? []),
+          defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
+            ...(annotationActions ?? []),
           );
         }}
         onActionSelected={(executable) => {
@@ -1031,8 +1031,8 @@ export default function Editor({
       (event) => {
         if (!event.ctrlKey || !event.shiftKey) {
           popUpRoot.render(<Fragment />);
-          defaultInlineActions = cloneDeep(InlineActions).concat(
-            ...(defaultInlineActions ?? []),
+          defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
+            ...(annotationActions ?? []),
           );
         }
       },
@@ -1044,8 +1044,8 @@ export default function Editor({
       "mousedown",
       () => {
         popUpRoot.render(<Fragment />);
-        defaultInlineActions = cloneDeep(InlineActions).concat(
-          ...(defaultInlineActions ?? []),
+        defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
+          ...(annotationActions ?? []),
         );
       },
       {
@@ -1132,7 +1132,7 @@ export default function Editor({
               onCreate={createHandler}
               onDelete={deletionHandler}
               onSelect={debounce((block) => {
-                selectionHandler(block);
+                annotationsHandler(block);
               }, 260)}
               onAttachmentRequest={attachmentRequestHandler}
               onMarkdown={markdownHandler}

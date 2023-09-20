@@ -21,4 +21,4 @@
  */
 
 export { default as BlockActions } from "./BlockActions";
-export { default as InlineActions } from "./InlineActions";
+export { default as AnnotationActions } from "./AnnotationActions";

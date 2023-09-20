@@ -34,10 +34,10 @@ import { ColorPickerDialog } from "../ColorPickerDialog";
 import { REMOVE_COLOR } from "../../constants";
 import { type Root } from "react-dom/client";
 
-const ACTION_BUTTON_WIDTH: number = 28;
-const ACTION_MENU_PADDING: number = 42;
+const ANNOTATION_BUTTON_WIDTH: number = 28;
+const ANNOTATION_MENU_PADDING: number = 42;
 
-interface InlineToolbarProps {
+interface AnnotationToolbarProps {
   dialogRoot: Root | undefined;
   coordinates: Coordinates;
   actions: readonly Action[];
@@ -45,27 +45,27 @@ interface InlineToolbarProps {
   onClose: () => void;
 }
 
-export default function InlineToolbar({
+export default function AnnotationToolbar({
   dialogRoot,
   coordinates,
   actions,
   onActionSelected,
   onClose,
-}: InlineToolbarProps): JSX.Element {
-  const ACTION_MENU_WIDTH =
-    ACTION_BUTTON_WIDTH * actions.length + ACTION_MENU_PADDING;
-  const ACTION_MENU_HEIGHT = 38;
+}: AnnotationToolbarProps): JSX.Element {
+  const ANNOTATION_TOOLBAR_WIDTH =
+    ANNOTATION_BUTTON_WIDTH * actions.length + ANNOTATION_MENU_PADDING;
+  const ANNOTATION_TOOLBAR_HEIGHT = 38;
 
   const xAxis =
     window.innerWidth > 500
-      ? ACTION_MENU_WIDTH + coordinates.x >= window.innerWidth
-        ? coordinates.x - ACTION_MENU_WIDTH - 30
+      ? ANNOTATION_TOOLBAR_WIDTH + coordinates.x >= window.innerWidth
+        ? coordinates.x - ANNOTATION_TOOLBAR_WIDTH - 30
         : coordinates.x
-      : (window.innerWidth - ACTION_MENU_WIDTH) / 2 - 32;
+      : (window.innerWidth - ANNOTATION_TOOLBAR_WIDTH) / 2 - 32;
 
   const yAxis =
     coordinates.y <= 30
-      ? coordinates.y + ACTION_MENU_HEIGHT - 10
+      ? coordinates.y + ANNOTATION_TOOLBAR_HEIGHT - 10
       : coordinates.y - 45;
 
   return (

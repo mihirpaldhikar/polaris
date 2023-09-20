@@ -36,7 +36,7 @@ import {
 } from "../icons";
 import { REMOVE_COLOR, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
-const InlineActions: readonly Action[] = [
+const AnnotationActions: readonly Action[] = [
   {
     id: generateUUID(),
     name: "Bold",
@@ -220,4 +220,4 @@ const InlineActions: readonly Action[] = [
   },
 ];
 
-export default InlineActions;
+export default AnnotationActions;

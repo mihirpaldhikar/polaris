@@ -94,7 +94,7 @@
 ### Breaking Changes:
 
 - `content` field of `Block` is now renamed to `data`.
-- `selectionMenu` prop of `Editor` is now renamed to `inlineActions`.
+- `selectionMenu` prop of `Editor` is now renamed to `annotationActions`.
 
 ### Fixes:
 

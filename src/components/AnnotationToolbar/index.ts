@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as InlineToolbar } from "./InlineToolbar";
+export { default as AnnotationToolbar } from "./AnnotationToolbar";
