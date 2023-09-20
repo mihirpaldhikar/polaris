@@ -50,12 +50,18 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "title",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: "",
-          style: [],
-          role: "title",
+        onInitialized: (content: string) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: true,
+            template: {
+              id: focusId,
+              role: "title",
+              data: content,
+              style: [],
+            },
+          };
         },
       },
     },
@@ -69,12 +75,18 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "subTitle",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: "",
-          style: [],
-          role: "subTitle",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: true,
+            template: {
+              id: focusId,
+              role: "subTitle",
+              data: content,
+              style: [],
+            },
+          };
         },
       },
     },
@@ -88,12 +100,18 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "heading",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: "",
-          style: [],
-          role: "subHeading",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: true,
+            template: {
+              id: focusId,
+              role: "heading",
+              data: content,
+              style: [],
+            },
+          };
         },
       },
     },
@@ -107,12 +125,18 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "subHeading",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: "",
-          style: [],
-          role: "subHeading",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: true,
+            template: {
+              id: focusId,
+              role: "subHeading",
+              data: content,
+              style: [],
+            },
+          };
         },
       },
     },
@@ -126,12 +150,18 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "paragraph",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: "",
-          style: [],
-          role: "paragraph",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: true,
+            template: {
+              id: focusId,
+              role: "paragraph",
+              data: content,
+              style: [],
+            },
+          };
         },
       },
     },
@@ -145,12 +175,18 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "quote",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: "",
-          style: [],
-          role: "quote",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: true,
+            template: {
+              id: focusId,
+              role: "quote",
+              data: content,
+              style: [],
+            },
+          };
         },
       },
     },
@@ -164,131 +200,138 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "table",
-        defaultTemplate: {
-          id: generateUUID(),
-          style: [],
-          role: "table",
-          data: {
-            rows: [
-              {
-                id: generateUUID(),
-                columns: [
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: content.length === 0,
+            setCaretToStart: true,
+            template: {
+              id: generateUUID(),
+              role: "table",
+              style: [],
+              data: {
+                rows: [
                   {
                     id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
+                    columns: [
+                      {
+                        id: focusId,
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                    ],
                   },
                   {
                     id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
+                    columns: [
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                    ],
                   },
                   {
                     id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
+                    columns: [
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                    ],
                   },
                   {
                     id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
+                    columns: [
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                      {
+                        id: generateUUID(),
+                        role: "paragraph",
+                        data: "",
+                        style: [],
+                      },
+                    ],
                   },
                 ],
               },
-              {
-                id: generateUUID(),
-                columns: [
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                ],
-              },
-              {
-                id: generateUUID(),
-                columns: [
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                ],
-              },
-              {
-                id: generateUUID(),
-                columns: [
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                  {
-                    id: generateUUID(),
-                    role: "paragraph",
-                    data: "",
-                    style: [],
-                  },
-                ],
-              },
-            ],
-          },
+            },
+          };
         },
       },
     },
@@ -302,17 +345,24 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "image",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: {
-            url: "",
-            description: "",
-            width: 500,
-            height: 300,
-          },
-          style: [],
-          role: "image",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: content.length === 0,
+            setCaretToStart: true,
+            template: {
+              id: focusId,
+              role: "image",
+              style: [],
+              data: {
+                url: "",
+                description: "",
+                width: 500,
+                height: 300,
+              },
+            },
+          };
         },
       },
     },
@@ -326,17 +376,24 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "youtubeVideoEmbed",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: {
-            url: "",
-            description: "",
-            width: 500,
-            height: 300,
-          },
-          style: [],
-          role: "youtubeVideoEmbed",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            setCaretToStart: true,
+            inPlace: content.length === 0,
+            template: {
+              id: focusId,
+              role: "youtubeVideoEmbed",
+              style: [],
+              data: {
+                url: "",
+                description: "",
+                width: 500,
+                height: 300,
+              },
+            },
+          };
         },
       },
     },
@@ -350,17 +407,24 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "githubGistEmbed",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: {
-            url: "",
-            description: "",
-            width: 500,
-            height: 300,
-          },
-          style: [],
-          role: "githubGistEmbed",
+        onInitialized: (content) => {
+          const focusId = generateUUID();
+          return {
+            focusBlockId: focusId,
+            inPlace: content.length === 0,
+            setCaretToStart: true,
+            template: {
+              id: focusId,
+              role: "githubGistEmbed",
+              style: [],
+              data: {
+                url: "",
+                description: "",
+                width: 500,
+                height: 300,
+              },
+            },
+          };
         },
       },
     },
@@ -374,19 +438,25 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "bulletList",
-        defaultTemplate: {
-          id: generateUUID(),
-          data: [
-            {
+        onInitialized: (content) => {
+          const focusNode = generateUUID();
+          return {
+            focusBlockId: focusNode,
+            inPlace: true,
+            template: {
               id: generateUUID(),
-              role: "paragraph",
-              data: "",
+              role: "bulletList",
               style: [],
+              data: [
+                {
+                  id: focusNode,
+                  data: content,
+                  role: "paragraph",
+                  style: [],
+                },
+              ],
             },
-          ],
-          style: [],
-          role: "bulletList",
+          };
         },
       },
     },
@@ -400,19 +470,25 @@ const BlockActions: readonly Action[] = [
     execute: {
       type: "role",
       args: {
-        role: "bulletList",
-        defaultTemplate: {
-          id: generateUUID(),
-          style: [],
-          role: "bulletList",
-          data: [
-            {
+        onInitialized: (content) => {
+          const focusNode = generateUUID();
+          return {
+            focusBlockId: focusNode,
+            inPlace: true,
+            template: {
               id: generateUUID(),
-              role: "paragraph",
-              data: "",
+              role: "numberedList",
               style: [],
+              data: [
+                {
+                  id: focusNode,
+                  data: content,
+                  role: "paragraph",
+                  style: [],
+                },
+              ],
             },
-          ],
+          };
         },
       },
     },

@@ -25,35 +25,24 @@ import {
   type ListBlock,
   type TableBlock,
   type TextBlock,
-} from "./index";
+} from "./Block";
 
-interface TextBlockExecutable {
-  role: "title" | "subTitle" | "heading" | "subHeading" | "paragraph" | "quote";
-  defaultTemplate: TextBlock;
+export interface GenericBlockExecutable<GenericBlock> {
+  onInitialized: (content: string) => {
+    focusBlockId: string;
+    setCaretToStart?: boolean;
+    inPlace?: boolean;
+    template: GenericBlock;
+  };
 }
 
-interface AttachmentBlockExecutable {
-  role: "image" | "youtubeVideoEmbed" | "githubGistEmbed";
-  defaultTemplate: AttachmentBlock;
-}
-
-interface TableBlockExecutable {
-  role: "table";
-  defaultTemplate: TableBlock;
-}
-
-interface ListBlockExecutable {
-  role: "bulletList" | "numberedList";
-  defaultTemplate: ListBlock;
-}
-
-interface BlockExecutable {
+export interface BlockExecutable {
   type: "role";
   args:
-    | TextBlockExecutable
-    | AttachmentBlockExecutable
-    | TableBlockExecutable
-    | ListBlockExecutable;
+    | GenericBlockExecutable<TextBlock>
+    | GenericBlockExecutable<AttachmentBlock>
+    | GenericBlockExecutable<TableBlock>
+    | GenericBlockExecutable<ListBlock>;
 }
 
 export default BlockExecutable;

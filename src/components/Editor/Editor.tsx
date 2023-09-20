@@ -36,7 +36,7 @@ import {
   type InputArgs,
   type PolarisConfig,
   type Style,
-  type Table,
+  type TextBlock,
 } from "../../interfaces";
 import {
   blockRenderTypeFromRole,
@@ -257,220 +257,82 @@ export default function Editor({
           onActionSelected={(execute) => {
             switch (execute.type) {
               case "role": {
-                let focusNode = block.id;
-                const newRole = execute.args.role;
-                const defaultTemplate = execute.args.defaultTemplate;
+                let { focusBlockId, setCaretToStart, inPlace, template } =
+                  execute.args.onInitialized(previousContent);
 
-                if (
-                  newRole === "title" ||
-                  newRole === "subTitle" ||
-                  newRole === "heading" ||
-                  newRole === "subHeading" ||
-                  newRole === "paragraph" ||
-                  newRole === "quote"
-                ) {
-                  block = defaultTemplate;
-                  block.id = focusNode;
-                  block.data = previousContent;
-                  traverseAndUpdate(masterBlocks, block);
-                } else if (
-                  newRole === "image" ||
-                  newRole === "youtubeVideoEmbed" ||
-                  newRole === "githubGistEmbed"
-                ) {
-                  if (previousContent.length === 0) {
-                    block = defaultTemplate;
-                    block.id = focusNode;
-                    if (listMetadata != null) {
-                      const parentBlock = traverseAndFind(
-                        masterBlocks,
-                        listMetadata.parentId,
-                      );
-                      if (parentBlock != null) {
-                        const listData = parentBlock.data as Block[];
-                        traverseAndUpdate(listData, block);
-                        const blockIndex = listMetadata.childIndex;
-                        if (blockIndex === listData.length - 1) {
-                          const emptyBlock: Block = {
-                            id: generateUUID(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          };
-                          traverseAndUpdateBelow(listData, block, emptyBlock);
-                        }
-                      }
-                    } else {
-                      traverseAndUpdate(masterBlocks, block);
-                      const blockIndex = traverseAndFindBlockPosition(
-                        masterBlocks,
-                        block,
-                      );
-                      if (blockIndex === masterBlocks.length - 1) {
-                        const emptyBlock: Block = {
-                          id: generateUUID(),
-                          role: "paragraph",
-                          data: "",
-                          style: [],
-                        };
-                        traverseAndUpdateBelow(masterBlocks, block, emptyBlock);
-                      }
-                    }
+                if (listMetadata !== null) {
+                  const parentBlock = traverseAndFind(
+                    masterBlocks,
+                    listMetadata.parentId,
+                  );
+                  if (parentBlock == null) return;
+                  const listData = parentBlock.data as Block[];
+                  if (inPlace !== undefined && inPlace) {
+                    listData.splice(listMetadata.childIndex, 1, template);
                   } else {
                     block.data = previousContent;
-                    const imageBlock = defaultTemplate;
-                    if (listMetadata != null) {
-                      const parentBlock = traverseAndFind(
-                        masterBlocks,
-                        listMetadata.parentId,
-                      );
-                      if (parentBlock != null) {
-                        const listData = parentBlock.data as Block[];
-                        traverseAndUpdate(listData, block);
-                        traverseAndUpdateBelow(listData, block, imageBlock);
-                        const blockIndex = listMetadata.childIndex;
-                        if (blockIndex + 1 === listData.length - 1) {
-                          const emptyBlock: Block = {
-                            id: generateUUID(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          };
-                          traverseAndUpdateBelow(
-                            listData,
-                            imageBlock,
-                            emptyBlock,
-                          );
-                        }
-                      }
-                    } else {
-                      traverseAndUpdate(masterBlocks, block);
-                      traverseAndUpdateBelow(masterBlocks, block, imageBlock);
-                      const blockIndex = traverseAndFindBlockPosition(
-                        masterBlocks,
-                        block,
-                      );
-                      if (blockIndex + 1 === masterBlocks.length - 1) {
-                        const emptyBlock: Block = {
-                          id: generateUUID(),
-                          role: "paragraph",
-                          data: "",
-                          style: [],
-                        };
-                        traverseAndUpdateBelow(
-                          masterBlocks,
-                          imageBlock,
-                          emptyBlock,
-                        );
-                      }
-                    }
+                    listData.splice(
+                      listMetadata.childIndex,
+                      1,
+                      ...[block, template],
+                    );
                   }
-                } else if (
-                  newRole === "bulletList" ||
-                  newRole === "numberedList"
-                ) {
-                  block = defaultTemplate;
-                  block.id = focusNode;
-                  focusNode = (defaultTemplate.data as Block[])[0].id;
-                  traverseAndUpdate(masterBlocks, block);
-                } else if (newRole === "table") {
-                  if (previousContent.length === 0) {
-                    block = defaultTemplate;
-                    block.id = focusNode;
-                    focusNode = (defaultTemplate.data as Table).rows[0]
-                      .columns[0].id;
-                    if (listMetadata != null) {
-                      const parentBlock = traverseAndFind(
-                        masterBlocks,
-                        listMetadata.parentId,
-                      );
-                      if (parentBlock != null) {
-                        const listData = parentBlock.data as Block[];
-                        traverseAndUpdate(listData, block);
-                        const blockIndex = listMetadata.childIndex;
-                        if (blockIndex === listData.length - 1) {
-                          const emptyBlock: Block = {
-                            id: generateUUID(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          };
-                          traverseAndUpdateBelow(listData, block, emptyBlock);
-                        }
-                      }
-                    } else {
-                      traverseAndUpdate(masterBlocks, block);
-                      const blockIndex = traverseAndFindBlockPosition(
-                        masterBlocks,
-                        block,
-                      );
-                      if (blockIndex === masterBlocks.length - 1) {
-                        const emptyBlock: Block = {
-                          id: generateUUID(),
-                          role: "paragraph",
-                          data: "",
-                          style: [],
-                        };
-                        traverseAndUpdateBelow(masterBlocks, block, emptyBlock);
-                      }
+                  if (
+                    (listMetadata.childIndex === listData.length - 1 ||
+                      listMetadata.childIndex + 1 === listData.length - 1) &&
+                    typeof template.data !== "string"
+                  ) {
+                    const emptyBlock: TextBlock = {
+                      id: generateUUID(),
+                      data: "",
+                      role: "paragraph",
+                      style: [],
+                    };
+                    listData.splice(
+                      inPlace !== undefined && inPlace
+                        ? listMetadata.childIndex + 1
+                        : listMetadata.childIndex + 2,
+                      0,
+                      emptyBlock,
+                    );
+                  }
+                  parentBlock.data = listData;
+                  traverseAndUpdate(masterBlocks, parentBlock);
+                } else {
+                  if (inPlace !== undefined && inPlace) {
+                    template.id = block.id;
+                    if (typeof template.data === "string") {
+                      focusBlockId = template.id;
                     }
+                    traverseAndUpdate(masterBlocks, template);
                   } else {
                     block.data = previousContent;
-                    const tableBlock = defaultTemplate;
-                    focusNode = (tableBlock.data as Table).rows[0].columns[0]
-                      .id;
-                    if (listMetadata != null) {
-                      const parentBlock = traverseAndFind(
-                        masterBlocks,
-                        listMetadata.parentId,
-                      );
-                      if (parentBlock != null) {
-                        const listData = parentBlock.data as Block[];
-                        traverseAndUpdate(listData, block);
-                        traverseAndUpdateBelow(listData, block, tableBlock);
-                        const blockIndex = listMetadata.childIndex;
-                        if (blockIndex + 1 === listData.length - 1) {
-                          const emptyBlock: Block = {
-                            id: generateUUID(),
-                            role: "paragraph",
-                            data: "",
-                            style: [],
-                          };
-                          traverseAndUpdateBelow(
-                            listData,
-                            tableBlock,
-                            emptyBlock,
-                          );
-                        }
-                      }
-                    } else {
-                      traverseAndUpdate(masterBlocks, block);
-                      traverseAndUpdateBelow(masterBlocks, block, tableBlock);
-                      const blockIndex = traverseAndFindBlockPosition(
-                        masterBlocks,
-                        block,
-                      );
-                      if (blockIndex + 1 === masterBlocks.length - 1) {
-                        const emptyBlock: Block = {
-                          id: generateUUID(),
-                          role: "paragraph",
-                          data: "",
-                          style: [],
-                        };
-                        traverseAndUpdateBelow(
-                          masterBlocks,
-                          tableBlock,
-                          emptyBlock,
-                        );
-                      }
-                    }
+                    traverseAndUpdate(masterBlocks, block);
+                    traverseAndUpdateBelow(masterBlocks, block, template);
+                  }
+                  const blockIndex = traverseAndFindBlockPosition(
+                    masterBlocks,
+                    template,
+                  );
+                  if (
+                    (blockIndex === masterBlocks.length - 1 ||
+                      blockIndex + 1 === masterBlocks.length - 1) &&
+                    typeof template.data !== "string"
+                  ) {
+                    const emptyBlock: TextBlock = {
+                      id: generateUUID(),
+                      data: "",
+                      role: "paragraph",
+                      style: [],
+                    };
+                    traverseAndUpdateBelow(masterBlocks, template, emptyBlock);
                   }
                 }
 
                 propagateChanges(masterBlocks, {
-                  nodeId: focusNode,
-                  caretOffset: newRole === "table" ? 0 : caretOffset,
-                  nodeIndex: newRole === "table" ? 0 : nodeIndex,
+                  nodeId: focusBlockId,
+                  caretOffset: setCaretToStart ?? false ? 0 : caretOffset,
+                  nodeIndex: setCaretToStart ?? false ? 0 : nodeIndex,
                 });
                 break;
               }

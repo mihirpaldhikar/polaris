@@ -24,32 +24,31 @@ import type Style from "./Style";
 import { type Attachment } from "./index";
 import type Table from "./Table";
 
-export interface TextBlock {
+export interface GenericBlock {
   id: string;
+  style: Style[];
+  role: string;
+  data: any;
+}
+
+export interface TextBlock extends GenericBlock {
   role: "title" | "subTitle" | "heading" | "subHeading" | "paragraph" | "quote";
   data: string;
-  style: Style[];
 }
 
-export interface AttachmentBlock {
-  id: string;
+export interface AttachmentBlock extends GenericBlock {
   role: "image" | "youtubeVideoEmbed" | "githubGistEmbed";
   data: Attachment;
-  style: Style[];
 }
 
-export interface TableBlock {
-  id: string;
+export interface TableBlock extends GenericBlock {
   role: "table";
   data: Table;
-  style: Style[];
 }
 
-export interface ListBlock {
-  id: string;
+export interface ListBlock extends GenericBlock {
   role: "bulletList" | "numberedList";
   data: Block[];
-  style: Style[];
 }
 
 /**
