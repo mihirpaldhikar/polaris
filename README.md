@@ -114,32 +114,32 @@ Output
 ```html
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
-    />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="description" content="A basic Polaris Document" />
-    <meta name="author" content="Mihir Paldhikar" />
-    <title>Polaris Doc</title>
-  </head>
-  <body>
-    <h1 id="4da4d82a-4efc-45ac-bfdf-d78a06a392f6">Introducing Polaris</h1>
-    <p id="9b74c5a2-0807-4eaf-a1bd-33ea5ea74557">
-      Polaris is a rich semantic content editor.
-    </p>
-    <script type="text/javascript">
-      window.onmessage = function (messageEvent) {
-        const height = messageEvent.data.height;
-        const gistFrame = document.getElementById(messageEvent.data.id);
-        if (gistFrame != null) {
-          gistFrame.style.height = height + "px";
-        }
-      };
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+  />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="description" content="A basic Polaris Document" />
+  <meta name="author" content="Mihir Paldhikar" />
+  <title>Polaris Doc</title>
+</head>
+<body>
+<h1 id="4da4d82a-4efc-45ac-bfdf-d78a06a392f6">Introducing Polaris</h1>
+<p id="9b74c5a2-0807-4eaf-a1bd-33ea5ea74557">
+  Polaris is a rich semantic content editor.
+</p>
+<script type="text/javascript">
+  window.onmessage = function(messageEvent) {
+    const height = messageEvent.data.height;
+    const gistFrame = document.getElementById(messageEvent.data.id);
+    if (gistFrame != null) {
+      gistFrame.style.height = height + "px";
+    }
+  };
+</script>
+</body>
 </html>
 ```
 
@@ -156,32 +156,32 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
     text: {
       title: {
         fontSize: 2.25,
-        fontWight: 800,
+        fontWeight: 800,
         lineHeight: 2.3,
       },
       subTitle: {
         fontSize: 1.875,
-        fontWight: 700,
+        fontWeight: 700,
         lineHeight: 2,
       },
       heading: {
         fontSize: 1.5,
-        fontWight: 600,
+        fontWeight: 600,
         lineHeight: 1.9,
       },
       subHeading: {
         fontSize: 1.25,
-        fontWight: 500,
+        fontWeight: 500,
         lineHeight: 1.8,
       },
       paragraph: {
         fontSize: 1,
-        fontWight: 400,
+        fontWeight: 400,
         lineHeight: 1.75,
       },
       quote: {
         fontSize: 1,
-        fontWight: 500,
+        fontWeight: 500,
         lineHeight: 1.75,
       },
     },

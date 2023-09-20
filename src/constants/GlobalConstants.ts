@@ -27,32 +27,32 @@ export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
     text: {
       title: {
         fontSize: 2.25,
-        fontWight: 800,
+        fontWeight: 800,
         lineHeight: 2.3,
       },
       subTitle: {
         fontSize: 1.875,
-        fontWight: 700,
+        fontWeight: 700,
         lineHeight: 2,
       },
       heading: {
         fontSize: 1.5,
-        fontWight: 600,
+        fontWeight: 600,
         lineHeight: 1.9,
       },
       subHeading: {
         fontSize: 1.25,
-        fontWight: 500,
+        fontWeight: 500,
         lineHeight: 1.8,
       },
       paragraph: {
         fontSize: 1,
-        fontWight: 400,
+        fontWeight: 400,
         lineHeight: 1.75,
       },
       quote: {
         fontSize: 1,
-        fontWight: 500,
+        fontWeight: 500,
         lineHeight: 1.75,
       },
     },

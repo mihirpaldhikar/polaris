@@ -378,7 +378,7 @@ export default function TextBlock({
         (getConfigFromRole(block.role, config) as TextBlockConfig).fontSize
       }rem`,
       fontWeight: (getConfigFromRole(block.role, config) as TextBlockConfig)
-        .fontWight,
+        .fontWeight,
       lineHeight: (getConfigFromRole(block.role, config) as TextBlockConfig)
         .lineHeight,
       ...setNodeStyle(block.style),
