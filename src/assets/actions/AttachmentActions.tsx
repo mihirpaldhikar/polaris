@@ -21,9 +21,9 @@
  */
 
 import {
+  type Action,
   type Attachment,
   type Coordinates,
-  type Menu,
   type Style,
 } from "../../interfaces";
 import { generateUUID, getBlockNode } from "../../utils";
@@ -38,7 +38,7 @@ import {
 import { Fragment } from "react";
 import { SizeDialog } from "../../components/SizeDialog";
 
-export const AttachmentTools: Menu[] = [
+export const AttachmentActions: Action[] = [
   {
     id: generateUUID(),
     name: "Align Left",

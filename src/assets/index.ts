@@ -21,4 +21,4 @@
  */
 
 export * from "./icons";
-export * from "./tools";
+export * from "./actions";

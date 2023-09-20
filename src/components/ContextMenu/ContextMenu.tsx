@@ -21,11 +21,15 @@
  */
 
 import { type JSX } from "react";
-import { type Coordinates, type Executable, type Menu } from "../../interfaces";
+import {
+  type Action,
+  type Coordinates,
+  type Executable,
+} from "../../interfaces";
 
 interface ContextMenuProps {
   coordinates: Coordinates;
-  menu: Menu[];
+  menu: Action[];
   onClick: (execute: Executable) => void;
   onClose: () => void;
 }

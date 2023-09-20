@@ -21,7 +21,11 @@
  */
 
 import { type JSX, useEffect, useRef, useState } from "react";
-import { type Coordinates, type Executable, type Menu } from "../../interfaces";
+import {
+  type Action,
+  type Coordinates,
+  type Executable,
+} from "../../interfaces";
 import { isAllowedActionMenuKey } from "../../utils";
 import { matchSorter } from "match-sorter";
 
@@ -31,16 +35,16 @@ const ACTION_MENU_OPTION_HEIGHT: number = 60;
 
 interface BlockToolsProps {
   coordinates: Coordinates;
-  menu: readonly Menu[];
-  onSelect: (execute: Executable) => void;
+  actions: readonly Action[];
+  onActionSelected: (execute: Executable) => void;
   onClose: () => void;
   onEscape: (query: string) => void;
 }
 
 export default function BlockTools({
   coordinates,
-  menu,
-  onSelect,
+  actions,
+  onActionSelected,
   onClose,
   onEscape,
 }: BlockToolsProps): JSX.Element {
@@ -59,7 +63,9 @@ export default function BlockTools({
 
   const currentMenuIndex = useRef(-1);
   const query = useRef("");
-  const [matchedMenu, setMatchedMenu] = useState<readonly Menu[]>([...menu]);
+  const [matchedMenu, setMatchedMenu] = useState<readonly Action[]>([
+    ...actions,
+  ]);
 
   useEffect(() => {
     function keyManager(event: KeyboardEvent): void {
@@ -71,7 +77,7 @@ export default function BlockTools({
         }
         case "enter": {
           event.preventDefault();
-          onSelect(
+          onActionSelected(
             currentMenuIndex.current === -1
               ? matchedMenu[0].execute
               : matchedMenu[currentMenuIndex.current].execute,
@@ -114,13 +120,13 @@ export default function BlockTools({
 
           const matchedMenu =
             query.current.length === 0
-              ? menu
-              : matchSorter(menu, query.current, {
+              ? actions
+              : matchSorter(actions, query.current, {
                   keys: ["name"],
                 });
 
           setYAxis(
-            matchedMenu.length === menu.length &&
+            matchedMenu.length === actions.length &&
               window.innerHeight - (coordinates.y + ACTION_MENU_HEIGHT) <= 0
               ? coordinates.y - ACTION_MENU_HEIGHT - 40
               : coordinates.y,
@@ -135,8 +141,8 @@ export default function BlockTools({
 
             const matchedMenu =
               query.current.length === 0
-                ? menu
-                : matchSorter(menu, query.current, {
+                ? actions
+                : matchSorter(actions, query.current, {
                     keys: ["name"],
                   });
 
@@ -146,7 +152,7 @@ export default function BlockTools({
               currentMenuIndex.current = 0;
 
               setYAxis(
-                matchedMenu.length !== menu.length &&
+                matchedMenu.length !== actions.length &&
                   window.innerHeight -
                     (coordinates.y +
                       matchedMenu.length * ACTION_MENU_OPTION_HEIGHT) <=
@@ -169,7 +175,14 @@ export default function BlockTools({
     return () => {
       window.removeEventListener("keydown", keyManager);
     };
-  }, [coordinates.y, matchedMenu, menu, onClose, onEscape, onSelect]);
+  }, [
+    coordinates.y,
+    matchedMenu,
+    actions,
+    onClose,
+    onEscape,
+    onActionSelected,
+  ]);
 
   return (
     <div
@@ -191,7 +204,7 @@ export default function BlockTools({
               "flex h-[60px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-2 text-sm font-medium text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
             }
             onClick={() => {
-              onSelect(menu.execute);
+              onActionSelected(menu.execute);
               onClose();
             }}
           >

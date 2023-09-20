@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type Menu } from "../../interfaces";
+import { type Action } from "../../interfaces";
 import { generateUUID } from "../../utils";
 import {
   BoldIcon,
@@ -36,7 +36,7 @@ import {
 } from "../icons";
 import { REMOVE_COLOR, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
-const MasterInlineTools: readonly Menu[] = [
+const InlineActions: readonly Action[] = [
   {
     id: generateUUID(),
     name: "Bold",
@@ -220,4 +220,4 @@ const MasterInlineTools: readonly Menu[] = [
   },
 ];
 
-export default MasterInlineTools;
+export default InlineActions;

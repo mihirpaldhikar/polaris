@@ -29,11 +29,11 @@ import {
   useState,
 } from "react";
 import {
+  type Action,
   type Blob,
   type Block,
   type Coordinates,
   type InputArgs,
-  type Menu,
   type PolarisConfig,
   type Style,
   type Table,
@@ -66,7 +66,6 @@ import {
 } from "../../utils";
 import { createRoot, type Root } from "react-dom/client";
 import { InlineToolbar } from "../InlineToolbar";
-import { MasterBlockTools, MasterInlineTools } from "../../assets";
 import { DEFAULT_POLARIS_CONFIG, LINK_ATTRIBUTE } from "../../constants";
 import { BlockTools } from "../BlockTools";
 import RenderType from "../../enums/RenderType";
@@ -74,13 +73,14 @@ import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
 import { cloneDeep } from "lodash";
 import { Composer } from "../Composer";
+import { BlockActions, InlineActions } from "../../assets/index";
 
 interface EditorProps {
   editable?: boolean;
   blob: Blob;
   config?: PolarisConfig;
   className?: string;
-  inlineTools?: Menu[];
+  inlineActions?: Action[];
   onAttachmentSelected: (data: File | string) => Promise<string>;
 }
 
@@ -103,14 +103,14 @@ export default function Editor({
   editable = true,
   blob,
   config = DEFAULT_POLARIS_CONFIG,
-  inlineTools,
+  inlineActions,
   className,
   onAttachmentSelected,
 }: EditorProps): JSX.Element {
-  let masterInlineTools: readonly Menu[] = cloneDeep(MasterInlineTools).concat(
-    ...(inlineTools ?? []),
+  let defaultInlineActions: readonly Action[] = cloneDeep(InlineActions).concat(
+    ...(inlineActions ?? []),
   );
-  const masterBlockTools: readonly Menu[] = cloneDeep(MasterBlockTools);
+  const defaultBlockActions: readonly Action[] = cloneDeep(BlockActions);
 
   const isActionMenuOpen = useRef<boolean>(false);
 
@@ -194,7 +194,7 @@ export default function Editor({
       block: Block,
       previousContent: string,
       caretOffset: number,
-      blockTools: Menu[],
+      blockTools: Action[],
     ) => {
       const popupNode = window.document.getElementById(`popup-${blob.id}`);
       const editorNode = window.document.getElementById(`editor-${blob.id}`);
@@ -239,7 +239,7 @@ export default function Editor({
       popUpRoot.render(
         <BlockTools
           coordinates={actionMenuCoordinates}
-          menu={blockTools}
+          actions={blockTools}
           onClose={() => {
             dispatchEditorEvent("onActionMenu", {
               opened: false,
@@ -254,7 +254,7 @@ export default function Editor({
               nodeIndex,
             });
           }}
-          onSelect={(execute) => {
+          onActionSelected={(execute) => {
             switch (execute.type) {
               case "role": {
                 let focusNode = block.id;
@@ -509,9 +509,9 @@ export default function Editor({
           nodeAtCaretOffset as HTMLElement,
         );
 
-        const filteredBlockTools = masterBlockTools.filter((menu) => {
-          if (menu.allowedRoles !== undefined) {
-            return menu.allowedRoles?.includes(activeBlock.role);
+        const filteredBlockTools = defaultBlockActions.filter((action) => {
+          if (action.allowedRoles !== undefined) {
+            return action.allowedRoles?.includes(activeBlock.role);
           }
           return true;
         });
@@ -529,7 +529,7 @@ export default function Editor({
         );
       }
     },
-    [actionKeyHandler, masterBlockTools],
+    [actionKeyHandler, defaultBlockActions],
   );
 
   const mobileInputHandler = useCallback(
@@ -943,18 +943,21 @@ export default function Editor({
       return;
     }
 
-    for (const menu of masterInlineTools) {
-      if (menu.execute.type === "style" && Array.isArray(menu.execute.args)) {
+    for (const action of defaultInlineActions) {
+      if (
+        action.execute.type === "style" &&
+        Array.isArray(action.execute.args)
+      ) {
         if (
-          elementContainsStyle(startNodeParent, menu.execute.args) &&
-          elementContainsStyle(endNodeParent, menu.execute.args)
+          elementContainsStyle(startNodeParent, action.execute.args) &&
+          elementContainsStyle(endNodeParent, action.execute.args)
         ) {
-          menu.active = true;
+          action.active = true;
         }
       }
 
-      if (menu.execute.type === "input") {
-        const inputArgs = menu.execute.args as InputArgs;
+      if (action.execute.type === "input") {
+        const inputArgs = action.execute.args as InputArgs;
         if (
           typeof inputArgs.initialPayload === "object" &&
           inputArgs.executionTypeAfterInput === "style" &&
@@ -971,7 +974,7 @@ export default function Editor({
               : startNodeParent.style.getPropertyValue(
                   inputArgs.initialPayload.name,
                 );
-          menu.active = true;
+          action.active = true;
         }
 
         if (
@@ -982,7 +985,7 @@ export default function Editor({
         ) {
           inputArgs.initialPayload =
             startNodeParent.getAttribute(LINK_ATTRIBUTE) ?? "";
-          menu.active = true;
+          action.active = true;
         }
       }
     }
@@ -991,14 +994,14 @@ export default function Editor({
       <InlineToolbar
         dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
-        menus={masterInlineTools}
+        actions={defaultInlineActions}
         onClose={() => {
           popUpRoot.render(<Fragment />);
-          masterInlineTools = cloneDeep(MasterInlineTools).concat(
-            ...(inlineTools ?? []),
+          defaultInlineActions = cloneDeep(InlineActions).concat(
+            ...(defaultInlineActions ?? []),
           );
         }}
-        onMenuSelected={(executable) => {
+        onActionSelected={(executable) => {
           selection.removeAllRanges();
           selection.addRange(range);
           switch (executable.type) {
@@ -1028,8 +1031,8 @@ export default function Editor({
       (event) => {
         if (!event.ctrlKey || !event.shiftKey) {
           popUpRoot.render(<Fragment />);
-          masterInlineTools = cloneDeep(MasterInlineTools).concat(
-            ...(inlineTools ?? []),
+          defaultInlineActions = cloneDeep(InlineActions).concat(
+            ...(defaultInlineActions ?? []),
           );
         }
       },
@@ -1041,8 +1044,8 @@ export default function Editor({
       "mousedown",
       () => {
         popUpRoot.render(<Fragment />);
-        masterInlineTools = cloneDeep(MasterInlineTools).concat(
-          ...(inlineTools ?? []),
+        defaultInlineActions = cloneDeep(InlineActions).concat(
+          ...(defaultInlineActions ?? []),
         );
       },
       {

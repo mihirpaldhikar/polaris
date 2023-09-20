@@ -28,7 +28,7 @@ import { GitHubIcon, ImageIcon, YouTubeIcon } from "../../assets";
 import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { YouTubeVideoBlock } from "../YouTubeVideoBlock";
-import { AttachmentTools } from "../../assets/tools/AttachmentTools";
+import { AttachmentActions } from "../../assets/actions/AttachmentActions";
 import { GitHubGistBlock } from "../GitHubGistBlock";
 
 interface AttachmentBlockProps {
@@ -194,7 +194,7 @@ export default function AttachmentBlock({
     return (
       <AttachmentHolder
         block={block}
-        attachmentTools={AttachmentTools}
+        actions={AttachmentActions}
         onDelete={deleteHandler}
         onChange={onChange}
       >
@@ -206,7 +206,7 @@ export default function AttachmentBlock({
     return (
       <AttachmentHolder
         block={block}
-        attachmentTools={AttachmentTools}
+        actions={AttachmentActions}
         onDelete={deleteHandler}
         onChange={onChange}
       >
@@ -218,7 +218,7 @@ export default function AttachmentBlock({
     return (
       <AttachmentHolder
         block={block}
-        attachmentTools={AttachmentTools}
+        actions={AttachmentActions}
         onDelete={deleteHandler}
         onChange={onChange}
       >

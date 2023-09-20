@@ -22,10 +22,10 @@
 
 import { Fragment, type JSX } from "react";
 import {
+  type Action,
   type Coordinates,
   type Executable,
   type InputArgs,
-  type Menu,
   type Style,
 } from "../../interfaces";
 import { conditionalClassName } from "../../utils";
@@ -40,20 +40,20 @@ const ACTION_MENU_PADDING: number = 42;
 interface InlineToolbarProps {
   dialogRoot: Root | undefined;
   coordinates: Coordinates;
-  menus: readonly Menu[];
-  onMenuSelected: (executable: Executable) => void;
+  actions: readonly Action[];
+  onActionSelected: (executable: Executable) => void;
   onClose: () => void;
 }
 
 export default function InlineToolbar({
   dialogRoot,
   coordinates,
-  menus,
-  onMenuSelected,
+  actions,
+  onActionSelected,
   onClose,
 }: InlineToolbarProps): JSX.Element {
   const ACTION_MENU_WIDTH =
-    ACTION_BUTTON_WIDTH * menus.length + ACTION_MENU_PADDING;
+    ACTION_BUTTON_WIDTH * actions.length + ACTION_MENU_PADDING;
   const ACTION_MENU_HEIGHT = 38;
 
   const xAxis =
@@ -78,7 +78,7 @@ export default function InlineToolbar({
         "fixed z-50 flex flex-row items-center rounded-lg border border-gray-200 bg-white py-0.5 shadow-md"
       }
     >
-      {menus.map((menu) => {
+      {actions.map((menu) => {
         return (
           <div key={menu.id} className={"flex flex-row items-center"}>
             <span
@@ -93,7 +93,7 @@ export default function InlineToolbar({
               title={menu.name}
               onClick={() => {
                 if (menu.execute.type !== "input") {
-                  onMenuSelected(menu.execute);
+                  onActionSelected(menu.execute);
                 } else {
                   const inputArgs = menu.execute.args as InputArgs;
 
@@ -116,7 +116,7 @@ export default function InlineToolbar({
                               enabled: colorHexCode !== REMOVE_COLOR,
                             },
                           ];
-                          onMenuSelected({
+                          onActionSelected({
                             type: "style",
                             args: style,
                           });
@@ -141,7 +141,7 @@ export default function InlineToolbar({
                         onConfirm={(data, remove) => {
                           switch (inputArgs.executionTypeAfterInput) {
                             case "link": {
-                              onMenuSelected({
+                              onActionSelected({
                                 type: "link",
                                 args: data,
                               });
@@ -156,7 +156,7 @@ export default function InlineToolbar({
                                   enabled: !(remove === true),
                                 },
                               ];
-                              onMenuSelected({
+                              onActionSelected({
                                 type: "style",
                                 args: style,
                               });

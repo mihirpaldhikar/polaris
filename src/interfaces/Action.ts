@@ -20,5 +20,18 @@
  * SOFTWARE.
  */
 
-export { default as MasterBlockTools } from "./MasterBlockTools";
-export { default as MasterInlineTools } from "./MasterInlineTools";
+import { type JSX } from "react";
+import { type Executable } from "./index";
+
+interface Action {
+  separator?: boolean;
+  id: string;
+  name: string;
+  description?: string;
+  icon?: JSX.Element;
+  active?: boolean;
+  allowedRoles?: string[];
+  execute: Executable;
+}
+
+export default Action;

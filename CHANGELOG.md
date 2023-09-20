@@ -2,7 +2,7 @@
 
 ### Fixes:
 
-- Fix an issue which was causing IndexSizeError when switching blocks with Block tools Action menu.
+- Fix an issue which was causing IndexSizeError when switching blocks with Block tools Action actions.
 
 ## 0.7.0 (September 17. 2023)
 
@@ -18,7 +18,7 @@
 
 - Fix an issue in which Inline toolbar was getting out of viewport for mobile devices.
 - Fix an issue in which Slash command was not working as expected and keeps the slash if some block or tool is selected.
-- Fix debounce interval from 360 to 260 in onChange and onSelect callbacks for better typing experience.
+- Fix debounce interval from 360 to 260 in onChange and onActionSelected callbacks for better typing experience.
 
 ## 0.6.0 (September 16, 2023)
 
@@ -41,7 +41,7 @@
 
 - Fix an issue in which focus on block was not working as expected when a table block is initialized which was causing
   rendering error.
-- Fix an issue in which Action Menu was not working in mobile devices.
+- Fix an issue in which Action Action was not working in mobile devices.
 - Fix an issue in which Block Tools popup was getting dismissed due to arrow navigation code of table block.
 - Fix an issue in which Copy, Paste and other options not working in Dialog Box input fields for Mobile Devices.
 - Fix an issue in which height field of Size Dialog losing focus while typing.
@@ -58,7 +58,7 @@
 ### Breaking Changes:
 
 - `youtubeVideoEmbed` and `githubGistEmbed` are now separate blocks instead of `embed` block.
-- `allowedOn` has been renamed to `allowedRoles` in `Menu`.
+- `allowedOn` has been renamed to `allowedRoles` in `Action`.
 - Removed `lineHeight` field from `PolarisConfig`. The line height is now automatically managed bt the `Editor`
 
 ### Fixes:
@@ -94,7 +94,7 @@
 ### Breaking Changes:
 
 - `content` field of `Block` is now renamed to `data`.
-- `selectionMenu` prop of `Editor` is now renamed to `inlineTools`.
+- `selectionMenu` prop of `Editor` is now renamed to `inlineActions`.
 
 ### Fixes:
 
@@ -105,7 +105,7 @@
 
 ### Fixes:
 
-- Fix an issue in which a new block was getting created on Enter key pressed when Action Menu is opened.
+- Fix an issue in which a new block was getting created on Enter key pressed when Action Action is opened.
 
 ## 0.2.2 (September 1, 2023)
 
@@ -147,7 +147,7 @@
 
 ## 0.1.2 (June 29, 2023)
 
-- Fix bug of selection menu recreating dialog root even though it is already created by the Editor.
+- Fix bug of selection actions recreating dialog root even though it is already created by the Editor.
 
 ## 0.1.1 (June 29, 2023)
 

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type Menu } from "../../interfaces";
+import { type Action } from "../../interfaces";
 import { generateUUID } from "../../utils";
 import {
   AlignCenterIcon,
@@ -40,7 +40,7 @@ import {
   YouTubeIcon,
 } from "../icons";
 
-const MasterBlockTools: readonly Menu[] = [
+const BlockActions: readonly Action[] = [
   {
     id: generateUUID(),
     name: "Title",
@@ -491,4 +491,4 @@ const MasterBlockTools: readonly Menu[] = [
   },
 ];
 
-export default MasterBlockTools;
+export default BlockActions;

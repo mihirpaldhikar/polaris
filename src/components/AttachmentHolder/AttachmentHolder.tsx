@@ -29,10 +29,10 @@ import {
   setNodeStyle,
 } from "../../utils";
 import {
+  type Action,
   type Attachment,
   type Block,
   type Coordinates,
-  type Menu,
 } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { MoreOptionsIcon } from "../../assets";
@@ -43,7 +43,7 @@ interface AttachmentHolderProps {
   children: JSX.Element;
   parentBlock?: Block;
   block: Block;
-  attachmentTools: Menu[];
+  actions: Action[];
   onDelete: () => void;
   onChange: (block: Block) => void;
 }
@@ -51,13 +51,13 @@ interface AttachmentHolderProps {
 export default function AttachmentHolder({
   block,
   children,
-  attachmentTools,
+  actions,
   onDelete,
   onChange,
 }: AttachmentHolderProps): JSX.Element {
   const { popUpRoot, dialogRoot } = useContext(RootContext);
   const { config } = useContext(RootContext);
-  const tools = attachmentTools.filter((tool) => {
+  const tools = actions.filter((tool) => {
     if (tool.allowedRoles !== undefined) {
       return tool.allowedRoles?.includes(block.role);
     }
