@@ -25,7 +25,7 @@ import type Style from "./Style";
 export interface BlockSchema {
   id: string;
   style: Style[];
-  role: string;
+  role: any;
   data: any;
 }
 

@@ -30,7 +30,6 @@ interface Action {
   description?: string;
   icon?: JSX.Element;
   active?: boolean;
-  allowedRoles?: string[];
   execute: Executable;
 }
 

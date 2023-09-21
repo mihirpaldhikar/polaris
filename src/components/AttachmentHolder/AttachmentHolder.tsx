@@ -43,7 +43,7 @@ interface AttachmentHolderProps {
   children: JSX.Element;
   parentBlock?: BlockSchema;
   block: BlockSchema;
-  actions: Action[];
+  actions: readonly Action[];
   onDelete: () => void;
   onChange: (block: BlockSchema) => void;
 }
@@ -57,12 +57,6 @@ export default function AttachmentHolder({
 }: AttachmentHolderProps): JSX.Element {
   const { popUpRoot, dialogRoot } = useContext(RootContext);
   const { config } = useContext(RootContext);
-  const tools = actions.filter((tool) => {
-    if (tool.allowedRoles !== undefined) {
-      return tool.allowedRoles?.includes(block.role);
-    }
-    return true;
-  });
 
   return (
     <div
@@ -119,7 +113,7 @@ export default function AttachmentHolder({
                 popUpRoot.render(
                   <ContextMenu
                     coordinates={coordinates}
-                    menu={tools}
+                    menu={actions}
                     onClick={(execute) => {
                       if (typeof execute.args === "function") {
                         execute.args(

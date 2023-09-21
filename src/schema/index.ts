@@ -23,3 +23,4 @@
 export type { default as TextBlockSchema } from "./TextBlockSchema";
 export type { default as AttachmentBlockSchema } from "./AttachmentBlockSchema";
 export type { default as TableBlockSchema } from "./TableBlockSchema";
+export type { default as ListBlockSchema } from "./ListBlockSchema";

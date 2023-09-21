@@ -20,54 +20,173 @@
  * SOFTWARE.
  */
 
-import { createElement, type JSX } from "react";
-import { type Attachment, type BlockSchema } from "../../interfaces";
-import { generateUUID } from "../../utils";
+import { createElement, Fragment, type JSX } from "react";
+import {
+  type Action,
+  type Attachment,
+  type BlockLifecycle,
+  type BlockSchema,
+  type Coordinates,
+  type Style,
+} from "../../interfaces";
+import { generateUUID, getBlockNode } from "../../utils";
 import { FilePicker } from "../../components/FilePicker";
-import { ImageIcon } from "../../assets";
+import {
+  AlignCenterIcon,
+  AlignEndIcon,
+  AlignStartIcon,
+  ChangeIcon,
+  DeleteIcon,
+  ImageIcon,
+  ResizeIcon,
+} from "../../assets";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
-import { AttachmentActions } from "../../assets/actions/AttachmentActions";
+import { SizeDialog } from "../../components/SizeDialog";
 
 interface ImageBlockProps {
-  previousParentBlock: BlockSchema | null;
   block: BlockSchema;
-  listMetadata?: {
-    parent: BlockSchema;
-    currentIndex: number;
-  };
-  onAttachmentRequest: (block: BlockSchema, data: File | string) => void;
-  onChange: (block: BlockSchema) => void;
-  onDelete: (
-    block: BlockSchema,
-    previousBlock: BlockSchema,
-    nodeId: string,
-    setCursorToStart?: boolean,
-    holder?: BlockSchema[],
-  ) => void;
-  onCreate: (
-    parentBlock: BlockSchema,
-    targetBlock: BlockSchema,
-    holder?: BlockSchema[],
-    focusOn?: {
-      nodeId: string;
-      nodeChildIndex?: number;
-      caretOffset?: number;
-    },
-  ) => void;
+  blockLifecycle: BlockLifecycle;
 }
+
+const imageAttachmentActions: readonly Action[] = [
+  {
+    id: generateUUID(),
+    name: "Align Left",
+    icon: <AlignStartIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        const style: Style = {
+          name: "text-align",
+          value: "left",
+        };
+        const index = block.style.map((sty) => sty.name).indexOf(style.name);
+        if (index === -1) {
+          block.style.push(style);
+        } else {
+          block.style[index] = style;
+        }
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Align Center",
+    icon: <AlignCenterIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        const style: Style = {
+          name: "text-align",
+          value: "center",
+        };
+        const index = block.style.map((sty) => sty.name).indexOf(style.name);
+        if (index === -1) {
+          block.style.push(style);
+        } else {
+          block.style[index] = style;
+        }
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Align Right",
+    icon: <AlignEndIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        const style: Style = {
+          name: "text-align",
+          value: "right",
+        };
+        const index = block.style.map((sty) => sty.name).indexOf(style.name);
+        if (index === -1) {
+          block.style.push(style);
+        } else {
+          block.style[index] = style;
+        }
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Resize",
+    icon: <ResizeIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange, _onDelete, _popupRoot, dialogRoot) => {
+        if (dialogRoot !== undefined) {
+          const currentNode = getBlockNode(block.id) as HTMLElement;
+          const coordinates: Coordinates = {
+            y: currentNode.getBoundingClientRect().y,
+            x: currentNode.getBoundingClientRect().right,
+          };
+
+          dialogRoot.render(
+            <SizeDialog
+              initialSize={{
+                width: (block.data as Attachment).width,
+                height: (block.data as Attachment).height,
+              }}
+              coordinates={coordinates}
+              onConfirm={(width, height) => {
+                (block.data as Attachment).width = width;
+                (block.data as Attachment).height = height;
+                onChange(block, block.id);
+              }}
+              onClose={() => {
+                dialogRoot.render(<Fragment />);
+              }}
+            />,
+          );
+        }
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Change",
+    icon: <ChangeIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        (block.data as Attachment).url = "";
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Remove",
+    icon: <DeleteIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, _onChange, onDelete) => {
+        onDelete(block);
+      },
+    },
+  },
+];
 
 export default function ImageBlock({
   block,
-  onAttachmentRequest,
-  onDelete,
-  onChange,
-  onCreate,
-  previousParentBlock,
-  listMetadata,
+  blockLifecycle,
 }: ImageBlockProps): JSX.Element {
   if (typeof block.data !== "object") {
     throw new Error(`Invalid schema for block with role '${block.role}'`);
   }
+  const {
+    previousParentBlock,
+    listMetadata,
+    onChange,
+    onCreate,
+    onDelete,
+    onAttachmentRequest,
+  } = blockLifecycle;
   const attachment: Attachment = block.data;
 
   function deleteHandler(): void {
@@ -163,7 +282,7 @@ export default function ImageBlock({
   return (
     <AttachmentHolder
       block={block}
-      actions={AttachmentActions}
+      actions={imageAttachmentActions}
       onDelete={deleteHandler}
       onChange={onChange}
     >

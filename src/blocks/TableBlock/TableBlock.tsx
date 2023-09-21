@@ -30,12 +30,18 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { type BlockSchema, type Coordinates } from "../../interfaces";
+import {
+  type BlockLifecycle,
+  type BlockSchema,
+  type Coordinates,
+  type Table,
+} from "../../interfaces";
 import {
   conditionalClassName,
   generateUUID,
   getBlockNode,
   getEditorRoot,
+  openLinkInNewTab,
   setNodeStyle,
   subscribeToEditorEvent,
   unsubscribeFromEditorEvent,
@@ -48,50 +54,32 @@ import {
   DeleteIcon,
   DeleteRowIcon,
 } from "../../assets";
-import { type TableBlockSchema } from "../../schema";
+import { type TableBlockSchema, type TextBlockSchema } from "../../schema";
 
 interface TableBlockProps {
-  previousParentBlock: BlockSchema | null;
   block: TableBlockSchema;
-  listMetadata?: {
-    parent: BlockSchema;
-    currentIndex: number;
-  };
-  editable: boolean;
-  onChange: (block: BlockSchema, focus?: boolean) => void;
-  onClick: (even: MouseEvent) => void;
-  onSelect: (block: BlockSchema) => void;
-  onDelete: (
-    block: BlockSchema,
-    previousBlock: BlockSchema,
-    nodeId: string,
-    setCursorToStart?: boolean,
-    holder?: BlockSchema[],
-  ) => void;
-  onCreate: (
-    parentBlock: BlockSchema,
-    targetBlock: BlockSchema,
-    holder?: BlockSchema[],
-    focusOn?: {
-      nodeId: string;
-      nodeChildIndex?: number;
-      caretOffset?: number;
-    },
-  ) => void;
+  blockLifecycle: BlockLifecycle;
 }
 
 export default function TableBlock({
   block,
-  listMetadata,
-  previousParentBlock,
-  editable,
-  onClick,
-  onChange,
-  onSelect,
-  onDelete,
-  onCreate,
+  blockLifecycle,
 }: TableBlockProps): JSX.Element {
-  const tableData = block.data;
+  const {
+    previousParentBlock,
+    listMetadata,
+    onChange,
+    onCreate,
+    onDelete,
+    editable,
+    onSelect,
+  } = blockLifecycle;
+
+  if (typeof block.data !== "object") {
+    throw new Error(`Invalid schema for block with role '${block.role}'`);
+  }
+
+  const tableData: Table = block.data;
 
   function onCellChange(
     event: ChangeEvent<HTMLElement>,
@@ -270,7 +258,7 @@ export default function TableBlock({
           title={"Add row after current row"}
           className={"p-1 rounded-md hover:bg-gray-100 cursor-pointer"}
           onClick={() => {
-            const columns: BlockSchema[] = [];
+            const columns: TextBlockSchema[] = [];
             for (let i = 0; i < totalColumns; i++) {
               columns.push({
                 id: generateUUID(),
@@ -415,7 +403,9 @@ export default function TableBlock({
                       onSelect(cell);
                     }
                   },
-                  onClick,
+                  onClick: (event: MouseEvent) => {
+                    openLinkInNewTab(event);
+                  },
                   onInput: (event: ChangeEvent<HTMLElement>) => {
                     onCellChange(event, rowIndex, columnIndex);
                   },

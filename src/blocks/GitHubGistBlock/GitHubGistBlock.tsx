@@ -21,51 +21,55 @@
  */
 
 import { type JSX } from "react";
-import { type Attachment, type BlockSchema } from "../../interfaces";
+import {
+  type Action,
+  type Attachment,
+  type BlockLifecycle,
+  type BlockSchema,
+} from "../../interfaces";
 import { generateGitHubGistURL, generateUUID } from "../../utils";
-import { GitHubIcon } from "../../assets";
+import { ChangeIcon, DeleteIcon, GitHubIcon } from "../../assets";
 import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
-import { AttachmentActions } from "../../assets/actions/AttachmentActions";
+import { type AttachmentBlockSchema } from "../../schema";
 
 interface GitHubGistBlockProps {
-  previousParentBlock: BlockSchema | null;
-  block: BlockSchema;
-  listMetadata?: {
-    parent: BlockSchema;
-    currentIndex: number;
-  };
-  onChange: (block: BlockSchema) => void;
-  onDelete: (
-    block: BlockSchema,
-    previousBlock: BlockSchema,
-    nodeId: string,
-    setCursorToStart?: boolean,
-    holder?: BlockSchema[],
-  ) => void;
-  onCreate: (
-    parentBlock: BlockSchema,
-    targetBlock: BlockSchema,
-    holder?: BlockSchema[],
-    focusOn?: {
-      nodeId: string;
-      nodeChildIndex?: number;
-      caretOffset?: number;
-    },
-  ) => void;
+  block: AttachmentBlockSchema;
+  blockLifecycle: BlockLifecycle;
 }
+
+const githubGistAttachmentActions: readonly Action[] = [
+  {
+    id: generateUUID(),
+    name: "Change",
+    icon: <ChangeIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        (block.data as Attachment).url = "";
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Remove",
+    icon: <DeleteIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, _onChange, onDelete) => {
+        onDelete(block);
+      },
+    },
+  },
+];
 
 export default function GitHubGistBlock({
   block,
-  onDelete,
-  onChange,
-  onCreate,
-  previousParentBlock,
-  listMetadata,
+  blockLifecycle,
 }: GitHubGistBlockProps): JSX.Element {
-  if (typeof block.data !== "object") {
-    throw new Error(`Invalid schema for block with role '${block.role}'`);
-  }
+  const { previousParentBlock, listMetadata, onChange, onCreate, onDelete } =
+    blockLifecycle;
   const attachment: Attachment = block.data;
 
   const gistDocument = `
@@ -175,7 +179,7 @@ export default function GitHubGistBlock({
         onEmbedPicked={(url) => {
           attachment.url = url;
           block.data = attachment;
-          onChange(block);
+          onChange(block, true);
         }}
         onDelete={() => {
           deleteHandler();
@@ -187,7 +191,7 @@ export default function GitHubGistBlock({
   return (
     <AttachmentHolder
       block={block}
-      actions={AttachmentActions}
+      actions={githubGistAttachmentActions}
       onDelete={deleteHandler}
       onChange={onChange}
     >

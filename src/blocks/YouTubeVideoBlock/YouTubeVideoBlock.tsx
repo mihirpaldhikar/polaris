@@ -20,52 +20,164 @@
  * SOFTWARE.
  */
 
-import { type JSX } from "react";
-import { generateUUID, getYouTubeVideoID } from "../../utils";
-import { type BlockSchema } from "../../interfaces";
+import { Fragment, type JSX } from "react";
+import { generateUUID, getBlockNode, getYouTubeVideoID } from "../../utils";
+import {
+  type Action,
+  type Attachment,
+  type BlockLifecycle,
+  type BlockSchema,
+  type Coordinates,
+  type Style,
+} from "../../interfaces";
 import { EmbedPicker } from "../../components/EmbedPicker";
-import { YouTubeIcon } from "../../assets";
-import { AttachmentActions } from "../../assets/actions/AttachmentActions";
+import {
+  AlignCenterIcon,
+  AlignEndIcon,
+  AlignStartIcon,
+  ChangeIcon,
+  DeleteIcon,
+  ResizeIcon,
+  YouTubeIcon,
+} from "../../assets";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
+import { SizeDialog } from "../../components/SizeDialog";
+import { type AttachmentBlockSchema } from "../../schema";
 
 interface YouTubeVideoBlockProps {
-  previousParentBlock: BlockSchema | null;
-  block: BlockSchema;
-  listMetadata?: {
-    parent: BlockSchema;
-    currentIndex: number;
-  };
-  onChange: (block: BlockSchema) => void;
-  onDelete: (
-    block: BlockSchema,
-    previousBlock: BlockSchema,
-    nodeId: string,
-    setCursorToStart?: boolean,
-    holder?: BlockSchema[],
-  ) => void;
-  onCreate: (
-    parentBlock: BlockSchema,
-    targetBlock: BlockSchema,
-    holder?: BlockSchema[],
-    focusOn?: {
-      nodeId: string;
-      nodeChildIndex?: number;
-      caretOffset?: number;
-    },
-  ) => void;
+  block: AttachmentBlockSchema;
+  blockLifecycle: BlockLifecycle;
 }
 
+const youtubeAttachmentActions: readonly Action[] = [
+  {
+    id: generateUUID(),
+    name: "Align Left",
+    icon: <AlignStartIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        const style: Style = {
+          name: "text-align",
+          value: "left",
+        };
+        const index = block.style.map((sty) => sty.name).indexOf(style.name);
+        if (index === -1) {
+          block.style.push(style);
+        } else {
+          block.style[index] = style;
+        }
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Align Center",
+    icon: <AlignCenterIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        const style: Style = {
+          name: "text-align",
+          value: "center",
+        };
+        const index = block.style.map((sty) => sty.name).indexOf(style.name);
+        if (index === -1) {
+          block.style.push(style);
+        } else {
+          block.style[index] = style;
+        }
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Align Right",
+    icon: <AlignEndIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        const style: Style = {
+          name: "text-align",
+          value: "right",
+        };
+        const index = block.style.map((sty) => sty.name).indexOf(style.name);
+        if (index === -1) {
+          block.style.push(style);
+        } else {
+          block.style[index] = style;
+        }
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Resize",
+    icon: <ResizeIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange, _onDelete, _popupRoot, dialogRoot) => {
+        if (dialogRoot !== undefined) {
+          const currentNode = getBlockNode(block.id) as HTMLElement;
+          const coordinates: Coordinates = {
+            y: currentNode.getBoundingClientRect().y,
+            x: currentNode.getBoundingClientRect().right,
+          };
+
+          dialogRoot.render(
+            <SizeDialog
+              initialSize={{
+                width: (block.data as Attachment).width,
+                height: (block.data as Attachment).height,
+              }}
+              coordinates={coordinates}
+              onConfirm={(width, height) => {
+                (block.data as Attachment).width = width;
+                (block.data as Attachment).height = height;
+                onChange(block, block.id);
+              }}
+              onClose={() => {
+                dialogRoot.render(<Fragment />);
+              }}
+            />,
+          );
+        }
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Change",
+    icon: <ChangeIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, onChange) => {
+        (block.data as Attachment).url = "";
+        onChange(block, block.id);
+      },
+    },
+  },
+  {
+    id: generateUUID(),
+    name: "Remove",
+    icon: <DeleteIcon size={30} />,
+    execute: {
+      type: "blockFunction",
+      args: (block, _onChange, onDelete) => {
+        onDelete(block);
+      },
+    },
+  },
+];
 export default function YouTubeVideoBlock({
   block,
-  onDelete,
-  onChange,
-  onCreate,
-  previousParentBlock,
-  listMetadata,
+  blockLifecycle,
 }: YouTubeVideoBlockProps): JSX.Element {
-  if (typeof block.data !== "object") {
-    throw new Error(`Invalid schema for block with role '${block.role}'`);
-  }
+  const { previousParentBlock, listMetadata, onChange, onCreate, onDelete } =
+    blockLifecycle;
   const attachment = block.data;
 
   function deleteHandler(): void {
@@ -150,7 +262,7 @@ export default function YouTubeVideoBlock({
         onEmbedPicked={(url) => {
           attachment.url = url;
           block.data = attachment;
-          onChange(block);
+          onChange(block, true);
         }}
         onDelete={() => {
           deleteHandler();
@@ -162,7 +274,7 @@ export default function YouTubeVideoBlock({
   return (
     <AttachmentHolder
       block={block}
-      actions={AttachmentActions}
+      actions={youtubeAttachmentActions}
       onDelete={deleteHandler}
       onChange={onChange}
     >

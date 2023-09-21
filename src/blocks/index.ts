@@ -20,8 +20,15 @@
  * SOFTWARE.
  */
 
-export { TextBlock } from "./TextBlock";
-export { TableBlock } from "./TableBlock";
-export { YouTubeVideoBlock } from "./YouTubeVideoBlock";
-export { GitHubGistBlock } from "./GitHubGistBlock";
-export { ImageBlock } from "./ImageBlock";
+export { ParagraphBlockPlugin } from "./ParagraphBlock";
+export { TitleBlockPlugin } from "./TitleBlock";
+export { SubTitleBlockPlugin } from "./SubTitleBlock";
+export { HeadingBlockPlugin } from "./HeadingBlock";
+export { SubHeadingBlockPlugin } from "./SubHeadingBlock";
+export { QuoteBlockPlugin } from "./QuoteBlock";
+export { TableBlockPlugin } from "./TableBlock";
+export { YouTubeVideoBlockPlugin } from "./YouTubeVideoBlock";
+export { GitHubGistBlockPlugin } from "./GitHubGistBlock";
+export { ImageBlockPlugin } from "./ImageBlock";
+export { NumberedListBlockPlugin } from "./NumberedListBlock";
+export { BulletListBlockPlugin } from "./BulletListBlock";

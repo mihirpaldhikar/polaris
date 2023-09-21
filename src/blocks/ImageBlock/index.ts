@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as ImageBlock } from "./ImageBlock";
+export { default as ImageBlockPlugin } from "./ImageBlockPlugin";

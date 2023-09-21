@@ -23,7 +23,7 @@
 import { type Attachment, type BlockSchema } from "../interfaces";
 
 interface AttachmentBlockSchema extends BlockSchema {
-  role: "image" | "youtubeVideoEmbed" | "githubGistEmbed";
+  role: "image" | "youtubeVideo" | "githubGist";
   data: Attachment;
 }
 

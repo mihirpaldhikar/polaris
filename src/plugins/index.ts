@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as YouTubeVideoBlockPlugin } from "./YoutubeVideoBlockPlugin";
+export { BlockPlugin } from "./BlockPlugin";

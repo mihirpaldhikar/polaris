@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as GitHubGistBlock } from "./GitHubGistBlock";
+export { default as GitHubGistBlockPlugin } from "./GithubGistBlockPlugin";

@@ -20,4 +20,23 @@
  * SOFTWARE.
  */
 
-export { default as YouTubeVideoBlockPlugin } from "./YoutubeVideoBlockPlugin";
+import { type BlockLifecycle, type BlockSchema } from "./index";
+import { type JSX } from "react";
+
+interface GenericBlockPlugin<TBlockSchema = BlockSchema> {
+  name: string;
+  role: string;
+  description: string;
+  icon: JSX.Element;
+
+  onInitialized: (content: string) => {
+    focusBlockId: string;
+    setCaretToStart?: boolean;
+    inPlace?: boolean;
+    template: TBlockSchema;
+  };
+
+  render: (block: TBlockSchema, lifecycle: BlockLifecycle) => JSX.Element;
+}
+
+export default GenericBlockPlugin;

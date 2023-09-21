@@ -35,60 +35,40 @@ import {
   getCaretOffset,
   getConfigFromRole,
   getPlaceholderFromRole,
-  nodeTypeFromRole,
+  openLinkInNewTab,
   setNodeStyle,
   splitBlocksAtCaretOffset,
   subscribeToEditorEvent,
   unsubscribeFromEditorEvent,
 } from "../../utils";
-import { type BlockSchema, type Table } from "../../interfaces";
+import {
+  type BlockLifecycle,
+  type BlockSchema,
+  type Table,
+} from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
 import { type TextBlockSchema } from "../../schema";
 
-interface TextBlockProps {
-  listMetadata?: {
-    parent: BlockSchema;
-    currentIndex: number;
-  };
-  previousParentBlock: BlockSchema | null;
+interface QuoteBlockProps {
   block: TextBlockSchema;
-  editable: boolean;
-  onClick: (event: MouseEvent) => void;
-  onSelect: (block: BlockSchema) => void;
-  onChange: (block: BlockSchema) => void;
-  onCreate: (
-    parentBlock: BlockSchema,
-    targetBlock: BlockSchema,
-    holder?: BlockSchema[],
-    focusOn?: {
-      nodeId: string;
-      nodeChildIndex?: number;
-      caretOffset?: number;
-    },
-  ) => void;
-  onDelete: (
-    block: BlockSchema,
-    previousBlock: BlockSchema,
-    nodeId: string,
-    setCursorToStart?: boolean,
-    holder?: BlockSchema[],
-  ) => void;
-  onMarkdown: (block: BlockSchema, focusBlockId?: string) => void;
+  blockLifecycle: BlockLifecycle;
 }
 
-export default function TextBlock({
-  listMetadata,
+export default function QuoteBlock({
   block,
-  previousParentBlock,
-  editable,
-  onClick,
-  onSelect,
-  onChange,
-  onCreate,
-  onDelete,
-  onMarkdown,
-}: TextBlockProps): JSX.Element {
+  blockLifecycle,
+}: QuoteBlockProps): JSX.Element {
+  const {
+    previousParentBlock,
+    editable,
+    listMetadata,
+    onChange,
+    onCreate,
+    onDelete,
+    onMarkdown,
+    onSelect,
+  } = blockLifecycle;
   const isActionMenuOpen = useRef(false);
   const originalBlock = useRef<BlockSchema>({ ...block });
   const roleChangeByMarkdown = useRef(false);
@@ -381,7 +361,7 @@ export default function TextBlock({
     }
   }
 
-  return createElement(nodeTypeFromRole(block.role), {
+  return createElement("blockquote", {
     "data-parent-block-id":
       listMetadata === undefined ? null : listMetadata.parent.id,
     "data-child-block-index":
@@ -414,7 +394,9 @@ export default function TextBlock({
     onKeyDown: (event: KeyboardEvent) => {
       keyboardHandler(event);
     },
-    onClick,
+    onClick: (event: MouseEvent) => {
+      openLinkInNewTab(event);
+    },
     onSelect: () => {
       if (window.getSelection()?.toString().length !== 0) {
         onSelect(block);

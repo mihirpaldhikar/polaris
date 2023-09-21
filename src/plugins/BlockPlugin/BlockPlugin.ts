@@ -20,4 +20,23 @@
  * SOFTWARE.
  */
 
-export { default as YouTubeVideoBlockPlugin } from "./YoutubeVideoBlockPlugin";
+import { type BlockSchema, type GenericBlockPlugin } from "../../interfaces";
+
+export default class BlockPlugin {
+  private readonly blocks: Map<string, GenericBlockPlugin<BlockSchema>>;
+
+  public constructor() {
+    this.blocks = new Map<string, GenericBlockPlugin<BlockSchema>>();
+  }
+
+  public registerBlock(block: GenericBlockPlugin): void {
+    if (this.blocks.has(block.role)) {
+      return;
+    }
+    this.blocks.set(block.role, block);
+  }
+
+  registeredBlocks(): Readonly<Map<string, GenericBlockPlugin<BlockSchema>>> {
+    return this.blocks;
+  }
+}

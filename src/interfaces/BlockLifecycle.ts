@@ -20,4 +20,36 @@
  * SOFTWARE.
  */
 
-export { default as YouTubeVideoBlockPlugin } from "./YoutubeVideoBlockPlugin";
+import { type BlockSchema } from "./index";
+
+interface BlockLifecycle {
+  editable: boolean;
+  previousParentBlock: BlockSchema | null;
+  listMetadata?: {
+    parent: BlockSchema;
+    currentIndex: number;
+  };
+  onChange: (block: BlockSchema, focus?: boolean) => void;
+  onCreate: (
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
+  ) => void;
+  onDelete: (
+    block: BlockSchema,
+    previousBlock: BlockSchema,
+    nodeId: string,
+    setCursorToStart?: boolean,
+    holder?: BlockSchema[],
+  ) => void;
+  onSelect: (block: BlockSchema) => void;
+  onAttachmentRequest: (block: BlockSchema, data: File | string) => void;
+  onMarkdown: (block: BlockSchema, focusBlockId?: string) => void;
+}
+
+export default BlockLifecycle;

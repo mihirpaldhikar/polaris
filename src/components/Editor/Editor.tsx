@@ -25,6 +25,7 @@ import {
   type JSX,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -38,7 +39,6 @@ import {
   type Style,
 } from "../../interfaces";
 import {
-  blockRenderTypeFromRole,
   dispatchEditorEvent,
   elementContainsStyle,
   findNextTextNode,
@@ -67,12 +67,33 @@ import { createRoot, type Root } from "react-dom/client";
 import { AnnotationToolbar } from "../AnnotationToolbar";
 import { DEFAULT_POLARIS_CONFIG, LINK_ATTRIBUTE } from "../../constants";
 import { BlockTools } from "../BlockTools";
-import RenderType from "../../enums/RenderType";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { debounce } from "debounce";
 import { cloneDeep } from "lodash";
 import { Composer } from "../Composer";
 import { AnnotationActions, BlockActions } from "../../assets/index";
+import type GenericBlockPlugin from "../../interfaces/GenericBlockPlugin";
+import { BlockPlugin } from "../../plugins";
+import {
+  BulletListBlockPlugin,
+  GitHubGistBlockPlugin,
+  HeadingBlockPlugin,
+  ImageBlockPlugin,
+  NumberedListBlockPlugin,
+  ParagraphBlockPlugin,
+  QuoteBlockPlugin,
+  SubHeadingBlockPlugin,
+  SubTitleBlockPlugin,
+  TableBlockPlugin,
+  TitleBlockPlugin,
+  YouTubeVideoBlockPlugin,
+} from "../../blocks";
+
+declare global {
+  interface Window {
+    registeredBlocks: Readonly<Map<string, GenericBlockPlugin>>;
+  }
+}
 
 interface EditorProps {
   editable?: boolean;
@@ -98,6 +119,8 @@ interface EditorProps {
  * @author Mihir Paldhikar
  */
 
+const blockPlugin = new BlockPlugin();
+
 export default function Editor({
   editable = true,
   blob,
@@ -109,7 +132,43 @@ export default function Editor({
   let defaultAnnotationActions: readonly Action[] = cloneDeep(
     AnnotationActions,
   ).concat(...(annotationActions ?? []));
-  const defaultBlockActions: readonly Action[] = cloneDeep(BlockActions);
+
+  window.registeredBlocks = useMemo(() => {
+    blockPlugin.registerBlock(new ParagraphBlockPlugin());
+    blockPlugin.registerBlock(new TitleBlockPlugin());
+    blockPlugin.registerBlock(new SubTitleBlockPlugin());
+    blockPlugin.registerBlock(new HeadingBlockPlugin());
+    blockPlugin.registerBlock(new SubHeadingBlockPlugin());
+    blockPlugin.registerBlock(new QuoteBlockPlugin());
+    blockPlugin.registerBlock(new ImageBlockPlugin());
+    blockPlugin.registerBlock(new YouTubeVideoBlockPlugin());
+    blockPlugin.registerBlock(new GitHubGistBlockPlugin());
+    blockPlugin.registerBlock(new TableBlockPlugin());
+    blockPlugin.registerBlock(new NumberedListBlockPlugin());
+    blockPlugin.registerBlock(new BulletListBlockPlugin());
+    return blockPlugin.registeredBlocks();
+  }, []);
+
+  const registeredBlockActions: Action[] = useMemo(() => {
+    return Array.from(blockPlugin.registeredBlocks().values()).map((block) => {
+      return {
+        id: generateUUID(),
+        name: block.name,
+        description: block.description,
+        icon: block.icon,
+        execute: {
+          type: "role",
+          args: {
+            onInitialized: block.onInitialized,
+          },
+        },
+      };
+    });
+  }, []);
+
+  const defaultBlockActions: Readonly<Action[]> = useMemo(() => {
+    return [...registeredBlockActions, ...BlockActions];
+  }, [registeredBlockActions]);
 
   const isActionMenuOpen = useRef<boolean>(false);
 
@@ -171,10 +230,7 @@ export default function Editor({
         masterBlocks[blockIndex] = block;
         updateMasterBlocks(masterBlocks);
       }
-      if (
-        blockRenderTypeFromRole(block.role) === RenderType.ATTACHMENT ||
-        (focus !== undefined && focus)
-      ) {
+      if (focus !== undefined && focus) {
         setFocusedNode({
           nodeId: block.id,
           nodeIndex: 0,
@@ -195,7 +251,7 @@ export default function Editor({
       block: BlockSchema,
       previousContent: string,
       caretOffset: number,
-      blockTools: Action[],
+      blockTools: readonly Action[],
     ) => {
       const popupNode = window.document.getElementById(`popup-${blob.id}`);
       const editorNode = window.document.getElementById(`editor-${blob.id}`);
@@ -260,7 +316,6 @@ export default function Editor({
               case "role": {
                 let { focusBlockId, setCaretToStart, inPlace, template } =
                   execute.args.onInitialized(previousContent);
-
                 if (listMetadata !== null) {
                   const parentBlock = traverseAndFind(
                     masterBlocks,
@@ -371,14 +426,6 @@ export default function Editor({
         const computedCaretOffset = getCaretOffset(
           nodeAtCaretOffset as HTMLElement,
         );
-
-        const filteredBlockTools = defaultBlockActions.filter((action) => {
-          if (action.allowedRoles !== undefined) {
-            return action.allowedRoles?.includes(activeBlock.role);
-          }
-          return true;
-        });
-
         actionKeyHandler(
           getNodeIndex(activeNode, nodeAtCaretOffset),
           activeBlock,
@@ -388,7 +435,7 @@ export default function Editor({
                 .substring(0, caretOffset - 1)
                 .concat(activeBlock.data.substring(caretOffset)),
           isMobile ? computedCaretOffset - 1 : computedCaretOffset,
-          filteredBlockTools,
+          defaultBlockActions,
         );
       }
     },
@@ -921,7 +968,7 @@ export default function Editor({
     block: BlockSchema,
     data: File | string,
   ): void {
-    if (block.role !== "image" || typeof block.data !== "object") {
+    if (typeof block.data !== "object") {
       return;
     }
 
@@ -986,19 +1033,22 @@ export default function Editor({
           return (
             <Composer
               key={block.id}
-              editable={editable}
-              previousParentBlock={index === 0 ? null : masterBlocks[index - 1]}
               block={block}
-              onChange={debounce((block, focus) => {
-                changeHandler(block, focus);
-              }, 260)}
-              onCreate={createHandler}
-              onDelete={deletionHandler}
-              onSelect={debounce((block) => {
-                annotationsHandler(block);
-              }, 260)}
-              onAttachmentRequest={attachmentRequestHandler}
-              onMarkdown={markdownHandler}
+              blockLifecycle={{
+                editable,
+                previousParentBlock:
+                  index === 0 ? null : masterBlocks[index - 1],
+                onChange: debounce((block, focus) => {
+                  changeHandler(block, focus);
+                }, 260),
+                onCreate: createHandler,
+                onDelete: deletionHandler,
+                onSelect: debounce((block) => {
+                  annotationsHandler(block);
+                }, 260),
+                onAttachmentRequest: attachmentRequestHandler,
+                onMarkdown: markdownHandler,
+              }}
             />
           );
         })}

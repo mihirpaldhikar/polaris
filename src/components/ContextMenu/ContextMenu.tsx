@@ -29,7 +29,7 @@ import {
 
 interface ContextMenuProps {
   coordinates: Coordinates;
-  menu: Action[];
+  menu: readonly Action[];
   onClick: (execute: Executable) => void;
   onClose: () => void;
 }

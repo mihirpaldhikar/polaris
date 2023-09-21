@@ -20,4 +20,11 @@
  * SOFTWARE.
  */
 
-export { default as YouTubeVideoBlockPlugin } from "./YoutubeVideoBlockPlugin";
+import { type BlockSchema } from "../interfaces";
+
+interface ListBlockSchema extends BlockSchema {
+  role: "numberedList" | "bulletList";
+  data: BlockSchema[];
+}
+
+export default ListBlockSchema;

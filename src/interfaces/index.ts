@@ -31,3 +31,5 @@ export type { default as Attachment } from "./Attachment";
 export type { default as PolarisConfig } from "./PolarisConfig";
 export type { default as Table } from "./Table";
 export type { default as BlockExecutable } from "./BlockExecutable";
+export type { default as BlockLifecycle } from "./BlockLifecycle";
+export type { default as GenericBlockPlugin } from "./GenericBlockPlugin";

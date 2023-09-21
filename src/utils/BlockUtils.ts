@@ -92,8 +92,8 @@ export function getConfigFromRole(
     case "bulletList":
     case "numberedList":
       return config.block.list;
-    case "youtubeVideoEmbed":
-    case "githubGistEmbed":
+    case "youtubeVideo":
+    case "githubGist":
     case "image":
       return config.block.attachment;
     default:

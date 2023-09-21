@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as YouTubeVideoBlockPlugin } from "./YoutubeVideoBlockPlugin";
+export { default as NumberedListBlockPlugin } from "./NumberedListBlockPlugin";

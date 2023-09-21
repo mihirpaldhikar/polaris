@@ -20,56 +20,48 @@
  * SOFTWARE.
  */
 
-import { type Action } from "../../interfaces";
+import type React from "react";
+import { type BlockLifecycle, type GenericBlockPlugin } from "../../interfaces";
 import { generateUUID } from "../../utils";
-import { AlignCenterIcon, AlignEndIcon, AlignStartIcon } from "../icons";
+import ParagraphBlock from "./ParagraphBlock";
+import { ParagraphIcon } from "../../assets";
+import { type TextBlockSchema } from "../../schema";
 
-const BlockActions: readonly Action[] = [
-  {
-    id: generateUUID(),
-    name: "Align Start",
-    description: `Align text to start`,
-    icon: <AlignStartIcon size={32} />,
-    execute: {
-      type: "style",
-      args: [
-        {
-          name: "textAlign",
-          value: "start",
-        },
-      ],
-    },
-  },
-  {
-    id: generateUUID(),
-    name: "Align Center",
-    description: `Align text at the center`,
-    icon: <AlignCenterIcon size={32} />,
-    execute: {
-      type: "style",
-      args: [
-        {
-          name: "textAlign",
-          value: "center",
-        },
-      ],
-    },
-  },
-  {
-    id: generateUUID(),
-    name: "Align End",
-    description: `Align text at the end`,
-    icon: <AlignEndIcon size={32} />,
-    execute: {
-      type: "style",
-      args: [
-        {
-          name: "textAlign",
-          value: "end",
-        },
-      ],
-    },
-  },
-];
+export default class ParagraphBlockPlugin
+  implements GenericBlockPlugin<TextBlockSchema>
+{
+  description: string;
+  icon: React.JSX.Element;
+  name: string;
+  role: string;
 
-export default BlockActions;
+  constructor() {
+    this.name = "Paragraph";
+    this.description = "Just start typing.";
+    this.role = "paragraph";
+    this.icon = <ParagraphIcon />;
+  }
+
+  onInitialized(content: string): {
+    focusBlockId: string;
+    setCaretToStart?: boolean;
+    inPlace?: boolean;
+    template: TextBlockSchema;
+  } {
+    const focusId = generateUUID();
+    return {
+      focusBlockId: focusId,
+      inPlace: true,
+      template: {
+        id: focusId,
+        role: "paragraph",
+        data: content,
+        style: [],
+      },
+    };
+  }
+
+  render(block: TextBlockSchema, lifecycle: BlockLifecycle): React.JSX.Element {
+    return <ParagraphBlock block={block} blockLifecycle={lifecycle} />;
+  }
+}

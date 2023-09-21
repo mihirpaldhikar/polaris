@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-export { default as TableBlock } from "./TableBlock";
+export { default as TableBlockPlugin } from "./TableBlockPlugin";

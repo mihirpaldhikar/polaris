@@ -20,12 +20,12 @@
  * SOFTWARE.
  */
 
-import { type BlockSchema } from "./index";
+import { type TextBlockSchema } from "../schema";
 
 interface Table {
   rows: Array<{
     id: string;
-    columns: BlockSchema[];
+    columns: TextBlockSchema[];
   }>;
 }
 
