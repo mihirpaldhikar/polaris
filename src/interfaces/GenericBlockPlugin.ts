@@ -36,6 +36,8 @@ interface GenericBlockPlugin<TBlockSchema = BlockSchema> {
     template: TBlockSchema;
   };
 
+  serializeToHTMLElement: (block: TBlockSchema) => HTMLElement;
+
   render: (block: TBlockSchema, lifecycle: BlockLifecycle) => JSX.Element;
 }
 

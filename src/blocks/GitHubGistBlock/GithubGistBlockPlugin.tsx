@@ -23,9 +23,10 @@
 import { type BlockLifecycle, type GenericBlockPlugin } from "../../interfaces";
 import type React from "react";
 import { GitHubIcon } from "../../assets";
-import { generateUUID } from "../../utils";
+import { generateGitHubGistURL, generateUUID } from "../../utils";
 import GitHubGistBlock from "./GitHubGistBlock";
 import { type AttachmentBlockSchema } from "../../schema";
+import { kebabCase } from "lodash";
 
 export default class GithubGistBlockPlugin
   implements GenericBlockPlugin<AttachmentBlockSchema>
@@ -65,6 +66,55 @@ export default class GithubGistBlockPlugin
         style: [],
       },
     };
+  }
+
+  serializeToHTMLElement(block: AttachmentBlockSchema): HTMLElement {
+    const node = document.createElement("div");
+    for (const style of block.style) {
+      node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
+    }
+    node.style.setProperty("width", "100%");
+    node.style.setProperty("padding-top", "15px");
+    node.style.setProperty("padding-bottom", "15px");
+    const childNode = document.createElement("div");
+    childNode.style.setProperty("display", "inline-block");
+    childNode.style.setProperty("width", "100%");
+    const attachment = block.data;
+    const gistDocument = `
+   data:text/html;charset=utf-8,
+   <head>
+     <base target="_blank" />
+     <title></title>
+   </head>
+   <body id="gist-${block.id}" onload="adjustFrame()">
+     <style>
+       * {
+         margin: 0;
+         padding: 0;
+       }
+     </style>
+     <script src="${generateGitHubGistURL(attachment.url)}"></script>
+     <script>
+       function adjustFrame() {
+         window.top.postMessage({
+           height: document.body.scrollHeight,
+           id: document.body.id.replace("gist-", "") 
+         }, "*");
+       }
+     </script>
+   </body>
+      `;
+    const attachmentNode = document.createElement("iframe");
+    attachmentNode.id = block.id;
+    attachmentNode.style.setProperty("display", "inline-block");
+    attachmentNode.style.setProperty("border", "none");
+    attachmentNode.width = "100%";
+    attachmentNode.style.border = "none";
+    attachmentNode.src = gistDocument;
+    childNode.innerHTML = attachmentNode.outerHTML;
+
+    node.appendChild(childNode);
+    return node;
   }
 
   render(

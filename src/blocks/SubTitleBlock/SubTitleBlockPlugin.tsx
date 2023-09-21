@@ -22,10 +22,12 @@
 
 import type React from "react";
 import { type BlockLifecycle, type GenericBlockPlugin } from "../../interfaces";
-import { generateUUID } from "../../utils";
+import { generateUUID, isInlineAnnotationsNode } from "../../utils";
 import SubTitleBlock from "./SubTitleBlock";
 import { SubTitleIcon } from "../../assets";
 import { type TextBlockSchema } from "../../schema";
+import { kebabCase } from "lodash";
+import { LINK_ATTRIBUTE } from "../../constants";
 
 export default class SubTitleBlockPlugin
   implements GenericBlockPlugin<TextBlockSchema>
@@ -59,6 +61,29 @@ export default class SubTitleBlockPlugin
         style: [],
       },
     };
+  }
+
+  serializeToHTMLElement(block: TextBlockSchema): HTMLElement {
+    const node = document.createElement("h2");
+    node.id = block.id;
+    for (const style of block.style) {
+      node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
+    }
+    node.innerHTML = block.data;
+    for (const childNode of node.childNodes) {
+      if (isInlineAnnotationsNode(childNode)) {
+        const element = childNode as HTMLElement;
+        if (element.getAttribute(LINK_ATTRIBUTE) !== null) {
+          const anchorNode = document.createElement("a");
+          anchorNode.href = element.getAttribute(LINK_ATTRIBUTE) as string;
+          anchorNode.target = "_blank";
+          anchorNode.innerText = element.innerText;
+          anchorNode.style.cssText = element.style.cssText;
+          node.replaceChild(anchorNode, element);
+        }
+      }
+    }
+    return node;
   }
 
   render(block: TextBlockSchema, lifecycle: BlockLifecycle): React.JSX.Element {

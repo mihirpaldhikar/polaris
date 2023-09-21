@@ -23,9 +23,10 @@
 import { type BlockLifecycle, type GenericBlockPlugin } from "../../interfaces";
 import type React from "react";
 import { YouTubeIcon } from "../../assets";
-import { generateUUID } from "../../utils";
+import { generateUUID, getYouTubeVideoID } from "../../utils";
 import YouTubeVideoBlock from "./YouTubeVideoBlock";
 import { type AttachmentBlockSchema } from "../../schema";
+import { kebabCase } from "lodash";
 
 export default class YoutubeVideoBlockPlugin
   implements GenericBlockPlugin<AttachmentBlockSchema>
@@ -65,6 +66,32 @@ export default class YoutubeVideoBlockPlugin
         style: [],
       },
     };
+  }
+
+  serializeToHTMLElement(block: AttachmentBlockSchema): HTMLElement {
+    const node = document.createElement("div");
+    for (const style of block.style) {
+      node.style.setProperty(kebabCase(style.name), kebabCase(style.value));
+    }
+    node.style.setProperty("width", "100%");
+    node.style.setProperty("padding-top", "15px");
+    node.style.setProperty("padding-bottom", "15px");
+    const childNode = document.createElement("div");
+    childNode.style.setProperty("display", "inline-block");
+    childNode.style.setProperty("width", "100%");
+    const attachment = block.data;
+    const attachmentNode = document.createElement("iframe");
+    attachmentNode.id = block.id;
+    attachmentNode.style.setProperty("display", "inline-block");
+    attachmentNode.style.setProperty("border", "none");
+    attachmentNode.src = `https://www.youtube.com/embed/${getYouTubeVideoID(
+      attachment.url,
+    )}`;
+    attachmentNode.width = `${attachment.width}px`;
+    attachmentNode.height = `${attachment.height}px`;
+    childNode.innerHTML = attachmentNode.outerHTML;
+    node.appendChild(childNode);
+    return node;
   }
 
   render(

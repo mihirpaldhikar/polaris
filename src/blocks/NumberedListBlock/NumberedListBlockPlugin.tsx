@@ -69,6 +69,27 @@ export default class NumberedListBlockPlugin
     };
   }
 
+  serializeToHTMLElement(block: ListBlockSchema): HTMLElement {
+    const node = document.createElement("ol");
+    for (let i = 0; i < block.data.length; i++) {
+      node.style.setProperty("list-style-position", "outside");
+      node.style.setProperty("list-style-type", "decimal");
+      const listNode = document.createElement("li");
+      listNode.style.setProperty("margin-left", "3px");
+      listNode.style.setProperty("margin-right", "3px");
+      if (window?.registeredBlocks.has(block.data[i].role)) {
+        const listChild = (
+          window.registeredBlocks.get(block.data[i].role) as GenericBlockPlugin
+        ).serializeToHTMLElement(block.data[i]);
+        if (listChild !== null) {
+          listNode.innerHTML = listChild.outerHTML;
+        }
+        node.appendChild(listNode);
+      }
+    }
+    return node;
+  }
+
   render(block: ListBlockSchema, lifecycle: BlockLifecycle): React.JSX.Element {
     return <NumberedListBlock block={block} blockLifecycle={lifecycle} />;
   }
