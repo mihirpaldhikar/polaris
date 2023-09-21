@@ -25,7 +25,7 @@
     "url": "https://github.com/mihirpaldhikar/polaris/issues"
   },
   "homepage": "https://github.com/mihirpaldhikar/polaris#readme",
-  "main": "dist/cjs/index.js",
+  "type": "module",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "files": [

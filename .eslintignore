@@ -8,3 +8,7 @@ node_modules
 
 ### Build Artifacts ###
 dist
+
+### Config Files ###
+*.config.js
+*.config.cjs

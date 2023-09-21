@@ -11,4 +11,4 @@ dist
 .next
 
 ### Bundler Configs ###
-rollup.config.mjs
+rollup.config.js
