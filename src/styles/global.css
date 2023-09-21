@@ -25,22 +25,22 @@
 @tailwind utilities;
 
 .editor {
-    @apply selection:bg-slate-200;
+  @apply selection:bg-slate-200;
 }
 
 .filePicker::-webkit-file-upload-button {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .filePicker {
-    color: transparent;
+  color: transparent;
 }
 
 [contenteditable="true"] {
-    @apply flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words;
+  @apply flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words;
 }
 
 [contenteditable="true"]:focus[placeholder]:empty:before {
-    content: attr(placeholder);
-    color: #c2c1c1;
+  content: attr(placeholder);
+  color: #c2c1c1;
 }
