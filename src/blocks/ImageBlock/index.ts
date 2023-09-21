@@ -20,9 +20,4 @@
  * SOFTWARE.
  */
 
-export { TextBlock } from "./TextBlock";
-export { AttachmentBlock } from "./AttachmentBlock";
-export { TableBlock } from "./TableBlock";
-export { YouTubeVideoBlock } from "./YouTubeVideoBlock";
-export { GitHubGistBlock } from "./GitHubGistBlock";
-export { ImageBlock } from "./ImageBlock";
+export { default as ImageBlock } from "./ImageBlock";

@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-import { createElement, Fragment, type JSX } from "react";
-import { generateUUID, nodeTypeFromRole } from "../../utils";
+import { Fragment, type JSX } from "react";
+import { generateUUID } from "../../utils";
 import { type Attachment, type BlockSchema } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
 import { GitHubIcon, ImageIcon, YouTubeIcon } from "../../assets";
@@ -31,6 +31,7 @@ import { YouTubeVideoBlock } from "../YouTubeVideoBlock";
 import { AttachmentActions } from "../../assets/actions/AttachmentActions";
 import { GitHubGistBlock } from "../GitHubGistBlock";
 import { type AttachmentBlockSchema } from "../../schema";
+import { ImageBlock } from "../ImageBlock";
 
 interface AttachmentBlockProps {
   previousParentBlock: BlockSchema | null;
@@ -223,19 +224,7 @@ export default function AttachmentBlock({
         onDelete={deleteHandler}
         onChange={onChange}
       >
-        {createElement(nodeTypeFromRole(block.role), {
-          id: block.id,
-          "data-parent-block-id":
-            listMetadata === undefined ? null : listMetadata.parent.id,
-          "data-child-block-index":
-            listMetadata === undefined ? null : listMetadata.currentIndex,
-          draggable: false,
-          src: attachment.url,
-          alt: attachment.description,
-          height: attachment.height,
-          width: attachment.width,
-          className: "inline-block rounded-lg border border-gray-300",
-        })}
+        <ImageBlock block={block} />
       </AttachmentHolder>
     );
 

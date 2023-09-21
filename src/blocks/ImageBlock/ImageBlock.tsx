@@ -20,9 +20,34 @@
  * SOFTWARE.
  */
 
-export { TextBlock } from "./TextBlock";
-export { AttachmentBlock } from "./AttachmentBlock";
-export { TableBlock } from "./TableBlock";
-export { YouTubeVideoBlock } from "./YouTubeVideoBlock";
-export { GitHubGistBlock } from "./GitHubGistBlock";
-export { ImageBlock } from "./ImageBlock";
+import { createElement, type JSX } from "react";
+import { type Attachment, type BlockSchema } from "../../interfaces";
+import { type AttachmentBlockSchema } from "../../schema";
+
+interface ImageBlockProps {
+  block: AttachmentBlockSchema;
+  listMetadata?: {
+    parent: BlockSchema;
+    currentIndex: number;
+  };
+}
+
+export default function ImageBlock({
+  block,
+  listMetadata,
+}: ImageBlockProps): JSX.Element {
+  const attachment: Attachment = block.data;
+  return createElement("img", {
+    id: block.id,
+    "data-parent-block-id":
+      listMetadata === undefined ? null : listMetadata.parent.id,
+    "data-child-block-index":
+      listMetadata === undefined ? null : listMetadata.currentIndex,
+    draggable: false,
+    src: attachment.url,
+    alt: attachment.description,
+    height: attachment.height,
+    width: attachment.width,
+    className: "inline-block rounded-lg border border-gray-300",
+  });
+}
