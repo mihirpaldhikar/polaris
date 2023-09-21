@@ -36,7 +36,11 @@
     color: transparent;
 }
 
-.text_renderer:focus[placeholder]:empty:before {
+[contenteditable="true"] {
+    @apply flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words;
+}
+
+[contenteditable="true"]:focus[placeholder]:empty:before {
     content: attr(placeholder);
     color: #c2c1c1;
 }

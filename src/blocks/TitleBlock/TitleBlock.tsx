@@ -29,7 +29,6 @@ import {
   useRef,
 } from "react";
 import {
-  conditionalClassName,
   generateUUID,
   getBlockNode,
   getCaretOffset,
@@ -378,9 +377,6 @@ export default function TitleBlock({
     },
     placeholder: "Title...",
     spellCheck: true,
-    className: conditionalClassName(
-      "text_renderer block flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",
-    ),
     onInput: (event: ChangeEvent<HTMLElement>) => {
       onDataChange(event);
     },

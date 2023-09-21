@@ -378,9 +378,7 @@ export default function ParagraphBlock({
     },
     placeholder: "Press '/' for commands...",
     spellCheck: true,
-    className: conditionalClassName(
-      "text_renderer block flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",
-    ),
+    className: conditionalClassName(""),
     onInput: (event: ChangeEvent<HTMLElement>) => {
       onDataChange(event);
     },
