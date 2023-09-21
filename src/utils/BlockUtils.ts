@@ -34,44 +34,6 @@ import {
 } from "../interfaces/PolarisConfig";
 import { NODE_TYPE } from "../constants";
 
-/**
- * @function nodeTypeFromRole
- * @param role
- *
- * @description Returns string name of HTMLElement based on the block role.
- *
- * @returns string
- *
- * @author Mihir Paldhikar
- */
-
-export function nodeTypeFromRole(role: string): string {
-  switch (role) {
-    case "title":
-      return "h1";
-    case "subTitle":
-      return "h2";
-    case "heading":
-      return "h3";
-    case "subHeading":
-      return "h4";
-    case "paragraph":
-      return "p";
-    case "quote":
-      return "blockquote";
-    case "bulletList":
-      return "ul";
-    case "numberedList":
-      return "ol";
-    case "image":
-      return "img";
-    case "table":
-      return "table";
-    default:
-      return "p";
-  }
-}
-
 export function getConfigFromRole(
   role: string,
   config: PolarisConfig,
