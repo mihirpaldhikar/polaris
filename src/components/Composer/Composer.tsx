@@ -29,14 +29,16 @@ import {
   openLinkInNewTab,
   setNodeStyle,
 } from "../../utils";
-import { AttachmentBlock, TableBlock, TextBlock } from "../../blocks";
+import {
+  GitHubGistBlock,
+  ImageBlock,
+  TableBlock,
+  TextBlock,
+  YouTubeVideoBlock,
+} from "../../blocks";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
-import {
-  type AttachmentBlockSchema,
-  type TableBlockSchema,
-  type TextBlockSchema,
-} from "../../schema";
+import { type TableBlockSchema, type TextBlockSchema } from "../../schema";
 
 interface ComposerProps {
   editable: boolean;
@@ -121,19 +123,37 @@ export default function Composer({
         onMarkdown={onMarkdown}
       />
     );
-  } else if (
-    block.role === "image" ||
-    block.role === "youtubeVideoEmbed" ||
-    block.role === "githubGistEmbed"
-  ) {
+  } else if (block.role === "image") {
     return (
-      <AttachmentBlock
-        block={block as AttachmentBlockSchema}
+      <ImageBlock
+        block={block}
         previousParentBlock={previousParentBlock}
         listMetadata={listMetadata}
         onCreate={onCreate}
         onChange={onChange}
         onAttachmentRequest={onAttachmentRequest}
+        onDelete={onDelete}
+      />
+    );
+  } else if (block.role === "youtubeVideoEmbed") {
+    return (
+      <YouTubeVideoBlock
+        block={block}
+        previousParentBlock={previousParentBlock}
+        listMetadata={listMetadata}
+        onCreate={onCreate}
+        onChange={onChange}
+        onDelete={onDelete}
+      />
+    );
+  } else if (block.role === "githubGistEmbed") {
+    return (
+      <GitHubGistBlock
+        block={block}
+        previousParentBlock={previousParentBlock}
+        listMetadata={listMetadata}
+        onCreate={onCreate}
+        onChange={onChange}
         onDelete={onDelete}
       />
     );

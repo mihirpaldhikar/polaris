@@ -21,39 +21,169 @@
  */
 
 import { type JSX } from "react";
-import { getYouTubeVideoID } from "../../utils";
+import { generateUUID, getYouTubeVideoID } from "../../utils";
 import { type BlockSchema } from "../../interfaces";
-import { type AttachmentBlockSchema } from "../../schema";
+import { EmbedPicker } from "../../components/EmbedPicker";
+import { YouTubeIcon } from "../../assets";
+import { AttachmentActions } from "../../assets/actions/AttachmentActions";
+import { AttachmentHolder } from "../../components/AttachmentHolder";
 
 interface YouTubeVideoBlockProps {
-  block: AttachmentBlockSchema;
+  previousParentBlock: BlockSchema | null;
+  block: BlockSchema;
   listMetadata?: {
     parent: BlockSchema;
     currentIndex: number;
   };
+  onChange: (block: BlockSchema) => void;
+  onDelete: (
+    block: BlockSchema,
+    previousBlock: BlockSchema,
+    nodeId: string,
+    setCursorToStart?: boolean,
+    holder?: BlockSchema[],
+  ) => void;
+  onCreate: (
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
+    focusOn?: {
+      nodeId: string;
+      nodeChildIndex?: number;
+      caretOffset?: number;
+    },
+  ) => void;
 }
 
 export default function YouTubeVideoBlock({
   block,
+  onDelete,
+  onChange,
+  onCreate,
+  previousParentBlock,
   listMetadata,
 }: YouTubeVideoBlockProps): JSX.Element {
+  if (typeof block.data !== "object") {
+    throw new Error(`Invalid schema for block with role '${block.role}'`);
+  }
   const attachment = block.data;
+
+  function deleteHandler(): void {
+    if (listMetadata !== undefined) {
+      const listData = listMetadata.parent.data as BlockSchema[];
+      listData.splice(listMetadata.currentIndex, 1);
+      listMetadata.parent.data = listData;
+
+      if (
+        listMetadata.currentIndex === 0 &&
+        listData.length > 0 &&
+        previousParentBlock != null
+      ) {
+        onDelete(
+          block,
+          listData[listMetadata.currentIndex],
+          listData[listMetadata.currentIndex].id,
+          false,
+          listMetadata.parent.data,
+        );
+      } else if (
+        listMetadata.currentIndex === 0 &&
+        listData.length === 0 &&
+        previousParentBlock != null
+      ) {
+        onDelete(
+          listMetadata.parent,
+          previousParentBlock,
+          previousParentBlock.id,
+        );
+      } else if (
+        listMetadata.currentIndex === 0 &&
+        listData.length === 0 &&
+        previousParentBlock == null
+      ) {
+        const emptyBlock: BlockSchema = {
+          id: generateUUID(),
+          data: "",
+          role: "paragraph",
+          style: [],
+        };
+        onCreate(listMetadata.parent, emptyBlock, undefined, {
+          nodeId: emptyBlock.id,
+        });
+        onDelete(listMetadata.parent, emptyBlock, emptyBlock.id);
+      } else {
+        onDelete(
+          block,
+          listData[listMetadata.currentIndex - 1],
+          listData[listMetadata.currentIndex - 1].id,
+          false,
+          listMetadata.parent.data,
+        );
+      }
+      return;
+    }
+
+    if (previousParentBlock == null) {
+      const emptyBlock: BlockSchema = {
+        id: generateUUID(),
+        data: "",
+        role: "paragraph",
+        style: [],
+      };
+      onCreate(block, emptyBlock, undefined, {
+        nodeId: emptyBlock.id,
+      });
+      onDelete(block, emptyBlock, emptyBlock.id, true);
+      return;
+    }
+
+    onDelete(block, previousParentBlock, previousParentBlock.id);
+  }
+
+  if (attachment.url === "") {
+    return (
+      <EmbedPicker
+        id={block.id}
+        listMetadata={listMetadata}
+        icon={<YouTubeIcon size={25} />}
+        message={"Click here to embed a YouTube Video"}
+        onEmbedPicked={(url) => {
+          attachment.url = url;
+          block.data = attachment;
+          onChange(block);
+        }}
+        onDelete={() => {
+          deleteHandler();
+        }}
+      />
+    );
+  }
+
   return (
-    <iframe
-      id={block.id}
-      data-parent-block-id={
-        listMetadata === undefined ? null : listMetadata.parent.id
-      }
-      data-child-block-index={
-        listMetadata === undefined ? null : listMetadata.currentIndex
-      }
-      data-block-url={attachment.url}
-      width={attachment.width}
-      height={attachment.height}
-      src={`https://www.youtube.com/embed/${getYouTubeVideoID(attachment.url)}`}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen={true}
-      className={"rounded-md inline-block border border-gray-300"}
-    />
+    <AttachmentHolder
+      block={block}
+      actions={AttachmentActions}
+      onDelete={deleteHandler}
+      onChange={onChange}
+    >
+      <iframe
+        id={block.id}
+        data-parent-block-id={
+          listMetadata === undefined ? null : listMetadata.parent.id
+        }
+        data-child-block-index={
+          listMetadata === undefined ? null : listMetadata.currentIndex
+        }
+        data-block-url={attachment.url}
+        width={attachment.width}
+        height={attachment.height}
+        src={`https://www.youtube.com/embed/${getYouTubeVideoID(
+          attachment.url,
+        )}`}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen={true}
+        className={"rounded-md inline-block border border-gray-300"}
+      />
+    </AttachmentHolder>
   );
 }
