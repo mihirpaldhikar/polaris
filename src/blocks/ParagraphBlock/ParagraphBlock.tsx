@@ -34,7 +34,6 @@ import {
   getBlockNode,
   getCaretOffset,
   getConfigFromRole,
-  getPlaceholderFromRole,
   openLinkInNewTab,
   setNodeStyle,
   splitBlocksAtCaretOffset,
@@ -383,7 +382,7 @@ export default function ParagraphBlock({
         .lineHeight,
       ...setNodeStyle(block.style),
     },
-    placeholder: getPlaceholderFromRole(block.role),
+    placeholder: "Press '/' for commands...",
     spellCheck: true,
     className: conditionalClassName(
       "text_renderer block flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",

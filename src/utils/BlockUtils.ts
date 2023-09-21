@@ -215,21 +215,6 @@ export function getEditorRoot(): HTMLElement {
   return blockDOM[0] as HTMLElement;
 }
 
-export function getPlaceholderFromRole(role: string): string {
-  switch (role) {
-    case "title":
-      return "Title...";
-    case "subTitle":
-      return "Subtitle...";
-    case "heading":
-      return "Heading...";
-    case "subHeading":
-      return "Subheading...";
-    default:
-      return "Press '/' for commands...";
-  }
-}
-
 export function upsertStyle(arr: Style[], newObj: Style): Style[] {
   return [...arr.filter((obj) => obj.name !== newObj.name), { ...newObj }];
 }
