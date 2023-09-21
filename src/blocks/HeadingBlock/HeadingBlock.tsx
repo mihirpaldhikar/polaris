@@ -33,7 +33,6 @@ import {
   generateUUID,
   getBlockNode,
   getCaretOffset,
-  getConfigFromRole,
   openLinkInNewTab,
   setNodeStyle,
   splitBlocksAtCaretOffset,
@@ -46,7 +45,6 @@ import {
   type Table,
 } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
-import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
 import { type TextBlockSchema } from "../../schema";
 
 interface HeadingBlockProps {
@@ -373,13 +371,9 @@ export default function HeadingBlock({
     contentEditable: editable,
     dangerouslySetInnerHTML: { __html: block.data },
     style: {
-      fontSize: `${
-        (getConfigFromRole(block.role, config) as TextBlockConfig).fontSize
-      }rem`,
-      fontWeight: (getConfigFromRole(block.role, config) as TextBlockConfig)
-        .fontWeight,
-      lineHeight: (getConfigFromRole(block.role, config) as TextBlockConfig)
-        .lineHeight,
+      fontSize: `${config.block.text.heading.fontSize}rem`,
+      fontWeight: config.block.text.heading.fontWeight,
+      lineHeight: config.block.text.heading.lineHeight,
       ...setNodeStyle(block.style),
     },
     placeholder: "Heading...",

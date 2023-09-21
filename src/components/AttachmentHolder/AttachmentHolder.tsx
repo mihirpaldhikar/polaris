@@ -24,7 +24,6 @@ import { Fragment, type JSX, useContext } from "react";
 import {
   conditionalClassName,
   getBlockNode,
-  getConfigFromRole,
   getEditorRoot,
   setNodeStyle,
 } from "../../utils";
@@ -37,7 +36,6 @@ import {
 import RootContext from "../../contexts/RootContext/RootContext";
 import { MoreOptionsIcon } from "../../assets";
 import { ContextMenu } from "../../components/ContextMenu";
-import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 
 interface AttachmentHolderProps {
   children: JSX.Element;
@@ -62,14 +60,8 @@ export default function AttachmentHolder({
     <div
       className={`w-full`}
       style={{
-        paddingTop: `${
-          (getConfigFromRole(block.role, config) as AttachmentBlockConfig)
-            .spacing
-        }rem`,
-        paddingBottom: `${
-          (getConfigFromRole(block.role, config) as AttachmentBlockConfig)
-            .spacing
-        }rem`,
+        paddingTop: `${config.block.attachment.spacing}rem`,
+        paddingBottom: `${config.block.attachment.spacing}rem`,
         ...setNodeStyle(block.style),
       }}
     >

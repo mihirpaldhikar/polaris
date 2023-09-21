@@ -20,47 +20,9 @@
  * SOFTWARE.
  */
 
-import {
-  type BlockSchema,
-  type PolarisConfig,
-  type Style,
-} from "../interfaces";
+import { type BlockSchema, type Style } from "../interfaces";
 import { camelCase } from "lodash";
-import {
-  type AttachmentBlockConfig,
-  type ListBlockConfig,
-  type TextBlockConfig,
-} from "../interfaces/PolarisConfig";
 import { NODE_TYPE } from "../constants";
-
-export function getConfigFromRole(
-  role: string,
-  config: PolarisConfig,
-): TextBlockConfig | AttachmentBlockConfig | ListBlockConfig | null {
-  switch (role) {
-    case "title":
-      return config.block.text.title;
-    case "subTitle":
-      return config.block.text.subTitle;
-    case "heading":
-      return config.block.text.heading;
-    case "subHeading":
-      return config.block.text.subHeading;
-    case "paragraph":
-      return config.block.text.paragraph;
-    case "quote":
-      return config.block.text.quote;
-    case "bulletList":
-    case "numberedList":
-      return config.block.list;
-    case "youtubeVideo":
-    case "githubGist":
-    case "image":
-      return config.block.attachment;
-    default:
-      return null;
-  }
-}
 
 /**
  * @function setNodeStyle

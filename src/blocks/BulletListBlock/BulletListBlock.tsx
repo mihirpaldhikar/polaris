@@ -27,8 +27,7 @@ import {
   type GenericBlockPlugin,
 } from "../../interfaces";
 import { type ListBlockSchema } from "../../schema";
-import { getConfigFromRole, setNodeStyle } from "../../utils";
-import { type ListBlockConfig } from "../../interfaces/PolarisConfig";
+import { setNodeStyle } from "../../utils";
 import RootContext from "../../contexts/RootContext/RootContext";
 
 interface BulletListProps {
@@ -64,9 +63,7 @@ export default function BulletListBlock({
           key={childBlock.id}
           className={"pl-2"}
           style={{
-            marginTop: `${
-              (getConfigFromRole(block.role, config) as ListBlockConfig).spacing
-            }rem`,
+            marginTop: `${config.block.list.spacing}rem`,
           }}
         >
           {window.registeredBlocks.has(block.role) ? (
