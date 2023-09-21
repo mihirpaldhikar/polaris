@@ -20,13 +20,11 @@
  * SOFTWARE.
  */
 
-import { type BlockSchema } from "./index";
+import { type BlockSchema } from "../interfaces";
 
-interface Table {
-  rows: Array<{
-    id: string;
-    columns: BlockSchema[];
-  }>;
+interface TextBlockSchema extends BlockSchema {
+  role: "title" | "subTitle" | "heading" | "subHeading" | "paragraph" | "quote";
+  data: string;
 }
 
-export default Table;
+export default TextBlockSchema;

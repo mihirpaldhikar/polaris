@@ -25,14 +25,14 @@ import { DeleteIcon } from "../../assets";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { InputDialog } from "../InputDialog";
 import { getBlockNode } from "../../utils";
-import { type Block, type Coordinates } from "../../interfaces";
+import { type BlockSchema, type Coordinates } from "../../interfaces";
 
 interface EmbedPickerProps {
   id: string;
   message: string;
   icon: JSX.Element;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
   onEmbedPicked: (url: string) => void;

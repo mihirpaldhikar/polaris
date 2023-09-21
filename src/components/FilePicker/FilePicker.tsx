@@ -22,12 +22,12 @@
 
 import { type JSX } from "react";
 import { DeleteIcon } from "../../assets";
-import { type Block } from "../../interfaces";
+import { type BlockSchema } from "../../interfaces";
 
 interface FilePickerProps {
   id: string;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
   message: string;

@@ -31,7 +31,7 @@ import {
 import {
   type Action,
   type Attachment,
-  type Block,
+  type BlockSchema,
   type Coordinates,
 } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
@@ -41,11 +41,11 @@ import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
 
 interface AttachmentHolderProps {
   children: JSX.Element;
-  parentBlock?: Block;
-  block: Block;
+  parentBlock?: BlockSchema;
+  block: BlockSchema;
   actions: Action[];
   onDelete: () => void;
-  onChange: (block: Block) => void;
+  onChange: (block: BlockSchema) => void;
 }
 
 export default function AttachmentHolder({

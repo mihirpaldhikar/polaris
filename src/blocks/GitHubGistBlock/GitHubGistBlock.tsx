@@ -21,13 +21,14 @@
  */
 
 import { type JSX } from "react";
-import { type Attachment, type Block } from "../../interfaces";
+import { type Attachment, type BlockSchema } from "../../interfaces";
 import { generateGitHubGistURL } from "../../utils";
+import { type AttachmentBlockSchema } from "../../schema";
 
 interface GitHubGistBlockProps {
-  block: Block;
+  block: AttachmentBlockSchema;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
 }
@@ -36,7 +37,7 @@ export default function GitHubGistBlock({
   block,
   listMetadata,
 }: GitHubGistBlockProps): JSX.Element {
-  const attachment: Attachment = block.data as Attachment;
+  const attachment: Attachment = block.data;
 
   const gistDocument = `
    data:text/html;charset=utf-8,

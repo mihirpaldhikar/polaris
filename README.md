@@ -209,13 +209,13 @@ const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
 
 #### Terminologies
 
-1. `block` - A Block is the smallest unit holding all the necessary information required to render blocks.
+1. `block` - A BlockSchema is the smallest unit holding all the necessary information required to render blocks.
 2. `blob` - A Blob is a collection of blocks holding all the information and position of the blocks.
 3. `composer` - A Composer uses block to determine how to render blocks.
 4. `editor` - An Editor is an orchestrator for all the blocks. It uses blob to handle the creation, update, deletion of
    the blocks.
 
-#### Block Roles
+#### BlockSchema Roles
 
 1. `title` - To render text as a Title
 2. `subTitle` - To render text as a SubTitle

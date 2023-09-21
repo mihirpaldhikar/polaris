@@ -20,13 +20,21 @@
  * SOFTWARE.
  */
 
-import { type BlockSchema } from "./index";
+import type Style from "./Style";
 
-interface Table {
-  rows: Array<{
-    id: string;
-    columns: BlockSchema[];
-  }>;
+export interface BlockSchema {
+  id: string;
+  style: Style[];
+  role: string;
+  data: any;
 }
 
-export default Table;
+/**
+ * @type BlockSchema
+ *
+ * @description BlockSchema is the smallest unit of document which contains all the information required by the parser to render DOM Node.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export default BlockSchema;

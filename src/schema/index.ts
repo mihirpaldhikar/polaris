@@ -20,13 +20,6 @@
  * SOFTWARE.
  */
 
-import { type BlockSchema } from "./index";
-
-interface Table {
-  rows: Array<{
-    id: string;
-    columns: BlockSchema[];
-  }>;
-}
-
-export default Table;
+export type { default as TextBlockSchema } from "./TextBlockSchema";
+export type { default as AttachmentBlockSchema } from "./AttachmentBlockSchema";
+export type { default as TableBlockSchema } from "./TableBlockSchema";

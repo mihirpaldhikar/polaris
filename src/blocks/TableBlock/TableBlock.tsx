@@ -30,12 +30,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import {
-  type Block,
-  type Coordinates,
-  type Table,
-  type TextBlock,
-} from "../../interfaces";
+import { type BlockSchema, type Coordinates } from "../../interfaces";
 import {
   conditionalClassName,
   generateUUID,
@@ -53,29 +48,30 @@ import {
   DeleteIcon,
   DeleteRowIcon,
 } from "../../assets";
+import { type TableBlockSchema } from "../../schema";
 
 interface TableBlockProps {
-  previousParentBlock: Block | null;
-  block: Block;
+  previousParentBlock: BlockSchema | null;
+  block: TableBlockSchema;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
   editable: boolean;
-  onChange: (block: Block, focus?: boolean) => void;
+  onChange: (block: BlockSchema, focus?: boolean) => void;
   onClick: (even: MouseEvent) => void;
-  onSelect: (block: Block) => void;
+  onSelect: (block: BlockSchema) => void;
   onDelete: (
-    block: Block,
-    previousBlock: Block,
+    block: BlockSchema,
+    previousBlock: BlockSchema,
     nodeId: string,
     setCursorToStart?: boolean,
-    holder?: Block[],
+    holder?: BlockSchema[],
   ) => void;
   onCreate: (
-    parentBlock: Block,
-    targetBlock: Block,
-    holder?: Block[],
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
     focusOn?: {
       nodeId: string;
       nodeChildIndex?: number;
@@ -95,7 +91,7 @@ export default function TableBlock({
   onDelete,
   onCreate,
 }: TableBlockProps): JSX.Element {
-  const tableData = block.data as Table;
+  const tableData = block.data;
 
   function onCellChange(
     event: ChangeEvent<HTMLElement>,
@@ -164,7 +160,7 @@ export default function TableBlock({
     }
 
     if (listMetadata !== undefined) {
-      const listData = listMetadata.parent.data as Block[];
+      const listData = listMetadata.parent.data as BlockSchema[];
       listData.splice(listMetadata.currentIndex, 1);
       listMetadata.parent.data = listData;
 
@@ -195,7 +191,7 @@ export default function TableBlock({
         listData.length === 0 &&
         previousParentBlock == null
       ) {
-        const emptyBlock: Block = {
+        const emptyBlock: BlockSchema = {
           id: generateUUID(),
           data: "",
           role: "paragraph",
@@ -218,7 +214,7 @@ export default function TableBlock({
     }
 
     if (previousParentBlock == null) {
-      const emptyBlock: Block = {
+      const emptyBlock: BlockSchema = {
         id: generateUUID(),
         data: "",
         role: "paragraph",
@@ -274,7 +270,7 @@ export default function TableBlock({
           title={"Add row after current row"}
           className={"p-1 rounded-md hover:bg-gray-100 cursor-pointer"}
           onClick={() => {
-            const columns: TextBlock[] = [];
+            const columns: BlockSchema[] = [];
             for (let i = 0; i < totalColumns; i++) {
               columns.push({
                 id: generateUUID(),

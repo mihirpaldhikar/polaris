@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type Block, type Coordinates, type Style } from "../interfaces";
+import { type BlockSchema, type Coordinates, type Style } from "../interfaces";
 import {
   INLINE_ANNOTATIONS_NODE,
   LINK_ATTRIBUTE,
@@ -837,20 +837,10 @@ export function openLinkInNewTab(event: MouseEvent): void {
   }
 }
 
-export function splitBlocksAtCaretOffset(
-  block: Block,
+export function splitBlocksAtCaretOffset<TBlockSchema>(
+  block: BlockSchema,
   caretOffset: number,
-): Block[] {
-  if (
-    block.role === "table" ||
-    block.role === "bulletList" ||
-    block.role === "numberedList" ||
-    block.role === "githubGistEmbed" ||
-    block.role === "youtubeVideoEmbed" ||
-    block.role === "image"
-  ) {
-    return [];
-  }
+): TBlockSchema[] {
   const blockNode = getBlockNode(block.id) as HTMLElement;
   const nodeAtCaretOffset = getNodeAt(blockNode, caretOffset);
   const caretNodeOffset = nodeOffset(blockNode, nodeAtCaretOffset);
@@ -862,7 +852,7 @@ export function splitBlocksAtCaretOffset(
     },
   );
 
-  const newBlock: Block = {
+  const newBlock: BlockSchema = {
     id: generateUUID(),
     role: "paragraph",
     data: "",
@@ -920,5 +910,5 @@ export function splitBlocksAtCaretOffset(
   newBlock.role = newBlockContent.length === 0 ? "paragraph" : block.role;
   newBlock.style = newBlockContent.length === 0 ? [] : block.style;
 
-  return [block, newBlock];
+  return [block, newBlock] as TBlockSchema[];
 }

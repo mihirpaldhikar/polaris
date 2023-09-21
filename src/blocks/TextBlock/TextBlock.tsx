@@ -41,25 +41,26 @@ import {
   subscribeToEditorEvent,
   unsubscribeFromEditorEvent,
 } from "../../utils";
-import { type Block, type Table } from "../../interfaces";
+import { type BlockSchema, type Table } from "../../interfaces";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type TextBlockConfig } from "../../interfaces/PolarisConfig";
+import { type TextBlockSchema } from "../../schema";
 
 interface TextBlockProps {
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
-  previousParentBlock: Block | null;
-  block: Block;
+  previousParentBlock: BlockSchema | null;
+  block: TextBlockSchema;
   editable: boolean;
   onClick: (event: MouseEvent) => void;
-  onSelect: (block: Block) => void;
-  onChange: (block: Block) => void;
+  onSelect: (block: BlockSchema) => void;
+  onChange: (block: BlockSchema) => void;
   onCreate: (
-    parentBlock: Block,
-    targetBlock: Block,
-    holder?: Block[],
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
     focusOn?: {
       nodeId: string;
       nodeChildIndex?: number;
@@ -67,13 +68,13 @@ interface TextBlockProps {
     },
   ) => void;
   onDelete: (
-    block: Block,
-    previousBlock: Block,
+    block: BlockSchema,
+    previousBlock: BlockSchema,
     nodeId: string,
     setCursorToStart?: boolean,
-    holder?: Block[],
+    holder?: BlockSchema[],
   ) => void;
-  onMarkdown: (block: Block) => void;
+  onMarkdown: (block: BlockSchema, focusBlockId?: string) => void;
 }
 
 export default function TextBlock({
@@ -89,7 +90,7 @@ export default function TextBlock({
   onMarkdown,
 }: TextBlockProps): JSX.Element {
   const isActionMenuOpen = useRef(false);
-  const originalBlock = useRef<Block>({ ...block });
+  const originalBlock = useRef<BlockSchema>({ ...block });
   const roleChangeByMarkdown = useRef(false);
   const { config } = useContext(RootContext);
 
@@ -121,23 +122,26 @@ export default function TextBlock({
           break;
         }
 
-        let newBlock: Block = {
+        let newBlock: BlockSchema = {
           id: generateUUID(),
           data: "",
           role: "paragraph",
           style: [],
         };
 
-        const splitNode = splitBlocksAtCaretOffset(block, caretOffset);
+        const splitNode = splitBlocksAtCaretOffset<TextBlockSchema>(
+          block,
+          caretOffset,
+        );
         block = splitNode[0];
         newBlock = splitNode[1];
 
         if (
           listMetadata !== undefined &&
-          (block.data as string).length === 0 &&
+          block.data.length === 0 &&
           (newBlock.data as string).length === 0
         ) {
-          const listData = listMetadata.parent.data as Block[];
+          const listData = listMetadata.parent.data as BlockSchema[];
           const remainingList = listData.splice(
             listMetadata.currentIndex,
             listData.length - listMetadata.currentIndex,
@@ -146,12 +150,8 @@ export default function TextBlock({
           listMetadata.parent.data = listData;
           onCreate(listMetadata.parent, newBlock);
 
-          if (
-            remainingList.length > 0 &&
-            (listMetadata.parent.role === "bulletList" ||
-              listMetadata.parent.role === "numberedList")
-          ) {
-            const newListBlock: Block = {
+          if (remainingList.length > 0) {
+            const newListBlock: BlockSchema = {
               id: generateUUID(),
               role: listMetadata.parent.role,
               style: listMetadata.parent.style,
@@ -169,7 +169,7 @@ export default function TextBlock({
           block,
           newBlock,
           listMetadata !== undefined
-            ? (listMetadata.parent.data as Block[])
+            ? (listMetadata.parent.data as BlockSchema[])
             : undefined,
         );
         break;
@@ -187,7 +187,7 @@ export default function TextBlock({
         event.preventDefault();
 
         if (listMetadata !== undefined) {
-          const listData = listMetadata.parent.data as Block[];
+          const listData = listMetadata.parent.data as BlockSchema[];
           if (listMetadata.currentIndex === 0) {
             if (previousParentBlock == null) return;
             const separateBlock = listData.splice(0, 1)[0];
@@ -208,7 +208,7 @@ export default function TextBlock({
           ) {
             listData[listMetadata.currentIndex - 1].data = (
               listData[listMetadata.currentIndex - 1].data as string
-            ).concat(block.data as string);
+            ).concat(block.data);
             listMetadata.parent.data = listData;
             onDelete(
               block,
@@ -229,7 +229,7 @@ export default function TextBlock({
               tableData.rows[tableData.rows.length - 1].columns.length - 1
             ].data = tableData.rows[tableData.rows.length - 1].columns[
               tableData.rows[tableData.rows.length - 1].columns.length - 1
-            ].data.concat(block.data as string);
+            ].data.concat(block.data);
             listData[listMetadata.currentIndex - 1].data = tableData;
             onDelete(
               block,
@@ -248,7 +248,7 @@ export default function TextBlock({
 
         if (typeof previousParentBlock.data === "string") {
           previousParentBlock.data = previousParentBlock.data.concat(
-            block.data as string,
+            block.data,
           );
           onDelete(block, previousParentBlock, previousParentBlock.id);
         } else if (
@@ -259,7 +259,7 @@ export default function TextBlock({
           if (typeof listData[listData.length - 1].data === "string") {
             listData[listData.length - 1].data = (
               listData[listData.length - 1].data as string
-            ).concat(block.data as string);
+            ).concat(block.data);
             onDelete(
               block,
               listData[listData.length - 1],
@@ -275,7 +275,7 @@ export default function TextBlock({
             tableData.rows[tableData.rows.length - 1].columns.length - 1
           ].data = tableData.rows[tableData.rows.length - 1].columns[
             tableData.rows[tableData.rows.length - 1].columns.length - 1
-          ].data.concat(block.data as string);
+          ].data.concat(block.data);
           previousParentBlock.data = tableData;
           onDelete(
             block,
@@ -291,73 +291,90 @@ export default function TextBlock({
         break;
       }
       case " ": {
-        if (typeof block.data === "string") {
-          switch (block.data) {
-            case "#": {
-              event.preventDefault();
-              block.role = "title";
-              block.data = "";
-              break;
-            }
-            case "##": {
-              event.preventDefault();
-              block.role = "subTitle";
-              block.data = "";
-              break;
-            }
-            case "###": {
-              event.preventDefault();
-              block.role = "heading";
-              block.data = "";
-              break;
-            }
-            case "####": {
-              event.preventDefault();
-              block.role = "subHeading";
-              block.data = "";
-              break;
-            }
-            case "&gt;":
-            case ">": {
-              event.preventDefault();
-              block.role = "quote";
-              block.data = "";
-              break;
-            }
-            case "+":
-            case "-": {
-              event.preventDefault();
-              block.role = "bulletList";
-              block.data = [
+        switch (block.data) {
+          case "#": {
+            event.preventDefault();
+            block.role = "title";
+            block.data = "";
+            roleChangeByMarkdown.current = true;
+            onMarkdown(block);
+            break;
+          }
+          case "##": {
+            event.preventDefault();
+            block.role = "subTitle";
+            block.data = "";
+            roleChangeByMarkdown.current = true;
+            onMarkdown(block);
+            break;
+          }
+          case "###": {
+            event.preventDefault();
+            block.role = "heading";
+            block.data = "";
+            roleChangeByMarkdown.current = true;
+            onMarkdown(block);
+            break;
+          }
+          case "####": {
+            event.preventDefault();
+            block.role = "subHeading";
+            block.data = "";
+            roleChangeByMarkdown.current = true;
+            onMarkdown(block);
+            break;
+          }
+          case "&gt;":
+          case ">": {
+            event.preventDefault();
+            block.role = "quote";
+            block.data = "";
+            roleChangeByMarkdown.current = true;
+            onMarkdown(block);
+            break;
+          }
+          case "+":
+          case "-": {
+            event.preventDefault();
+            const focusBlockId = generateUUID();
+            const newBlock: BlockSchema = {
+              id: block.id,
+              role: "bulletList",
+              style: [],
+              data: [
                 {
-                  id: generateUUID(),
+                  id: focusBlockId,
                   data: "",
                   role: "paragraph",
                   style: [],
                 },
-              ];
-              break;
-            }
-            default: {
-              if (/^\d+\.$/.test(block.data)) {
-                event.preventDefault();
-                block.role = "numberedList";
-                block.data = [
+              ],
+            };
+            roleChangeByMarkdown.current = true;
+            onMarkdown(newBlock, focusBlockId);
+            break;
+          }
+          default: {
+            if (/^\d+\.$/.test(block.data)) {
+              event.preventDefault();
+              const focusBlockId = generateUUID();
+              const newBlock: BlockSchema = {
+                id: block.id,
+                role: "numberedList",
+                style: [],
+                data: [
                   {
-                    id: generateUUID(),
+                    id: focusBlockId,
                     data: "",
                     role: "paragraph",
                     style: [],
                   },
-                ];
-                break;
-              } else {
-                return;
-              }
+                ],
+              };
+              roleChangeByMarkdown.current = true;
+              onMarkdown(newBlock, focusBlockId);
             }
           }
-          roleChangeByMarkdown.current = true;
-          onMarkdown(block);
         }
         break;
       }

@@ -20,13 +20,11 @@
  * SOFTWARE.
  */
 
-import { type BlockSchema } from "./index";
+import { type BlockSchema, type Table } from "../interfaces";
 
-interface Table {
-  rows: Array<{
-    id: string;
-    columns: BlockSchema[];
-  }>;
+interface TableBlockSchema extends BlockSchema {
+  role: "table";
+  data: Table;
 }
 
-export default Table;
+export default TableBlockSchema;

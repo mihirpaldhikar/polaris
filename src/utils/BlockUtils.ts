@@ -20,7 +20,11 @@
  * SOFTWARE.
  */
 
-import { type Block, type PolarisConfig, type Style } from "../interfaces";
+import {
+  type BlockSchema,
+  type PolarisConfig,
+  type Style,
+} from "../interfaces";
 import RenderType from "../enums/RenderType";
 import { camelCase } from "lodash";
 import {
@@ -158,8 +162,8 @@ export function blockRenderTypeFromRole(role: string): RenderType {
 }
 
 export function traverseAndUpdate(
-  masterBlocks: Block[],
-  targetBlock: Block,
+  masterBlocks: BlockSchema[],
+  targetBlock: BlockSchema,
 ): void {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
@@ -168,16 +172,16 @@ export function traverseAndUpdate(
     } else if (
       blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
     ) {
-      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
+      traverseAndUpdate(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
   }
 }
 
 export function traverseAndFind(
-  masterBlocks: Block[],
+  masterBlocks: BlockSchema[],
   blockId: string,
-): Block | null {
-  const listBlocks: Block[] = [];
+): BlockSchema | null {
+  const listBlocks: BlockSchema[] = [];
 
   for (const block of masterBlocks) {
     if (block.id === blockId) return block;
@@ -195,8 +199,8 @@ export function traverseAndFind(
 }
 
 export function traverseAndDelete(
-  masterBlocks: Block[],
-  targetBlock: Block,
+  masterBlocks: BlockSchema[],
+  targetBlock: BlockSchema,
 ): void {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
@@ -205,15 +209,15 @@ export function traverseAndDelete(
     } else if (
       blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
     ) {
-      traverseAndDelete(masterBlocks[i].data as Block[], targetBlock);
+      traverseAndDelete(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
   }
 }
 
 export function traverseAndUpdateBelow(
-  masterBlocks: Block[],
-  parentBlock: Block,
-  targetBlock: Block,
+  masterBlocks: BlockSchema[],
+  parentBlock: BlockSchema,
+  targetBlock: BlockSchema,
 ): void {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === parentBlock.id) {
@@ -222,21 +226,21 @@ export function traverseAndUpdateBelow(
     } else if (
       blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
     ) {
-      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
+      traverseAndUpdate(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
   }
 }
 
 export function traverseAndFindBlockPosition(
-  masterBlocks: Block[],
-  targetBlock: Block,
+  masterBlocks: BlockSchema[],
+  targetBlock: BlockSchema,
 ): number {
   for (let i = 0; i < masterBlocks.length; i++) {
     if (masterBlocks[i].id === targetBlock.id) {
       return i;
     }
     if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
-      traverseAndUpdate(masterBlocks[i].data as Block[], targetBlock);
+      traverseAndUpdate(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
   }
   return -1;

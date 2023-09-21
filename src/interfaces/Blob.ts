@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import type Block from "./Block";
+import type Block from "./BlockSchema";
 
 /**
  * @interface Blob

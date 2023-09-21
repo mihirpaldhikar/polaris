@@ -31,12 +31,11 @@ import {
 import {
   type Action,
   type Blob,
-  type Block,
+  type BlockSchema,
   type Coordinates,
   type InputArgs,
   type PolarisConfig,
   type Style,
-  type TextBlock,
 } from "../../interfaces";
 import {
   blockRenderTypeFromRole,
@@ -114,7 +113,9 @@ export default function Editor({
 
   const isActionMenuOpen = useRef<boolean>(false);
 
-  const [masterBlocks, updateMasterBlocks] = useState<Block[]>(blob.blocks);
+  const [masterBlocks, updateMasterBlocks] = useState<BlockSchema[]>(
+    blob.blocks,
+  );
   const [focusedNode, setFocusedNode] = useState<
     | {
         nodeId: string;
@@ -142,7 +143,7 @@ export default function Editor({
 
   const propagateChanges = useCallback(
     (
-      blocks: Block[],
+      blocks: BlockSchema[],
       focus?: {
         nodeId: string;
         caretOffset: number;
@@ -160,7 +161,7 @@ export default function Editor({
   );
 
   const changeHandler = useCallback(
-    (block: Block, focus?: boolean) => {
+    (block: BlockSchema, focus?: boolean) => {
       const blockIndex: number = masterBlocks
         .map((blk) => blk.id)
         .indexOf(block.id);
@@ -191,7 +192,7 @@ export default function Editor({
   const actionKeyHandler = useCallback(
     (
       nodeIndex: number,
-      block: Block,
+      block: BlockSchema,
       previousContent: string,
       caretOffset: number,
       blockTools: Action[],
@@ -266,7 +267,7 @@ export default function Editor({
                     listMetadata.parentId,
                   );
                   if (parentBlock == null) return;
-                  const listData = parentBlock.data as Block[];
+                  const listData = parentBlock.data as BlockSchema[];
                   if (inPlace !== undefined && inPlace) {
                     listData.splice(listMetadata.childIndex, 1, template);
                   } else {
@@ -282,7 +283,7 @@ export default function Editor({
                       listMetadata.childIndex + 1 === listData.length - 1) &&
                     typeof template.data !== "string"
                   ) {
-                    const emptyBlock: TextBlock = {
+                    const emptyBlock: BlockSchema = {
                       id: generateUUID(),
                       data: "",
                       role: "paragraph",
@@ -319,7 +320,7 @@ export default function Editor({
                       blockIndex + 1 === masterBlocks.length - 1) &&
                     typeof template.data !== "string"
                   ) {
-                    const emptyBlock: TextBlock = {
+                    const emptyBlock: BlockSchema = {
                       id: generateUUID(),
                       data: "",
                       role: "paragraph",
@@ -363,7 +364,7 @@ export default function Editor({
   );
 
   const actionMenuTriggerHandler = useCallback(
-    (activeBlock: Block, activeNode: HTMLElement, isMobile: boolean) => {
+    (activeBlock: BlockSchema, activeNode: HTMLElement, isMobile: boolean) => {
       const caretOffset = getCaretOffset(activeNode);
       if (typeof activeBlock.data === "string") {
         const nodeAtCaretOffset = getNodeAt(activeNode, caretOffset);
@@ -713,9 +714,9 @@ export default function Editor({
   }, [focusedNode]);
 
   function createHandler(
-    parentBlock: Block,
-    targetBlock: Block,
-    holder?: Block[],
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
     focusOn?: {
       nodeId: string;
       nodeChildIndex?: number;
@@ -732,11 +733,11 @@ export default function Editor({
   }
 
   function deletionHandler(
-    block: Block,
-    previousBlock: Block,
+    block: BlockSchema,
+    previousBlock: BlockSchema,
     nodeId: string,
     setCursorToStart?: boolean,
-    holder?: Block[],
+    holder?: BlockSchema[],
   ): void {
     const previousNode = getBlockNode(nodeId) as HTMLElement;
 
@@ -771,7 +772,7 @@ export default function Editor({
     });
   }
 
-  function annotationsHandler(block: Block): void {
+  function annotationsHandler(block: BlockSchema): void {
     const selection = window.getSelection();
 
     const popupNode = window.document.getElementById(`popup-${blob.id}`);
@@ -916,7 +917,10 @@ export default function Editor({
     );
   }
 
-  function attachmentRequestHandler(block: Block, data: File | string): void {
+  function attachmentRequestHandler(
+    block: BlockSchema,
+    data: File | string,
+  ): void {
     if (block.role !== "image" || typeof block.data !== "object") {
       return;
     }
@@ -931,8 +935,8 @@ export default function Editor({
           const parentBlock = traverseAndFind(
             masterBlocks,
             listMetadata.parentId,
-          ) as Block;
-          traverseAndUpdate(parentBlock.data as Block[], block);
+          ) as BlockSchema;
+          traverseAndUpdate(parentBlock.data as BlockSchema[], block);
         } else {
           traverseAndUpdate(masterBlocks, block);
         }
@@ -946,13 +950,10 @@ export default function Editor({
     });
   }
 
-  function markdownHandler(block: Block): void {
+  function markdownHandler(block: BlockSchema, focusBlockId?: string): void {
     traverseAndUpdate(masterBlocks, block);
     propagateChanges(masterBlocks, {
-      nodeId:
-        blockRenderTypeFromRole(block.role) === RenderType.LIST
-          ? (block.data as Block[])[0].id
-          : block.id,
+      nodeId: focusBlockId ?? block.id,
       caretOffset: 0,
     });
   }

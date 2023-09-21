@@ -22,7 +22,7 @@
 
 import "./styles/global.css";
 
-export type { Block, PolarisConfig } from "./interfaces";
+export type { BlockSchema, PolarisConfig } from "./interfaces";
 export { generateUUID } from "./utils";
 export { serializeBlob } from "./utils";
 export {

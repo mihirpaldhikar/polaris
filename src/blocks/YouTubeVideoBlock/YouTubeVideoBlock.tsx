@@ -22,12 +22,13 @@
 
 import { type JSX } from "react";
 import { getYouTubeVideoID } from "../../utils";
-import { type Attachment, type Block } from "../../interfaces";
+import { type BlockSchema } from "../../interfaces";
+import { type AttachmentBlockSchema } from "../../schema";
 
 interface YouTubeVideoBlockProps {
-  block: Block;
+  block: AttachmentBlockSchema;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
 }
@@ -36,7 +37,7 @@ export default function YouTubeVideoBlock({
   block,
   listMetadata,
 }: YouTubeVideoBlockProps): JSX.Element {
-  const attachment = block.data as Attachment;
+  const attachment = block.data;
   return (
     <iframe
       id={block.id}

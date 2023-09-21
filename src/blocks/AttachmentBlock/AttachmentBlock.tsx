@@ -22,7 +22,7 @@
 
 import { createElement, Fragment, type JSX } from "react";
 import { generateUUID, nodeTypeFromRole } from "../../utils";
-import { type Attachment, type Block } from "../../interfaces";
+import { type Attachment, type BlockSchema } from "../../interfaces";
 import { FilePicker } from "../../components/FilePicker";
 import { GitHubIcon, ImageIcon, YouTubeIcon } from "../../assets";
 import { EmbedPicker } from "../../components/EmbedPicker";
@@ -30,27 +30,28 @@ import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { YouTubeVideoBlock } from "../YouTubeVideoBlock";
 import { AttachmentActions } from "../../assets/actions/AttachmentActions";
 import { GitHubGistBlock } from "../GitHubGistBlock";
+import { type AttachmentBlockSchema } from "../../schema";
 
 interface AttachmentBlockProps {
-  previousParentBlock: Block | null;
-  block: Block;
+  previousParentBlock: BlockSchema | null;
+  block: AttachmentBlockSchema;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
-  onAttachmentRequest: (block: Block, data: File | string) => void;
-  onChange: (block: Block) => void;
+  onAttachmentRequest: (block: BlockSchema, data: File | string) => void;
+  onChange: (block: BlockSchema) => void;
   onDelete: (
-    block: Block,
-    previousBlock: Block,
+    block: BlockSchema,
+    previousBlock: BlockSchema,
     nodeId: string,
     setCursorToStart?: boolean,
-    holder?: Block[],
+    holder?: BlockSchema[],
   ) => void;
   onCreate: (
-    parentBlock: Block,
-    targetBlock: Block,
-    holder?: Block[],
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
     focusOn?: {
       nodeId: string;
       nodeChildIndex?: number;
@@ -68,11 +69,11 @@ export default function AttachmentBlock({
   previousParentBlock,
   listMetadata,
 }: AttachmentBlockProps): JSX.Element {
-  const attachment: Attachment = block.data as Attachment;
+  const attachment: Attachment = block.data;
 
   function deleteHandler(): void {
     if (listMetadata !== undefined) {
-      const listData = listMetadata.parent.data as Block[];
+      const listData = listMetadata.parent.data as BlockSchema[];
       listData.splice(listMetadata.currentIndex, 1);
       listMetadata.parent.data = listData;
 
@@ -103,7 +104,7 @@ export default function AttachmentBlock({
         listData.length === 0 &&
         previousParentBlock == null
       ) {
-        const emptyBlock: Block = {
+        const emptyBlock: BlockSchema = {
           id: generateUUID(),
           data: "",
           role: "paragraph",
@@ -126,7 +127,7 @@ export default function AttachmentBlock({
     }
 
     if (previousParentBlock == null) {
-      const emptyBlock: Block = {
+      const emptyBlock: BlockSchema = {
         id: generateUUID(),
         data: "",
         role: "paragraph",

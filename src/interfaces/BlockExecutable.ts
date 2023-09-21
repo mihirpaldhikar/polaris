@@ -20,29 +20,18 @@
  * SOFTWARE.
  */
 
-import {
-  type AttachmentBlock,
-  type ListBlock,
-  type TableBlock,
-  type TextBlock,
-} from "./Block";
-
-export interface GenericBlockExecutable<GenericBlock> {
-  onInitialized: (content: string) => {
-    focusBlockId: string;
-    setCaretToStart?: boolean;
-    inPlace?: boolean;
-    template: GenericBlock;
-  };
-}
+import { type BlockSchema } from "./index";
 
 export interface BlockExecutable {
   type: "role";
-  args:
-    | GenericBlockExecutable<TextBlock>
-    | GenericBlockExecutable<AttachmentBlock>
-    | GenericBlockExecutable<TableBlock>
-    | GenericBlockExecutable<ListBlock>;
+  args: {
+    onInitialized: (content: string) => {
+      focusBlockId: string;
+      setCaretToStart?: boolean;
+      inPlace?: boolean;
+      template: BlockSchema;
+    };
+  };
 }
 
 export default BlockExecutable;

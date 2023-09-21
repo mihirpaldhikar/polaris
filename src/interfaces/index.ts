@@ -21,13 +21,7 @@
  */
 
 export type { default as Style } from "./Style";
-export type {
-  default as Block,
-  TextBlock,
-  AttachmentBlock,
-  TableBlock,
-  ListBlock,
-} from "./Block";
+export type { default as BlockSchema } from "./BlockSchema";
 export type { default as Coordinates } from "./Coordinates";
 export type { default as Blob } from "./Blob";
 export type { default as Action } from "./Action";

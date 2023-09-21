@@ -2,7 +2,7 @@
 
 ### Fixes:
 
-- Fix an issue which was causing IndexSizeError when switching blocks with Block tools Action actions.
+- Fix an issue which was causing IndexSizeError when switching blocks with BlockSchema tools Action actions.
 
 ## 0.7.0 (September 17. 2023)
 
@@ -42,7 +42,7 @@
 - Fix an issue in which focus on block was not working as expected when a table block is initialized which was causing
   rendering error.
 - Fix an issue in which Action Action was not working in mobile devices.
-- Fix an issue in which Block Tools popup was getting dismissed due to arrow navigation code of table block.
+- Fix an issue in which BlockSchema Tools popup was getting dismissed due to arrow navigation code of table block.
 - Fix an issue in which Copy, Paste and other options not working in Dialog Box input fields for Mobile Devices.
 - Fix an issue in which height field of Size Dialog losing focus while typing.
 
@@ -71,7 +71,8 @@
 
 - Add support for YouTube Video and GitHub Gist Embeds.
 - Add an option to configure Blocks and Editor with `PolarisConfig`.
-- Serialization from `Blob` to `HTML` now gives complete `HTML Document` as output instead of only containing `Block`.
+- Serialization from `Blob` to `HTML` now gives complete `HTML Document` as output instead of only
+  containing `BlockSchema`.
 - Add `name` field to `Blob` for unique `Blob` name.
 
 ### Breaking Changes:
@@ -93,7 +94,7 @@
 
 ### Breaking Changes:
 
-- `content` field of `Block` is now renamed to `data`.
+- `content` field of `BlockSchema` is now renamed to `data`.
 - `selectionMenu` prop of `Editor` is now renamed to `annotationActions`.
 
 ### Fixes:
@@ -126,7 +127,8 @@
 
 - Add support for nested lists.
 - Lists is not limited to paragraph but can also contain all the blocks.
-- Block type is not required while creating a new block. The Block type is automatically handled internally by the
+- BlockSchema type is not required while creating a new block. The BlockSchema type is automatically handled internally
+  by the
   editor.
 - Performance of the Editor has been improved.
 

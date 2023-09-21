@@ -21,7 +21,7 @@
  */
 
 import { createElement, Fragment, type JSX, useContext } from "react";
-import { type Block } from "../../interfaces";
+import { type BlockSchema } from "../../interfaces";
 import {
   conditionalClassName,
   getConfigFromRole,
@@ -32,20 +32,25 @@ import {
 import { AttachmentBlock, TableBlock, TextBlock } from "../../blocks";
 import RootContext from "../../contexts/RootContext/RootContext";
 import { type AttachmentBlockConfig } from "../../interfaces/PolarisConfig";
+import {
+  type AttachmentBlockSchema,
+  type TableBlockSchema,
+  type TextBlockSchema,
+} from "../../schema";
 
 interface ComposerProps {
   editable: boolean;
-  previousParentBlock: Block | null;
-  block: Block;
+  previousParentBlock: BlockSchema | null;
+  block: BlockSchema;
   listMetadata?: {
-    parent: Block;
+    parent: BlockSchema;
     currentIndex: number;
   };
-  onChange: (block: Block, focus?: boolean) => void;
+  onChange: (block: BlockSchema, focus?: boolean) => void;
   onCreate: (
-    parentBlock: Block,
-    targetBlock: Block,
-    holder?: Block[],
+    parentBlock: BlockSchema,
+    targetBlock: BlockSchema,
+    holder?: BlockSchema[],
     focusOn?: {
       nodeId: string;
       nodeChildIndex?: number;
@@ -53,15 +58,15 @@ interface ComposerProps {
     },
   ) => void;
   onDelete: (
-    block: Block,
-    previousBlock: Block,
+    block: BlockSchema,
+    previousBlock: BlockSchema,
     nodeId: string,
     setCursorToStart?: boolean,
-    holder?: Block[],
+    holder?: BlockSchema[],
   ) => void;
-  onSelect: (block: Block) => void;
-  onAttachmentRequest: (block: Block, data: File | string) => void;
-  onMarkdown: (block: Block) => void;
+  onSelect: (block: BlockSchema) => void;
+  onAttachmentRequest: (block: BlockSchema, data: File | string) => void;
+  onMarkdown: (block: BlockSchema, focusBlockId?: string) => void;
 }
 
 /**
@@ -75,7 +80,7 @@ interface ComposerProps {
  * @param onSelect
  * @returns JSX.Element
  *
- * @description Composer is responsible for rendering the Node from the Block. It also manages and updates the content of the block when the Node is mutated.
+ * @description Composer is responsible for rendering the Node from the BlockSchema. It also manages and updates the content of the block when the Node is mutated.
  *
  * @author Mihir Paldhikar
  */
@@ -106,7 +111,7 @@ export default function Composer({
       <TextBlock
         listMetadata={listMetadata}
         previousParentBlock={previousParentBlock}
-        block={block}
+        block={block as TextBlockSchema}
         editable={editable}
         onChange={onChange}
         onClick={openLinkInNewTab}
@@ -123,7 +128,7 @@ export default function Composer({
   ) {
     return (
       <AttachmentBlock
-        block={block}
+        block={block as AttachmentBlockSchema}
         previousParentBlock={previousParentBlock}
         listMetadata={listMetadata}
         onCreate={onCreate}
@@ -135,7 +140,7 @@ export default function Composer({
   } else if (block.role === "table") {
     return (
       <TableBlock
-        block={block}
+        block={block as TableBlockSchema}
         previousParentBlock={previousParentBlock}
         listMetadata={listMetadata}
         editable={editable}
@@ -146,7 +151,7 @@ export default function Composer({
         onCreate={onCreate}
       />
     );
-  } else if (block.role === "numberedList" || block.role === "bulletList") {
+  } else if (Array.isArray(block.data)) {
     return createElement(
       nodeTypeFromRole(block.role),
       {
@@ -159,7 +164,7 @@ export default function Composer({
           block.role === "numberedList" ? "list-decimal" : "list-disc",
         ),
       },
-      block.data.map((childBlock, index) => {
+      block.data.map((childBlock: BlockSchema, index) => {
         if (childBlock.role.toLowerCase().includes("list")) {
           return <Fragment key={childBlock.id} />;
         }
@@ -194,5 +199,5 @@ export default function Composer({
       }),
     );
   }
-  return <Fragment />;
+  throw new Error(`Block with role '${block.role}' is undefined.`);
 }

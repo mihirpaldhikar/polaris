@@ -20,45 +20,11 @@
  * SOFTWARE.
  */
 
-import type Style from "./Style";
-import { type Attachment } from "./index";
-import type Table from "./Table";
+import { type Attachment, type BlockSchema } from "../interfaces";
 
-export interface GenericBlock {
-  id: string;
-  style: Style[];
-  role: string;
-  data: any;
-}
-
-export interface TextBlock extends GenericBlock {
-  role: "title" | "subTitle" | "heading" | "subHeading" | "paragraph" | "quote";
-  data: string;
-}
-
-export interface AttachmentBlock extends GenericBlock {
+interface AttachmentBlockSchema extends BlockSchema {
   role: "image" | "youtubeVideoEmbed" | "githubGistEmbed";
   data: Attachment;
 }
 
-export interface TableBlock extends GenericBlock {
-  role: "table";
-  data: Table;
-}
-
-export interface ListBlock extends GenericBlock {
-  role: "bulletList" | "numberedList";
-  data: Block[];
-}
-
-/**
- * @type Block
- *
- * @description Block is the smallest unit of document which contains all the information required by the parser to render DOM Node.
- *
- * @author Mihir Paldhikar
- */
-
-type Block = TextBlock | AttachmentBlock | TableBlock | ListBlock;
-
-export default Block;
+export default AttachmentBlockSchema;

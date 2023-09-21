@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type Attachment, type Blob, type Block } from "../interfaces";
+import { type Attachment, type Blob, type BlockSchema } from "../interfaces";
 import { isInlineAnnotationsNode } from "./DOMUtils";
 import { blockRenderTypeFromRole, nodeTypeFromRole } from "./BlockUtils";
 import RenderType from "../enums/RenderType";
@@ -28,7 +28,7 @@ import { kebabCase } from "lodash";
 import { LINK_ATTRIBUTE } from "../constants";
 import { generateGitHubGistURL, getYouTubeVideoID } from "./SharedUtils";
 
-export function serializeBlock(block: Block): HTMLElement | null {
+export function serializeBlock(block: BlockSchema): HTMLElement | null {
   if (
     window === undefined ||
     document === undefined ||
