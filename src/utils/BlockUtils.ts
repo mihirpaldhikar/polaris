@@ -25,7 +25,6 @@ import {
   type PolarisConfig,
   type Style,
 } from "../interfaces";
-import RenderType from "../enums/RenderType";
 import { camelCase } from "lodash";
 import {
   type AttachmentBlockConfig,
@@ -100,29 +99,6 @@ export function getBlockNode(blockId: string): HTMLElement | null {
   return blockDOM;
 }
 
-export function blockRenderTypeFromRole(role: string): RenderType {
-  switch (role) {
-    case "title":
-    case "subTitle":
-    case "heading":
-    case "subHeading":
-    case "paragraph":
-    case "quote":
-      return RenderType.TEXT;
-    case "bulletList":
-    case "numberedList":
-      return RenderType.LIST;
-    case "image":
-    case "youtubeVideoEmbed":
-    case "githubGistEmbed":
-      return RenderType.ATTACHMENT;
-    case "table":
-      return RenderType.TABLE;
-    default:
-      return RenderType.UNKNOWN;
-  }
-}
-
 export function traverseAndUpdate(
   masterBlocks: BlockSchema[],
   targetBlock: BlockSchema,
@@ -132,7 +108,9 @@ export function traverseAndUpdate(
       masterBlocks[i] = targetBlock;
       return;
     } else if (
-      blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
+      Array.isArray(masterBlocks[i].data) &&
+      typeof masterBlocks[i].role === "string" &&
+      (masterBlocks[i].role as string).toLowerCase().includes("list")
     ) {
       traverseAndUpdate(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
@@ -169,7 +147,9 @@ export function traverseAndDelete(
       masterBlocks.splice(i, 1);
       return;
     } else if (
-      blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
+      Array.isArray(masterBlocks[i].data) &&
+      typeof masterBlocks[i].role === "string" &&
+      (masterBlocks[i].role as string).toLowerCase().includes("list")
     ) {
       traverseAndDelete(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
@@ -186,7 +166,9 @@ export function traverseAndUpdateBelow(
       masterBlocks.splice(i + 1, 0, targetBlock);
       return;
     } else if (
-      blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST
+      Array.isArray(masterBlocks[i].data) &&
+      typeof masterBlocks[i].role === "string" &&
+      (masterBlocks[i].role as string).toLowerCase().includes("list")
     ) {
       traverseAndUpdate(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
@@ -201,7 +183,11 @@ export function traverseAndFindBlockPosition(
     if (masterBlocks[i].id === targetBlock.id) {
       return i;
     }
-    if (blockRenderTypeFromRole(masterBlocks[i].role) === RenderType.LIST) {
+    if (
+      Array.isArray(masterBlocks[i].data) &&
+      typeof masterBlocks[i].role === "string" &&
+      (masterBlocks[i].role as string).toLowerCase().includes("list")
+    ) {
       traverseAndUpdate(masterBlocks[i].data as BlockSchema[], targetBlock);
     }
   }
