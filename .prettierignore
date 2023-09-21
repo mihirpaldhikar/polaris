@@ -9,3 +9,6 @@ node_modules
 ### Build Artifacts ###
 dist
 .next
+
+### Bundler Configs ###
+rollup.config.mjs
