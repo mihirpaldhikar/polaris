@@ -380,9 +380,6 @@ export default function TitleBlock({
     spellCheck: true,
     className: conditionalClassName(
       "text_renderer block flex-1 overflow-hidden focus:outline-none focus:ring-0 outline-none ring-0 cursor-text break-words",
-      block.role === "quote"
-        ? `rounded-md font-medium border-l-[8px] border-gray-300 bg-gray-100 p-4`
-        : "",
     ),
     onInput: (event: ChangeEvent<HTMLElement>) => {
       onDataChange(event);
