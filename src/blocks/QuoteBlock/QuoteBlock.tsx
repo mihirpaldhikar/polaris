@@ -166,7 +166,10 @@ export default function QuoteBlock({
 
         event.preventDefault();
 
-        if (listMetadata !== undefined) {
+        if (
+          listMetadata !== undefined &&
+          typeof listMetadata.parent.role === "string"
+        ) {
           const listData = listMetadata.parent.data as BlockSchema[];
           if (listMetadata.currentIndex === 0) {
             if (previousParentBlock == null) return;
@@ -199,7 +202,7 @@ export default function QuoteBlock({
             );
           } else if (
             typeof listData[listMetadata.currentIndex - 1].data === "object" &&
-            listData[listMetadata.currentIndex - 1].role
+            (listData[listMetadata.currentIndex - 1].role as string)
               .toLowerCase()
               .includes("table")
           ) {
@@ -233,7 +236,7 @@ export default function QuoteBlock({
           onDelete(block, previousParentBlock, previousParentBlock.id);
         } else if (
           Array.isArray(previousParentBlock.data) &&
-          previousParentBlock.role.toLowerCase().includes("list")
+          (previousParentBlock.role as string).toLowerCase().includes("list")
         ) {
           const listData = previousParentBlock.data;
           if (typeof listData[listData.length - 1].data === "string") {
@@ -248,7 +251,7 @@ export default function QuoteBlock({
           }
         } else if (
           typeof previousParentBlock.data === "object" &&
-          previousParentBlock.role.toLowerCase().includes("table")
+          (previousParentBlock.role as string).toLowerCase().includes("table")
         ) {
           const tableData = previousParentBlock.data as Table;
           tableData.rows[tableData.rows.length - 1].columns[
