@@ -129,9 +129,12 @@ export default function Editor({
   className,
   onAttachmentSelected,
 }: EditorProps): JSX.Element {
-  let defaultAnnotationActions: readonly Action[] = cloneDeep(
-    AnnotationActions,
-  ).concat(...(annotationActions ?? []));
+  const popupNode = useRef<HTMLDivElement>(null);
+  const dialogNode = useRef<HTMLDivElement>(null);
+  const editorNode = useRef<HTMLDivElement>(null);
+  const popUpRoot = useRef<Root>();
+  const dialogRoot = useRef<Root>();
+  const isActionMenuOpen = useRef<boolean>(false);
 
   window.registeredBlocks = useMemo(() => {
     blockPlugin.registerBlock(new ParagraphBlockPlugin());
@@ -170,7 +173,9 @@ export default function Editor({
     return [...registeredBlockActions, ...BlockActions];
   }, [registeredBlockActions]);
 
-  const isActionMenuOpen = useRef<boolean>(false);
+  let defaultAnnotationActions: readonly Action[] = cloneDeep(
+    AnnotationActions,
+  ).concat(...(annotationActions ?? []));
 
   const [masterBlocks, updateMasterBlocks] = useState<BlockSchema[]>(
     blob.blocks,
@@ -184,20 +189,9 @@ export default function Editor({
     | undefined
   >(undefined);
 
-  const [popUpRoot, setPopUpRoot] = useState<Root>();
-  const [dialogRoot, setDialogRoot] = useState<Root>();
-
   useEffect(() => {
-    setPopUpRoot(
-      createRoot(document.getElementById(`popup-${blob.id}`) as HTMLElement),
-    );
-    setDialogRoot(
-      createRoot(document.getElementById(`dialog-${blob.id}`) as HTMLElement),
-    );
-    return () => {
-      setPopUpRoot(undefined);
-      setDialogRoot(undefined);
-    };
+    popUpRoot.current = createRoot(popupNode.current as HTMLDivElement);
+    dialogRoot.current = createRoot(dialogNode.current as HTMLDivElement);
   }, [blob.id]);
 
   const propagateChanges = useCallback(
@@ -253,23 +247,15 @@ export default function Editor({
       caretOffset: number,
       blockTools: readonly Action[],
     ) => {
-      const popupNode = window.document.getElementById(`popup-${blob.id}`);
-      const editorNode = window.document.getElementById(`editor-${blob.id}`);
       const activeNode = getBlockNode(block.id);
-      if (
-        popupNode == null ||
-        editorNode == null ||
-        activeNode == null ||
-        popUpRoot === undefined ||
-        typeof block.data !== "string"
-      ) {
+      if (activeNode == null || typeof block.data !== "string") {
         return;
       }
 
       const listMetadata = getListMetadata(activeNode);
 
-      if (popupNode.childElementCount !== 0) {
-        popUpRoot.render(<Fragment />);
+      if (popupNode.current?.childElementCount !== 0) {
+        popUpRoot.current?.render(<Fragment />);
         dispatchEditorEvent("onActionMenu", {
           opened: false,
         });
@@ -293,7 +279,7 @@ export default function Editor({
         opened: true,
       });
       isActionMenuOpen.current = true;
-      popUpRoot.render(
+      popUpRoot.current?.render(
         <BlockTools
           coordinates={actionMenuCoordinates}
           actions={blockTools}
@@ -302,7 +288,7 @@ export default function Editor({
               opened: false,
             });
             isActionMenuOpen.current = false;
-            popUpRoot.render(<Fragment />);
+            popUpRoot.current?.render(<Fragment />);
           }}
           onEscape={(query) => {
             setFocusedNode({
@@ -411,11 +397,11 @@ export default function Editor({
         />,
       );
 
-      editorNode.addEventListener("mousedown", () => {
-        popUpRoot.render(<Fragment />);
+      editorNode.current?.addEventListener("mousedown", () => {
+        popUpRoot.current?.render(<Fragment />);
       });
     },
-    [blob.id, masterBlocks, popUpRoot, propagateChanges],
+    [masterBlocks, propagateChanges],
   );
 
   const actionMenuTriggerHandler = useCallback(
@@ -465,7 +451,7 @@ export default function Editor({
           );
         } else {
           if (popUpRoot !== undefined) {
-            popUpRoot.render(<Fragment />);
+            popUpRoot.current?.render(<Fragment />);
           }
         }
       }
@@ -822,18 +808,9 @@ export default function Editor({
   function annotationsHandler(block: BlockSchema): void {
     const selection = window.getSelection();
 
-    const popupNode = window.document.getElementById(`popup-${blob.id}`);
-    const blockNode = getBlockNode(block.id);
-    const editorNode = window.document.getElementById(`editor-${blob.id}`);
+    const activeNode = getBlockNode(block.id);
 
-    if (
-      !editable ||
-      selection == null ||
-      blockNode == null ||
-      editorNode == null ||
-      popupNode == null ||
-      popUpRoot === undefined
-    ) {
+    if (!editable || selection == null || activeNode == null) {
       return;
     }
 
@@ -900,13 +877,13 @@ export default function Editor({
       }
     }
 
-    popUpRoot.render(
+    popUpRoot.current?.render(
       <AnnotationToolbar
-        dialogRoot={dialogRoot}
+        dialogRoot={dialogRoot.current}
         coordinates={selectionMenuCoordinates}
         actions={defaultAnnotationActions}
         onClose={() => {
-          popUpRoot.render(<Fragment />);
+          popUpRoot.current?.render(<Fragment />);
           defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
             ...(annotationActions ?? []),
           );
@@ -916,18 +893,18 @@ export default function Editor({
           selection.addRange(range);
           switch (executable.type) {
             case "style": {
-              inlineAnnotationsManager(blockNode, executable.args as Style[]);
-              block.data = blockNode.innerHTML;
+              inlineAnnotationsManager(activeNode, executable.args as Style[]);
+              block.data = activeNode.innerHTML;
               changeHandler(block);
               break;
             }
             case "link": {
               inlineAnnotationsManager(
-                blockNode,
+                activeNode,
                 [],
                 executable.args as string,
               );
-              block.data = blockNode.innerHTML;
+              block.data = activeNode.innerHTML;
               changeHandler(block);
               break;
             }
@@ -936,11 +913,11 @@ export default function Editor({
       />,
     );
 
-    editorNode.addEventListener(
+    editorNode.current?.addEventListener(
       "keydown",
       (event) => {
         if (!event.ctrlKey || !event.shiftKey) {
-          popUpRoot.render(<Fragment />);
+          popUpRoot.current?.render(<Fragment />);
           defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
             ...(annotationActions ?? []),
           );
@@ -950,10 +927,10 @@ export default function Editor({
         once: true,
       },
     );
-    editorNode.addEventListener(
+    editorNode.current?.addEventListener(
       "mousedown",
       () => {
-        popUpRoot.render(<Fragment />);
+        popUpRoot.current?.render(<Fragment />);
         defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
           ...(annotationActions ?? []),
         );
@@ -1008,20 +985,21 @@ export default function Editor({
   return (
     <RootContext.Provider
       value={{
-        dialogRoot,
-        popUpRoot,
+        dialogRoot: dialogRoot.current,
+        popUpRoot: popUpRoot.current,
         config,
       }}
     >
       <div
-        id={`popup-${blob.id}`}
+        ref={popupNode}
         className={"select-none"}
         onContextMenu={(event) => {
           event.preventDefault();
         }}
       ></div>
-      <div id={`dialog-${blob.id}`} className={"select-none"}></div>
+      <div ref={dialogNode} className={"select-none"}></div>
       <div
+        ref={editorNode}
         data-node-type={"editor-root"}
         id={`editor-${blob.id}`}
         className={"block editor".concat(" ").concat(className ?? "")}
