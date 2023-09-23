@@ -35,6 +35,7 @@ interface EmbedPickerProps {
     parent: BlockSchema;
     currentIndex: number;
   };
+  regex: RegExp;
   onEmbedPicked: (url: string) => void;
   onDelete: () => void;
 }
@@ -43,6 +44,7 @@ export default function EmbedPicker({
   id,
   message,
   icon,
+  regex,
   onEmbedPicked,
   listMetadata,
   onDelete,
@@ -77,8 +79,7 @@ export default function EmbedPicker({
               type: "text",
               hint: "Add Link...",
               payload: "",
-              regex:
-                /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&/=]*)/,
+              regex,
             }}
             onConfirm={(data) => {
               onEmbedPicked(data);

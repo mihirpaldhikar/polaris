@@ -22,3 +22,6 @@
 
 export const YoutubeURLRegex =
   /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|youtubeVideoEmbed\/|shorts\/)|(?:(?:watch)?\?vi?=|\\&vi?=))([^#\\&?]*).*/;
+
+export const GitHubGistURLRegex =
+  /^(https?:\/\/)?gist.github.com\/([\w-]+)\/([\w-]+)(\.git)?$/;

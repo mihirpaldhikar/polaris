@@ -32,6 +32,7 @@ import { ChangeIcon, DeleteIcon, GitHubIcon } from "../../assets";
 import { EmbedPicker } from "../../components/EmbedPicker";
 import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { type AttachmentBlockSchema } from "../../schema";
+import { GitHubGistURLRegex } from "../../constants";
 
 interface GitHubGistBlockProps {
   block: AttachmentBlockSchema;
@@ -176,6 +177,7 @@ export default function GitHubGistBlock({
         listMetadata={listMetadata}
         icon={<GitHubIcon size={25} />}
         message={"Click here to embed GitHub Gist"}
+        regex={GitHubGistURLRegex}
         onEmbedPicked={(url) => {
           attachment.url = url;
           block.data = attachment;

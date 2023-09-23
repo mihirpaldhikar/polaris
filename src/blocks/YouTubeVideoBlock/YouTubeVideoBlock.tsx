@@ -43,6 +43,7 @@ import {
 import { AttachmentHolder } from "../../components/AttachmentHolder";
 import { SizeDialog } from "../../components/SizeDialog";
 import { type AttachmentBlockSchema } from "../../schema";
+import { YoutubeURLRegex } from "../../constants";
 
 interface YouTubeVideoBlockProps {
   block: AttachmentBlockSchema;
@@ -259,6 +260,7 @@ export default function YouTubeVideoBlock({
         listMetadata={listMetadata}
         icon={<YouTubeIcon size={25} />}
         message={"Click here to embed a YouTube Video"}
+        regex={YoutubeURLRegex}
         onEmbedPicked={(url) => {
           attachment.url = url;
           block.data = attachment;
