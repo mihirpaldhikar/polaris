@@ -26,7 +26,6 @@ export type { default as Coordinates } from "./Coordinates";
 export type { default as Blob } from "./Blob";
 export type { default as Action } from "./Action";
 export type { default as Executable } from "./Executable";
-export type { default as InputArgs } from "./InputArgs";
 export type { default as Attachment } from "./Attachment";
 export type { default as PolarisConfig } from "./PolarisConfig";
 export type { default as Table } from "./Table";
