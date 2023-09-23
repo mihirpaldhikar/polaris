@@ -34,7 +34,6 @@ import {
   type Blob,
   type BlockSchema,
   type Coordinates,
-  type InputArgs,
   type PolarisConfig,
   type Style,
 } from "../../interfaces";
@@ -379,7 +378,7 @@ export default function Editor({
                 break;
               }
               case "style": {
-                const newStyle = execute.args as Style[];
+                const newStyle = execute.args;
                 for (let i = 0; i < newStyle.length; i++) {
                   block.style = upsertStyle(block.style, newStyle[i]);
                 }
@@ -843,37 +842,28 @@ export default function Editor({
         }
       }
 
-      if (action.execute.type === "input") {
-        const inputArgs = action.execute.args as InputArgs;
+      if (action.execute.type === "styleInput") {
+        const args = action.execute.args;
         if (
-          typeof inputArgs.initialPayload === "object" &&
-          inputArgs.executionTypeAfterInput === "style" &&
-          elementContainsStyle(startNodeParent, inputArgs.initialPayload) &&
-          elementContainsStyle(endNodeParent, inputArgs.initialPayload)
+          elementContainsStyle(startNodeParent, args.payload) &&
+          elementContainsStyle(endNodeParent, args.payload)
         ) {
-          inputArgs.initialPayload.value =
-            inputArgs.type === "color"
+          args.payload.value =
+            args.inputType === "color"
               ? rgbStringToHex(
-                  startNodeParent.style.getPropertyValue(
-                    inputArgs.initialPayload.name,
-                  ),
+                  startNodeParent.style.getPropertyValue(args.payload.name),
                 )
-              : startNodeParent.style.getPropertyValue(
-                  inputArgs.initialPayload.name,
-                );
+              : startNodeParent.style.getPropertyValue(args.payload.name);
           action.active = true;
         }
-
-        if (
-          typeof inputArgs.initialPayload === "string" &&
-          inputArgs.executionTypeAfterInput === "link" &&
-          startNodeParent.getAttribute(LINK_ATTRIBUTE) !== null &&
-          endNodeParent.getAttribute(LINK_ATTRIBUTE) !== null
-        ) {
-          inputArgs.initialPayload =
-            startNodeParent.getAttribute(LINK_ATTRIBUTE) ?? "";
-          action.active = true;
-        }
+      } else if (
+        action.execute.type === "linkInput" &&
+        startNodeParent.getAttribute(LINK_ATTRIBUTE) !== null &&
+        endNodeParent.getAttribute(LINK_ATTRIBUTE) !== null
+      ) {
+        action.execute.args.payload =
+          startNodeParent.getAttribute(LINK_ATTRIBUTE) ?? "";
+        action.active = true;
       }
     }
 
@@ -893,17 +883,13 @@ export default function Editor({
           selection.addRange(range);
           switch (executable.type) {
             case "style": {
-              inlineAnnotationsManager(activeNode, executable.args as Style[]);
+              inlineAnnotationsManager(activeNode, executable.args);
               block.data = activeNode.innerHTML;
               changeHandler(block);
               break;
             }
-            case "link": {
-              inlineAnnotationsManager(
-                activeNode,
-                [],
-                executable.args as string,
-              );
+            case "linkInput": {
+              inlineAnnotationsManager(activeNode, [], executable.args.payload);
               block.data = activeNode.innerHTML;
               changeHandler(block);
               break;

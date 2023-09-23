@@ -25,13 +25,11 @@ import {
   type Action,
   type Coordinates,
   type Executable,
-  type InputArgs,
-  type Style,
 } from "../../interfaces";
 import { conditionalClassName } from "../../utils";
+import { type Root } from "react-dom/client";
 import { InputDialog } from "../InputDialog";
 import { ColorPickerDialog } from "../ColorPickerDialog";
-import { type Root } from "react-dom/client";
 
 const ANNOTATION_BUTTON_WIDTH: number = 28;
 const ANNOTATION_MENU_PADDING: number = 42;
@@ -91,82 +89,106 @@ export default function AnnotationToolbar({
               )}
               title={menu.name}
               onClick={() => {
-                if (menu.execute.type !== "input") {
-                  onActionSelected(menu.execute);
-                } else {
-                  const inputArgs = menu.execute.args as InputArgs;
-
-                  if (dialogRoot === undefined) return;
-
-                  if (inputArgs.type === "color") {
-                    dialogRoot.render(
-                      <ColorPickerDialog
-                        active={menu.active ?? false}
-                        coordinates={{
-                          x: xAxis,
-                          y: yAxis,
-                        }}
-                        inputArgs={inputArgs}
-                        onColorSelected={(colorHexCode) => {
-                          const style: Style[] = [
-                            {
-                              name: (inputArgs.initialPayload as Style).name,
-                              value: colorHexCode,
-                            },
-                          ];
-                          onActionSelected({
-                            type: "style",
-                            args: style,
-                          });
-                        }}
-                        onClose={() => {
-                          dialogRoot.render(<Fragment />);
-                        }}
-                      />,
-                    );
-                  } else {
-                    dialogRoot.render(
+                switch (menu.execute.type) {
+                  case "style": {
+                    onActionSelected(menu.execute);
+                    break;
+                  }
+                  case "linkInput": {
+                    const args = menu.execute.args;
+                    dialogRoot?.render(
                       <InputDialog
                         coordinates={{
                           x: xAxis,
                           y: yAxis,
                         }}
                         active={menu.active ?? false}
-                        inputArgs={menu.execute.args as InputArgs}
-                        onClose={() => {
-                          dialogRoot.render(<Fragment />);
+                        inputArgs={{
+                          type: "text",
+                          hint: menu.execute.args.hint,
+                          payload: menu.execute.args.payload,
+                          regex: menu.execute.args.regex,
                         }}
                         onConfirm={(data) => {
-                          switch (inputArgs.executionTypeAfterInput) {
-                            case "link": {
-                              onActionSelected({
-                                type: "link",
-                                args: data,
-                              });
-                              break;
-                            }
-                            case "style": {
-                              const style: Style[] = [
-                                {
-                                  name: (inputArgs.initialPayload as Style)
-                                    .name,
-                                  value: `${data}${
-                                    data.length === 0
-                                      ? ""
-                                      : inputArgs.unit ?? ""
-                                  }`,
-                                },
-                              ];
-                              onActionSelected({
-                                type: "style",
-                                args: style,
-                              });
-                              break;
-                            }
-                          }
+                          onActionSelected({
+                            type: "linkInput",
+                            args: {
+                              ...args,
+                              payload: data,
+                            },
+                          });
+                        }}
+                        onClose={() => {
+                          dialogRoot?.render(<Fragment />);
                         }}
                       />,
                     );
+                    break;
+                  }
+                  case "styleInput": {
+                    const args = menu.execute.args;
+                    if (args.inputType === "number") {
+                      dialogRoot?.render(
+                        <InputDialog
+                          coordinates={{
+                            x: xAxis,
+                            y: yAxis,
+                          }}
+                          active={menu.active ?? false}
+                          inputArgs={{
+                            type: "text",
+                            hint: menu.execute.args.hint,
+                            payload: menu.execute.args.payload.value,
+                            regex: menu.execute.args.regex,
+                          }}
+                          onConfirm={(data) => {
+                            onActionSelected({
+                              type: "style",
+                              args: [
+                                {
+                                  name: args.payload.name,
+                                  value: data,
+                                },
+                              ],
+                            });
+                          }}
+                          onClose={() => {
+                            dialogRoot?.render(<Fragment />);
+                          }}
+                        />,
+                      );
+                    } else if (args.inputType === "color") {
+                      dialogRoot?.render(
+                        <ColorPickerDialog
+                          coordinates={{
+                            x: xAxis,
+                            y: yAxis,
+                          }}
+                          active={menu.active ?? false}
+                          inputArgs={{
+                            type: args.inputType,
+                            regex: args.regex,
+                            payload: args.payload.value,
+                            hint: args.hint,
+                          }}
+                          onColorSelected={(colorHexCode) => {
+                            onActionSelected({
+                              type: "style",
+                              args: [
+                                {
+                                  name: args.payload.name,
+                                  value: colorHexCode,
+                                },
+                              ],
+                            });
+                          }}
+                          onClose={() => {
+                            dialogRoot?.render(<Fragment />);
+                          }}
+                        />,
+                      );
+                    }
+                    break;
                   }
                 }
                 onClose();

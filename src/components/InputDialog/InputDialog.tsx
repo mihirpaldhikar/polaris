@@ -21,14 +21,20 @@
  */
 
 import { Fragment, type JSX, useState } from "react";
-import { type Coordinates, type InputArgs } from "../../interfaces";
+import { type Coordinates } from "../../interfaces";
 import { Button } from "../Button";
 import { DialogBox } from "../DialogBox";
 
 interface InputDialogProps {
   coordinates: Coordinates;
   active: boolean;
-  inputArgs: InputArgs;
+  inputArgs: {
+    type: "number" | "text";
+    payload: string;
+    hint: string;
+    regex: RegExp;
+    unit?: "px" | "rem" | "em" | "vh" | "wh";
+  };
   onConfirm: (data: string, remove?: boolean) => void;
   onClose: () => void;
 }
@@ -40,14 +46,10 @@ export default function InputDialog({
   onConfirm,
   onClose,
 }: InputDialogProps): JSX.Element {
-  const [data, setData] = useState<string>(
-    typeof inputArgs.initialPayload === "string"
-      ? inputArgs.initialPayload
-      : inputArgs.initialPayload.value.replaceAll(inputArgs.unit ?? "", ""),
-  );
+  const [data, setData] = useState<string>(inputArgs.payload);
 
   const [disabled, setDisabled] = useState(
-    !inputArgs.validStringRegExp.test(data) || data === "",
+    !inputArgs.regex.test(data) || data === "",
   );
 
   return (
@@ -56,7 +58,7 @@ export default function InputDialog({
       coordinates={coordinates}
       onClose={onClose}
       onConfirm={() => {
-        if (inputArgs.validStringRegExp.test(data)) {
+        if (inputArgs.regex.test(data)) {
           onConfirm(data);
         }
       }}
@@ -73,7 +75,7 @@ export default function InputDialog({
           onChange={(event) => {
             setData(event.target.value);
             setDisabled(
-              !inputArgs.validStringRegExp.test(event.target.value) ||
+              !inputArgs.regex.test(event.target.value) ||
                 event.target.value === "",
             );
           }}
@@ -88,7 +90,7 @@ export default function InputDialog({
               disabled={disabled}
               text={"Confirm"}
               onClick={() => {
-                onConfirm(data);
+                onConfirm(data.concat(inputArgs.unit ?? ""));
                 onClose();
               }}
             />

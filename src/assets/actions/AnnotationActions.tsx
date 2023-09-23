@@ -84,13 +84,11 @@ const AnnotationActions: readonly Action[] = [
     separator: true,
     icon: <LinkIcon />,
     execute: {
-      type: "input",
+      type: "linkInput",
       args: {
         hint: "Add Link..",
-        type: "text",
-        executionTypeAfterInput: "link",
-        initialPayload: "",
-        validStringRegExp:
+        payload: "",
+        regex:
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&/=]*)/,
       },
     },
@@ -101,17 +99,16 @@ const AnnotationActions: readonly Action[] = [
     separator: true,
     icon: <TextSizeIcon />,
     execute: {
-      type: "input",
+      type: "styleInput",
       args: {
         hint: "Text Size..",
-        type: "number",
+        inputType: "number",
         unit: "px",
-        executionTypeAfterInput: "style",
-        initialPayload: {
+        payload: {
           name: "font-size",
           value: "",
         },
-        validStringRegExp: /^[0-9]*$/,
+        regex: /^[0-9]*$/,
       },
     },
   },
@@ -120,16 +117,15 @@ const AnnotationActions: readonly Action[] = [
     name: "Text Color",
     icon: <TextColorIcon />,
     execute: {
-      type: "input",
+      type: "styleInput",
       args: {
         hint: "HEX Code",
-        type: "color",
-        executionTypeAfterInput: "style",
-        initialPayload: {
+        inputType: "color",
+        payload: {
           name: "color",
           value: "",
         },
-        validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+        regex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
       },
     },
   },
@@ -138,16 +134,15 @@ const AnnotationActions: readonly Action[] = [
     name: "Text Background Color",
     icon: <TextBackgroundColorIcon />,
     execute: {
-      type: "input",
+      type: "styleInput",
       args: {
         hint: "HEX Code",
-        type: "color",
-        executionTypeAfterInput: "style",
-        initialPayload: {
+        inputType: "color",
+        payload: {
           name: "background-color",
           value: "",
         },
-        validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+        regex: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
       },
     },
   },

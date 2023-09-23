@@ -76,9 +76,8 @@ export default function EmbedPicker({
             inputArgs={{
               type: "text",
               hint: "Add Link...",
-              initialPayload: "",
-              executionTypeAfterInput: "link",
-              validStringRegExp:
+              payload: "",
+              regex:
                 /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&/=]*)/,
             }}
             onConfirm={(data) => {

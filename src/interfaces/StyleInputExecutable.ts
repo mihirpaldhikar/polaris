@@ -20,19 +20,17 @@
  * SOFTWARE.
  */
 
-import { type BlockExecutable } from "./index";
-import type TextInputExecutable from "./TextInputExecutable";
-import type StyleExecutable from "./StyleExecutable";
-import type StyleInputExecutable from "./StyleInputExecutable";
-import type LinkInputExecutable from "./LinkInputExecutable";
-import type BlockFunctionExecutable from "./BlockFunctionExecutable";
+import type Style from "./Style";
 
-type Executable =
-  | BlockExecutable
-  | TextInputExecutable
-  | StyleExecutable
-  | StyleInputExecutable
-  | LinkInputExecutable
-  | BlockFunctionExecutable;
+interface StyleInputExecutable {
+  type: "styleInput";
+  args: {
+    hint: string;
+    inputType: "color" | "number";
+    payload: Style;
+    regex: RegExp;
+    unit?: "px" | "rem" | "em" | "vh" | "wh";
+  };
+}
 
-export default Executable;
+export default StyleInputExecutable;

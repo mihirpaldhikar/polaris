@@ -20,19 +20,11 @@
  * SOFTWARE.
  */
 
-import { type BlockExecutable } from "./index";
-import type TextInputExecutable from "./TextInputExecutable";
-import type StyleExecutable from "./StyleExecutable";
-import type StyleInputExecutable from "./StyleInputExecutable";
-import type LinkInputExecutable from "./LinkInputExecutable";
-import type BlockFunctionExecutable from "./BlockFunctionExecutable";
+import { type BlockFunction } from "../types";
 
-type Executable =
-  | BlockExecutable
-  | TextInputExecutable
-  | StyleExecutable
-  | StyleInputExecutable
-  | LinkInputExecutable
-  | BlockFunctionExecutable;
+interface BlockFunctionExecutable {
+  type: "blockFunction";
+  args: BlockFunction;
+}
 
-export default Executable;
+export default BlockFunctionExecutable;

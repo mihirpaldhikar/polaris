@@ -107,7 +107,7 @@ export default function AttachmentHolder({
                     coordinates={coordinates}
                     menu={actions}
                     onClick={(execute) => {
-                      if (typeof execute.args === "function") {
+                      if (execute.type === "blockFunction") {
                         execute.args(
                           block,
                           onChange,

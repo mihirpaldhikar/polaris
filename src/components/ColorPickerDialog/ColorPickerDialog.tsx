@@ -21,14 +21,19 @@
  */
 
 import { Fragment, type JSX, useState } from "react";
-import { type Coordinates, type InputArgs } from "../../interfaces";
+import { type Coordinates } from "../../interfaces";
 import { Button } from "../Button";
 import { DialogBox } from "../DialogBox";
 
 interface ColorPickerDialogProps {
   coordinates: Coordinates;
   active: boolean;
-  inputArgs: InputArgs;
+  inputArgs: {
+    type: "color";
+    hint: string;
+    payload: string;
+    regex: RegExp;
+  };
   onColorSelected: (colorHexCode: string) => void;
   onClose: () => void;
 }
@@ -41,18 +46,10 @@ export default function ColorPickerDialog({
   onClose,
 }: ColorPickerDialogProps): JSX.Element {
   const [colorHexCode, setColorHexCode] = useState(
-    typeof inputArgs.initialPayload === "object"
-      ? inputArgs.initialPayload.value !== ""
-        ? inputArgs.initialPayload.value
-        : "#000000"
-      : inputArgs.initialPayload !== ""
-      ? inputArgs.initialPayload
-      : "#000000",
+    inputArgs.payload !== "" ? inputArgs.payload : "#000000",
   );
 
-  const [disabled, setDisabled] = useState(
-    !inputArgs.validStringRegExp.test(colorHexCode),
-  );
+  const [disabled, setDisabled] = useState(!inputArgs.regex.test(colorHexCode));
 
   const defaultColors: string[] = ["#304FFE", "#0288D1", "#0097A7", "#E53935"];
 
@@ -62,7 +59,7 @@ export default function ColorPickerDialog({
       coordinates={coordinates}
       onClose={onClose}
       onConfirm={() => {
-        if (inputArgs.validStringRegExp.test(colorHexCode)) {
+        if (inputArgs.regex.test(colorHexCode)) {
           onColorSelected(colorHexCode);
         }
       }}
@@ -82,7 +79,7 @@ export default function ColorPickerDialog({
                   backgroundColor: color,
                 }}
                 onClick={() => {
-                  if (inputArgs.validStringRegExp.test(color)) {
+                  if (inputArgs.regex.test(color)) {
                     onColorSelected(color);
                   }
                   onClose();
@@ -100,7 +97,7 @@ export default function ColorPickerDialog({
               backgroundColor: colorHexCode,
             }}
             onClick={() => {
-              if (inputArgs.validStringRegExp.test(colorHexCode)) {
+              if (inputArgs.regex.test(colorHexCode)) {
                 onColorSelected(colorHexCode);
               }
               onClose();
@@ -115,14 +112,14 @@ export default function ColorPickerDialog({
             }
             onChange={(e) => {
               setColorHexCode(e.target.value);
-              setDisabled(!inputArgs.validStringRegExp.test(e.target.value));
+              setDisabled(!inputArgs.regex.test(e.target.value));
             }}
           />
           <Button
             disabled={disabled}
             text={"Select"}
             onClick={() => {
-              if (inputArgs.validStringRegExp.test(colorHexCode)) {
+              if (inputArgs.regex.test(colorHexCode)) {
                 onColorSelected(colorHexCode);
               }
               onClose();
@@ -132,7 +129,7 @@ export default function ColorPickerDialog({
         <div className={"flex flex-row justify-center space-x-2 px-2"}>
           <Button
             hidden={!active}
-            text={"Remove Color"}
+            text={"Remove"}
             color={"danger"}
             onClick={() => {
               onColorSelected("");

@@ -20,19 +20,13 @@
  * SOFTWARE.
  */
 
-import { type BlockExecutable } from "./index";
-import type TextInputExecutable from "./TextInputExecutable";
-import type StyleExecutable from "./StyleExecutable";
-import type StyleInputExecutable from "./StyleInputExecutable";
-import type LinkInputExecutable from "./LinkInputExecutable";
-import type BlockFunctionExecutable from "./BlockFunctionExecutable";
+interface LinkInputExecutable {
+  type: "linkInput";
+  args: {
+    hint: string;
+    payload: string;
+    regex: RegExp;
+  };
+}
 
-type Executable =
-  | BlockExecutable
-  | TextInputExecutable
-  | StyleExecutable
-  | StyleInputExecutable
-  | LinkInputExecutable
-  | BlockFunctionExecutable;
-
-export default Executable;
+export default LinkInputExecutable;
