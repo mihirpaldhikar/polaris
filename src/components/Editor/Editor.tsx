@@ -131,8 +131,8 @@ export default function Editor({
   const popupNode = useRef<HTMLDivElement>(null);
   const dialogNode = useRef<HTMLDivElement>(null);
   const editorNode = useRef<HTMLDivElement>(null);
-  const popUpRoot = useRef<Root>();
-  const dialogRoot = useRef<Root>();
+  const [popUpRoot, setPopupRoot] = useState<Root>();
+  const [dialogRoot, setDialogRoot] = useState<Root>();
   const isActionMenuOpen = useRef<boolean>(false);
 
   window.registeredBlocks = useMemo(() => {
@@ -189,8 +189,8 @@ export default function Editor({
   >(undefined);
 
   useEffect(() => {
-    popUpRoot.current = createRoot(popupNode.current as HTMLDivElement);
-    dialogRoot.current = createRoot(dialogNode.current as HTMLDivElement);
+    setPopupRoot(createRoot(popupNode.current as HTMLDivElement));
+    setDialogRoot(createRoot(dialogNode.current as HTMLDivElement));
   }, [blob.id]);
 
   const propagateChanges = useCallback(
@@ -254,7 +254,7 @@ export default function Editor({
       const listMetadata = getListMetadata(activeNode);
 
       if (popupNode.current?.childElementCount !== 0) {
-        popUpRoot.current?.render(<Fragment />);
+        popUpRoot?.render(<Fragment />);
         dispatchEditorEvent("onActionMenu", {
           opened: false,
         });
@@ -278,7 +278,7 @@ export default function Editor({
         opened: true,
       });
       isActionMenuOpen.current = true;
-      popUpRoot.current?.render(
+      popUpRoot?.render(
         <BlockTools
           coordinates={actionMenuCoordinates}
           actions={blockTools}
@@ -287,7 +287,7 @@ export default function Editor({
               opened: false,
             });
             isActionMenuOpen.current = false;
-            popUpRoot.current?.render(<Fragment />);
+            popUpRoot?.render(<Fragment />);
           }}
           onEscape={(query) => {
             setFocusedNode({
@@ -397,10 +397,10 @@ export default function Editor({
       );
 
       editorNode.current?.addEventListener("mousedown", () => {
-        popUpRoot.current?.render(<Fragment />);
+        popUpRoot?.render(<Fragment />);
       });
     },
-    [masterBlocks, propagateChanges],
+    [masterBlocks, popUpRoot, propagateChanges],
   );
 
   const actionMenuTriggerHandler = useCallback(
@@ -450,7 +450,7 @@ export default function Editor({
           );
         } else {
           if (popUpRoot !== undefined) {
-            popUpRoot.current?.render(<Fragment />);
+            popUpRoot?.render(<Fragment />);
           }
         }
       }
@@ -867,13 +867,13 @@ export default function Editor({
       }
     }
 
-    popUpRoot.current?.render(
+    popUpRoot?.render(
       <AnnotationToolbar
-        dialogRoot={dialogRoot.current}
+        dialogRoot={dialogRoot}
         coordinates={selectionMenuCoordinates}
         actions={defaultAnnotationActions}
         onClose={() => {
-          popUpRoot.current?.render(<Fragment />);
+          popUpRoot?.render(<Fragment />);
           defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
             ...(annotationActions ?? []),
           );
@@ -903,7 +903,7 @@ export default function Editor({
       "keydown",
       (event) => {
         if (!event.ctrlKey || !event.shiftKey) {
-          popUpRoot.current?.render(<Fragment />);
+          popUpRoot?.render(<Fragment />);
           defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
             ...(annotationActions ?? []),
           );
@@ -916,7 +916,7 @@ export default function Editor({
     editorNode.current?.addEventListener(
       "mousedown",
       () => {
-        popUpRoot.current?.render(<Fragment />);
+        popUpRoot?.render(<Fragment />);
         defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
           ...(annotationActions ?? []),
         );
@@ -971,8 +971,8 @@ export default function Editor({
   return (
     <RootContext.Provider
       value={{
-        dialogRoot: dialogRoot.current,
-        popUpRoot: popUpRoot.current,
+        dialogRoot,
+        popUpRoot,
         config,
       }}
     >
