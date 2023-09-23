@@ -29,7 +29,6 @@ interface InputArgs {
   validStringRegExp: RegExp;
   initialPayload: string | Style;
   unit?: string;
-  payloadIfRemovedClicked?: string;
 }
 
 export default InputArgs;

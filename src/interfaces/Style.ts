@@ -31,7 +31,6 @@
 interface Style {
   name: string;
   value: string;
-  enabled?: boolean;
 }
 
 export default Style;

@@ -34,7 +34,6 @@ import {
   TextSizeIcon,
   UnderlineIcon,
 } from "../icons";
-import { REMOVE_COLOR, REMOVE_LINK, REMOVE_STYLE } from "../../constants";
 
 const AnnotationActions: readonly Action[] = [
   {
@@ -91,7 +90,6 @@ const AnnotationActions: readonly Action[] = [
         type: "text",
         executionTypeAfterInput: "link",
         initialPayload: "",
-        payloadIfRemovedClicked: REMOVE_LINK,
         validStringRegExp:
           /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\\+.~#?&/=]*)/,
       },
@@ -113,7 +111,6 @@ const AnnotationActions: readonly Action[] = [
           name: "font-size",
           value: "",
         },
-        payloadIfRemovedClicked: REMOVE_STYLE,
         validStringRegExp: /^[0-9]*$/,
       },
     },
@@ -132,7 +129,6 @@ const AnnotationActions: readonly Action[] = [
           name: "color",
           value: "",
         },
-        payloadIfRemovedClicked: REMOVE_COLOR,
         validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
       },
     },
@@ -151,7 +147,6 @@ const AnnotationActions: readonly Action[] = [
           name: "background-color",
           value: "",
         },
-        payloadIfRemovedClicked: REMOVE_COLOR,
         validStringRegExp: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
       },
     },

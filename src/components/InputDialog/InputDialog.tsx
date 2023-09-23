@@ -106,7 +106,7 @@ export default function InputDialog({
           text={"Remove"}
           color={"danger"}
           onClick={() => {
-            onConfirm(inputArgs.payloadIfRemovedClicked ?? "", true);
+            onConfirm("", true);
             onClose();
           }}
         />

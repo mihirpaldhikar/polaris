@@ -22,7 +22,6 @@
 
 import { Fragment, type JSX, useState } from "react";
 import { type Coordinates, type InputArgs } from "../../interfaces";
-import { REMOVE_COLOR } from "../../constants";
 import { Button } from "../Button";
 import { DialogBox } from "../DialogBox";
 
@@ -136,7 +135,7 @@ export default function ColorPickerDialog({
             text={"Remove Color"}
             color={"danger"}
             onClick={() => {
-              onColorSelected(REMOVE_COLOR);
+              onColorSelected("");
               onClose();
             }}
           />

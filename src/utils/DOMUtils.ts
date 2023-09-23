@@ -25,7 +25,6 @@ import {
   INLINE_ANNOTATIONS_NODE,
   LINK_ATTRIBUTE,
   NODE_TYPE,
-  REMOVE_LINK,
 } from "../constants";
 import { getBlockNode } from "./BlockUtils";
 import { generateUUID } from "./SharedUtils";
@@ -328,23 +327,39 @@ export function generateInlineAnnotationsString(
     tempNode.innerText = nodeFragments[i].textContent as string;
 
     for (let i = 0; i < style.length; i++) {
-      if (style[i].enabled ?? false) {
-        tempNode.style.setProperty(style[i].name, style[i].value);
+      if (
+        tempNode.style.getPropertyValue(style[i].name).length === 0 ||
+        (tempNode.style.getPropertyValue(style[i].name).includes("rgb")
+          ? rgbStringToHex(tempNode.style.getPropertyValue(style[i].name)) !==
+            style[i].value
+          : false) ||
+        style[i].name.includes("-link") ||
+        style[i].name.includes("link-") ||
+        style[i].name.includes("-link-") ||
+        tempNode.style.getPropertyValue(style[i].name) !== style[i].value
+      ) {
+        tempNode.style.setProperty(
+          style[i].name
+            .replaceAll("-link", "")
+            .replaceAll("link-", "")
+            .replaceAll("-link-", ""),
+          style[i].value,
+        );
       } else {
         tempNode.style.removeProperty(style[i].name);
       }
     }
 
-    if (link !== undefined && link !== REMOVE_LINK) {
+    if (link !== undefined && link.length !== 0) {
       tempNode.setAttribute(LINK_ATTRIBUTE, link);
-    } else if (link === undefined || link === REMOVE_LINK) {
+    } else if (link === undefined || link.length === 0) {
       tempNode.removeAttribute(LINK_ATTRIBUTE);
     }
 
     inlineAnnotationsString = inlineAnnotationsString.concat(
       (tempNode.getAttribute("style") == null ||
         tempNode.getAttribute("style") === "") &&
-        (link === undefined || link === REMOVE_LINK)
+        (link === undefined || link.length === 0)
         ? tempNode.innerText
         : tempNode.outerHTML,
     );
@@ -680,7 +695,7 @@ export function inlineAnnotationsManager(
 ): void {
   const selection = window.getSelection();
 
-  if (selection == null || selection.toString() === "") return;
+  if (selection == null || selection.toString().length === 0) return;
 
   const range = selection.getRangeAt(0);
 
@@ -688,25 +703,6 @@ export function inlineAnnotationsManager(
   const endContainerParent = range.endContainer.parentElement;
 
   if (startContainerParent == null || endContainerParent == null) return;
-
-  if (
-    elementContainsStyle(startContainerParent, style) &&
-    elementContainsStyle(endContainerParent, style)
-  ) {
-    style = style.map((sty) => {
-      return {
-        ...sty,
-        enabled: sty.enabled ?? false,
-      };
-    });
-  } else {
-    style = style.map((sty) => {
-      return {
-        ...sty,
-        enabled: sty.enabled ?? true,
-      };
-    });
-  }
 
   if (
     inlineAnnotationsLink(startContainerParent) ===
@@ -724,7 +720,7 @@ export function inlineAnnotationsManager(
       link = undefined;
     } else if (
       link !== undefined &&
-      link === REMOVE_LINK &&
+      link.length === 0 &&
       (inlineAnnotationsLink(startContainerParent) === undefined ||
         inlineAnnotationsLink(startContainerParent) !== undefined)
     ) {
@@ -736,9 +732,8 @@ export function inlineAnnotationsManager(
     style.push(
       ...[
         {
-          name: "text-decoration",
+          name: "link-text-decoration",
           value: "underline",
-          enabled: true,
         },
       ],
     );

@@ -31,7 +31,6 @@ import {
 import { conditionalClassName } from "../../utils";
 import { InputDialog } from "../InputDialog";
 import { ColorPickerDialog } from "../ColorPickerDialog";
-import { REMOVE_COLOR } from "../../constants";
 import { type Root } from "react-dom/client";
 
 const ANNOTATION_BUTTON_WIDTH: number = 28;
@@ -113,7 +112,6 @@ export default function AnnotationToolbar({
                             {
                               name: (inputArgs.initialPayload as Style).name,
                               value: colorHexCode,
-                              enabled: colorHexCode !== REMOVE_COLOR,
                             },
                           ];
                           onActionSelected({
@@ -138,7 +136,7 @@ export default function AnnotationToolbar({
                         onClose={() => {
                           dialogRoot.render(<Fragment />);
                         }}
-                        onConfirm={(data, remove) => {
+                        onConfirm={(data) => {
                           switch (inputArgs.executionTypeAfterInput) {
                             case "link": {
                               onActionSelected({
@@ -152,8 +150,11 @@ export default function AnnotationToolbar({
                                 {
                                   name: (inputArgs.initialPayload as Style)
                                     .name,
-                                  value: `${data}${inputArgs.unit ?? ""}`,
-                                  enabled: !(remove === true),
+                                  value: `${data}${
+                                    data.length === 0
+                                      ? ""
+                                      : inputArgs.unit ?? ""
+                                  }`,
                                 },
                               ];
                               onActionSelected({
