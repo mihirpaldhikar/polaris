@@ -23,4 +23,3 @@
 export const NODE_TYPE = "data-node-type";
 export const INLINE_ANNOTATIONS_NODE = "inline-annotations";
 export const LINK_ATTRIBUTE = "data-link";
-export const REMOVE_COLOR = "polaris://remove-color";
