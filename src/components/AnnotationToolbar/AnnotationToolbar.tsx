@@ -111,7 +111,7 @@ export default function AnnotationToolbar({
                         onColorSelected={(colorHexCode) => {
                           const style: Style[] = [
                             {
-                              name: (inputArgs.initialPayload as Style).name,
+                              name: inputArgs.initialPayload.name,
                               value: colorHexCode,
                               enabled: colorHexCode !== REMOVE_COLOR,
                             },
