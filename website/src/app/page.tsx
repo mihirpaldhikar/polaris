@@ -24,10 +24,9 @@
 import { type JSX, useEffect, useState } from "react";
 import {
   type Blob,
-  DEFAULT_POLARIS_CONFIG,
   Editor,
   generateUUID,
-  serializeFileToBase64,
+  serializeFile,
 } from "@mihirpaldhikar/polaris";
 import Link from "next/link";
 import { FeatureCard, Glow, ProgressBar, ZigZag } from "@components/index";
@@ -50,19 +49,7 @@ export default function Home(): JSX.Element {
       {
         id: generateUUID(),
         role: "paragraph",
-        data: "",
-        style: [],
-      },
-      {
-        id: generateUUID(),
-        role: "paragraph",
         data: "Polaris is a WYSIWYG Editor, built on top of Web APIs and React for creating a rich editing experiences. With powerful editing support, you can write and get exact output in HTML.",
-        style: [],
-      },
-      {
-        id: generateUUID(),
-        role: "paragraph",
-        data: "",
         style: [],
       },
       {
@@ -84,7 +71,7 @@ export default function Home(): JSX.Element {
           {
             id: generateUUID(),
             role: "paragraph",
-            data: 'Selection menu for applying inline styling such as <span data-type="inline-specifier" style="font-weight: bold;">bold</span>, <span data-type="inline-specifier" style="font-style: italic;">italic</span>, <span data-type="inline-specifier" style="text-decoration: underline;">underline</span> and <span data-type="inline-specifier" data-link="https://mihirpaldhikar.com" style="text-decoration: underline;">links</span>.',
+            data: 'Selection menu for applying inline styling such as <span data-node-type="inline-annotations" style="font-weight: bold;">bold</span>, <span data-node-type="inline-annotations" style="font-style: italic;">italic</span>, <span data-node-type="inline-annotations" style="text-decoration: underline;">underline</span> and <span data-node-type="inline-annotations" data-link="https://mihirpaldhikar.com" style="text-decoration: underline;">links</span>.',
             style: [],
           },
           {
@@ -178,7 +165,7 @@ export default function Home(): JSX.Element {
                 {
                   id: generateUUID(),
                   role: "paragraph",
-                  data: '<span data-type="inline-specifier" data-link="https://google.com" style="text-decoration: underline;">https://google.com</span>',
+                  data: '<span data-node-type="inline-annotations" data-link="https://google.com" style="text-decoration: underline;">https://google.com</span>',
                   style: [],
                 },
               ],
@@ -213,7 +200,7 @@ export default function Home(): JSX.Element {
                 {
                   id: generateUUID(),
                   role: "paragraph",
-                  data: '<span data-type="inline-specifier" data-link="https://microsoft.com" style="text-decoration: underline;">https://microsoft.com</span>',
+                  data: '<span data-node-type="inline-annotations" data-link="https://microsoft.com" style="text-decoration: underline;">https://microsoft.com</span>',
                   style: [],
                 },
               ],
@@ -248,7 +235,7 @@ export default function Home(): JSX.Element {
                 {
                   id: generateUUID(),
                   role: "paragraph",
-                  data: '<span data-type="inline-specifier" data-link="https://apple.com" style="text-decoration: underline;">https://apple.com</span>',
+                  data: '<span data-node-type="inline-annotations" data-link="https://apple.com" style="text-decoration: underline;">https://apple.com</span>',
                   style: [],
                 },
               ],
@@ -300,21 +287,17 @@ export default function Home(): JSX.Element {
           </Glow>
         </div>
       </div>
-      <div
+
+      <Editor
         className={
           "border-gray-300 border bg-white min-h-[300px] mb-10 lg:mx-60 rounded-md px-4 py-3"
         }
-      >
-        <Editor
-          blob={blob}
-          config={DEFAULT_POLARIS_CONFIG}
-          onAttachmentSelected={async (data) => {
-            if (typeof data !== "string")
-              return await serializeFileToBase64(data);
-            return "";
-          }}
-        />
-      </div>
+        blob={blob}
+        onAttachmentSelected={async (data) => {
+          if (typeof data !== "string") return await serializeFile(data);
+          return "";
+        }}
+      />
       <div className={"flex items-center flex-col justify-center"}>
         <div className={"my-10 grid grid-cols-1 md:grid-cols-2 gap-4"}>
           <FeatureCard
