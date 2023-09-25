@@ -1,3 +1,42 @@
+## 0.8.0 (September 25, 2023)
+
+### Breaking Changes:
+
+- Polaris from now on will only support ES Modules and no more support for CommonJS. This is done to remove extra burden
+  to maintain CJS and to use modern tools and features.
+- Rename `INLINE_SPECIFIER_NODE` constant to `INLINE_ANNOTATIONS_NODE` and changed the value from `inline-specifier`
+  to `inline-annotations`
+- Rename `serializeBlockToHTML` to `serializeBlob`
+- Rename `serializeFileToBase64` to `serializeFile`
+- Rename `inlineTools` property of Editor to `annotationActions`.
+
+### New:
+
+- Add `fontWeight` config in `PolarisConfig` for text blocks.
+- Add `lineHeight` config in `PolarisConfig` for text blocks.
+- Fix an issue in which Action key was not rendering Block Tools popup when triggered after list or table.
+- `name` filed of `Blob` is now optional.
+- Add `description` field in `Blob` for adding description about the document.
+- Add `author` field in `Blob` for adding author to the document.
+- Add `className` property to `Editor` for applying css classes to the Editor.
+- `config` property of Editor is now optional. If no explicit config is passed, the editor
+  uses `DEFAULT_POLARIS_CONFIG`.
+- Introduced `GenericBlock` for defining custom blocks.
+- Simplified initialization of block when chosen with Block Actions.
+- Add `Plugins` (internal preview) for blocks which will enable to create custom blocks.
+- Migrated all blocks to New Block Plugin System.
+- The Annotation Toolbar, Block Tools and Dialog Box can now retain their position when window is scrolled. While
+  scrolling the window, all of these are hidden and shown only after scrolling has ended.
+
+### Fixes:
+
+- Fix an issue which was causing block role and style getting passed over to newly created block even though the content
+  after slicing is empty.
+- Fix an issue in which YouTube Video block was accepting non-youtube URLs and GitHub Gist block was accepting non
+  github-gist URLs.
+- Fix an issue in which Table toolbar was not rendering when a table cell is in focus.
+- Fix and Unified z-axis values for Annotation Toolbar, Dialog Box and Block Tools.
+
 ## 0.7.1 (September 18, 2023)
 
 ### Fixes:
