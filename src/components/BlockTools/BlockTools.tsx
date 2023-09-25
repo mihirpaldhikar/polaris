@@ -193,7 +193,7 @@ export default function BlockTools({
       data-y-coordinate={yAxis}
       data-x-coordinate={xAxis}
       className={
-        "fixed z-10 flex max-h-[200px] w-[250px] scroll-py-1 flex-col space-y-1 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+        "fixed z-10 flex max-h-[200px] w-[250px] scroll-py-0.5 flex-col space-y-0.5 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-md"
       }
     >
       {matchedMenu.map((menu) => {
@@ -203,7 +203,7 @@ export default function BlockTools({
             id={menu.id}
             tabIndex={0}
             className={
-              "flex h-[60px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-2 text-sm font-medium text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
+              "flex h-[60px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-1 text-sm font-medium text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
             }
             onClick={() => {
               onActionSelected(menu.execute);
