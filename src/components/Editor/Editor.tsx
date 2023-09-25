@@ -131,6 +131,7 @@ export default function Editor({
   const popupNode = useRef<HTMLDivElement>(null);
   const dialogNode = useRef<HTMLDivElement>(null);
   const editorNode = useRef<HTMLDivElement>(null);
+  const screenOffset = useRef(0);
   const [popUpRoot, setPopupRoot] = useState<Root>();
   const [dialogRoot, setDialogRoot] = useState<Root>();
   const isActionMenuOpen = useRef<boolean>(false);
@@ -405,6 +406,7 @@ export default function Editor({
 
   const actionMenuTriggerHandler = useCallback(
     (activeBlock: BlockSchema, activeNode: HTMLElement, isMobile: boolean) => {
+      screenOffset.current = window.scrollY;
       const caretOffset = getCaretOffset(activeNode);
       if (typeof activeBlock.data === "string") {
         const nodeAtCaretOffset = getNodeAt(activeNode, caretOffset);
@@ -708,7 +710,45 @@ export default function Editor({
     [blob, masterBlocks, actionMenuTriggerHandler, changeHandler],
   );
 
+  const scrollHandler = useCallback(() => {
+    if ((popupNode.current?.childElementCount ?? 0) > 0) {
+      (popupNode.current as HTMLElement).hidden = true;
+    }
+    if ((dialogNode.current?.childElementCount ?? 0) > 0) {
+      (dialogNode.current as HTMLElement).hidden = true;
+    }
+  }, []);
+
+  const scrollEndHandler = useCallback(() => {
+    const popupChild = popupNode.current?.firstElementChild;
+    const dialogChild = dialogNode.current?.firstElementChild;
+    if (popupChild != null) {
+      setTimeout(() => {
+        const yCoordinate = parseInt(
+          popupChild.getAttribute("data-y-coordinate") as string,
+        );
+        (popupChild as HTMLElement).style.top = `${
+          yCoordinate - (window.scrollY - screenOffset.current)
+        }px`;
+        (popupNode.current as HTMLElement).hidden = false;
+      });
+    }
+    if (dialogChild != null) {
+      setTimeout(() => {
+        const yCoordinate = parseInt(
+          dialogChild.getAttribute("data-y-coordinate") as string,
+        );
+        (dialogChild as HTMLElement).style.top = `${
+          yCoordinate - (window.scrollY - screenOffset.current)
+        }px`;
+        (dialogNode.current as HTMLElement).hidden = false;
+      });
+    }
+  }, []);
+
   useEffect(() => {
+    window.addEventListener("scroll", scrollHandler);
+    window.addEventListener("scrollend", scrollEndHandler);
     window.addEventListener("keydown", keyboardManager);
     window.addEventListener("input", mobileInputHandler);
     subscribeToEditorEvent(`saveEditor-${blob.id}`, () => {
@@ -718,10 +758,19 @@ export default function Editor({
       } satisfies Blob);
     });
     return () => {
+      window.removeEventListener("scroll", scrollHandler);
+      window.removeEventListener("scrollend", scrollEndHandler);
       window.removeEventListener("keydown", keyboardManager);
       window.removeEventListener("input", mobileInputHandler);
     };
-  }, [blob, keyboardManager, masterBlocks, mobileInputHandler]);
+  }, [
+    blob,
+    keyboardManager,
+    masterBlocks,
+    mobileInputHandler,
+    scrollEndHandler,
+    scrollHandler,
+  ]);
 
   useEffect(() => {
     if (focusedNode !== undefined) {
@@ -812,7 +861,7 @@ export default function Editor({
     if (!editable || selection == null || activeNode == null) {
       return;
     }
-
+    screenOffset.current = window.scrollY;
     const { x: endX } = getCaretCoordinates(false);
     const { x: startX, y: startY } = getCaretCoordinates(true);
     const middleX = startX + (endX - startX) / 2;

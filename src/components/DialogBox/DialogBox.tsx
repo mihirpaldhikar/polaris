@@ -100,6 +100,8 @@ export default function DialogBox({
         top: coordinates.y - 60,
         left: xAxis,
       }}
+      data-y-coordinate={coordinates.y - 60}
+      data-x-coordinate={xAxis}
       className={
         "fixed flex w-[250px] flex-col z-50 space-y-3 rounded-lg border border-gray-300 bg-white px-2 py-3 shadow-md"
       }
