@@ -54,6 +54,7 @@ export default class TableBlockPlugin
     return {
       focusBlockId: focusId,
       inPlace: content.length === 0,
+      setCaretToStart: true,
       template: {
         id: generateUUID(),
         role: "table",
