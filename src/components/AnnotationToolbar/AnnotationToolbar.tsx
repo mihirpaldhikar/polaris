@@ -74,7 +74,7 @@ export default function AnnotationToolbar({
       data-y-coordinate={yAxis}
       data-x-coordinate={xAxis}
       className={
-        "fixed z-30 flex flex-row items-center rounded-lg border border-gray-200 bg-white py-0.5 shadow-md"
+        "fixed z-30 flex flex-row items-center rounded-lg border border-gray-200 bg-white py-0.5 shadow-lg"
       }
     >
       {actions.map((menu) => {

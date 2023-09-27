@@ -193,7 +193,7 @@ export default function BlockTools({
       data-y-coordinate={yAxis}
       data-x-coordinate={xAxis}
       className={
-        "fixed z-30 flex max-h-[200px] w-[250px] scroll-py-0.5 flex-col space-y-0.5 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+        "fixed z-30 flex max-h-[200px] w-[250px] scroll-py-0.5 flex-col space-y-0.5 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg"
       }
     >
       {matchedMenu.map((menu) => {

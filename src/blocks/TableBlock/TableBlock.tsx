@@ -251,7 +251,7 @@ export default function TableBlock({
           left: coordinates.x,
         }}
         className={
-          "fixed z-50 flex space-x-1 flex-row items-center rounded-lg border border-gray-200 bg-white h-[40px] shadow-md px-2 py-1"
+          "fixed z-50 flex space-x-1 flex-row items-center rounded-lg border border-gray-200 bg-white h-[40px] shadow-lg px-2 py-1"
         }
       >
         <div
