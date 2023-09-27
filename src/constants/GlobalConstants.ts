@@ -26,24 +26,24 @@ export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
   block: {
     text: {
       title: {
-        fontSize: 2.25,
-        fontWeight: 800,
-        lineHeight: 2.3,
+        fontSize: 2.0,
+        fontWeight: 700,
+        lineHeight: 1.75,
       },
       subTitle: {
-        fontSize: 1.875,
-        fontWeight: 700,
-        lineHeight: 2,
+        fontSize: 1.65,
+        fontWeight: 600,
+        lineHeight: 1.75,
       },
       heading: {
         fontSize: 1.5,
         fontWeight: 600,
-        lineHeight: 1.9,
+        lineHeight: 1.75,
       },
       subHeading: {
         fontSize: 1.25,
         fontWeight: 500,
-        lineHeight: 1.8,
+        lineHeight: 1.75,
       },
       paragraph: {
         fontSize: 1,
