@@ -1,3 +1,11 @@
+## 0.8.1 (September 29, 2023)
+
+## Fixes:
+
+- Fix an issue in which initializing table block causing error when text content of current block is not empty.
+- Fix default Text Styles to improve spacings for texts in PolarisConfig.
+- Fix shadow for Annotation Toolbar, Block Tools and Dialog Box.
+
 ## 0.8.0 (September 25, 2023)
 
 ### Breaking Changes:
