@@ -141,6 +141,7 @@ export default function AnnotationToolbar({
                             type: "text",
                             hint: menu.execute.args.hint,
                             payload: menu.execute.args.payload.value,
+                            unit: menu.execute.args.unit,
                             regex: menu.execute.args.regex,
                           }}
                           onConfirm={(data) => {

@@ -59,7 +59,7 @@ export default function InputDialog({
       onClose={onClose}
       onConfirm={() => {
         if (inputArgs.regex.test(data)) {
-          onConfirm(data);
+          onConfirm(data.concat(inputArgs.unit ?? ""));
         }
       }}
     >
