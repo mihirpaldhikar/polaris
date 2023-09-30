@@ -1,5 +1,7 @@
 # Polaris
 
+https://github.com/mihirpaldhikar/polaris/assets/68847718/ebf91959-646c-4f6f-b19f-709dc794394a
+
 Polaris is a rich semantic content editor built on top of [React](https://react.dev) and Web APIs to create a rich
 content editing experience.
 
