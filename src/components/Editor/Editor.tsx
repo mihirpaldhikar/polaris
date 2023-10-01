@@ -492,14 +492,15 @@ export default function Editor({
           break;
         }
         case "arrowup": {
-          event.preventDefault();
-
           if (
             isActionMenuOpen.current ||
             activeNode == null ||
-            activeNode.getAttribute("contenteditable") !== "true"
+            activeNode.getAttribute("contenteditable") !== "true" ||
+            !(editorNode.current?.contains(activeNode) ?? false)
           )
             return;
+          event.preventDefault();
+
           const caretOffset = getCaretOffset(activeNode as HTMLElement);
           const previousNode = findPreviousTextNode(
             activeNode as HTMLElement,
@@ -529,14 +530,15 @@ export default function Editor({
           break;
         }
         case "arrowdown": {
-          event.preventDefault();
-
           if (
             isActionMenuOpen.current ||
             activeNode == null ||
-            activeNode.getAttribute("contenteditable") !== "true"
+            activeNode.getAttribute("contenteditable") !== "true" ||
+            !(editorNode.current?.contains(activeNode) ?? false)
           )
             return;
+
+          event.preventDefault();
 
           const caretOffset = getCaretOffset(activeNode as HTMLElement);
           const nextNode = findNextTextNode(
