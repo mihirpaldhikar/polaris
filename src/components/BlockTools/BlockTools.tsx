@@ -206,6 +206,7 @@ export default function BlockTools({
               "flex h-[60px] cursor-pointer flex-row items-center justify-start space-x-3 rounded-md p-1 text-sm font-medium text-black outline-none ring-0 hover:bg-gray-100 focus:bg-gray-100"
             }
             onClick={() => {
+              window.navigator.vibrate(1);
               onActionSelected(menu.execute);
               onClose();
             }}

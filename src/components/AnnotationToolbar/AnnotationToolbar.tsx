@@ -91,6 +91,7 @@ export default function AnnotationToolbar({
               )}
               title={menu.name}
               onClick={() => {
+                window.navigator.vibrate(1);
                 switch (menu.execute.type) {
                   case "style": {
                     onActionSelected(menu.execute);
