@@ -138,7 +138,7 @@ export default function AnnotationToolbar({
                           }}
                           active={menu.active ?? false}
                           inputArgs={{
-                            type: "text",
+                            type: args.inputType,
                             hint: menu.execute.args.hint,
                             payload: menu.execute.args.payload.value,
                             unit: menu.execute.args.unit,
