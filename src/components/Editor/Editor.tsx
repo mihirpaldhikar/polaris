@@ -135,6 +135,7 @@ export default function Editor({
   const [popUpRoot, setPopupRoot] = useState<Root>();
   const [dialogRoot, setDialogRoot] = useState<Root>();
   const isActionMenuOpen = useRef<boolean>(false);
+  const isDocumentSelected = useRef(false);
 
   window.registeredBlocks = useMemo(() => {
     blockPlugin.registerBlock(new ParagraphBlockPlugin());
@@ -474,6 +475,20 @@ export default function Editor({
           }
           break;
         }
+        case "a": {
+          if (
+            event.ctrlKey &&
+            editorNode.current?.contains(activeNode) === true
+          ) {
+            event.preventDefault();
+            const range = new Range();
+            range.selectNodeContents(editorNode.current);
+            window.getSelection()?.removeAllRanges();
+            window.getSelection()?.addRange(range);
+            isDocumentSelected.current = true;
+          }
+          break;
+        }
         case "/": {
           if (
             isActionMenuOpen.current ||
@@ -707,9 +722,35 @@ export default function Editor({
           }
           break;
         }
+        default: {
+          if (
+            isDocumentSelected.current &&
+            (event.key.toLowerCase() === "backspace" ||
+              /^[a-zA-Z0-9]$/.test(event.key))
+          ) {
+            event.preventDefault();
+            const emptyBlock: BlockSchema = {
+              id: generateUUID(),
+              data: /^[a-zA-Z0-9]$/.test(event.key) ? event.key : "",
+              role: "paragraph",
+              style: [],
+            };
+            propagateChanges([emptyBlock], {
+              nodeId: emptyBlock.id,
+              caretOffset: (emptyBlock.data as string).length === 0 ? 0 : 1,
+            });
+            isDocumentSelected.current = false;
+          }
+        }
       }
     },
-    [blob, masterBlocks, actionMenuTriggerHandler, changeHandler],
+    [
+      blob,
+      masterBlocks,
+      actionMenuTriggerHandler,
+      changeHandler,
+      propagateChanges,
+    ],
   );
 
   const scrollHandler = useCallback(() => {
@@ -753,6 +794,9 @@ export default function Editor({
     window.addEventListener("scrollend", scrollEndHandler);
     window.addEventListener("keydown", keyboardManager);
     window.addEventListener("input", mobileInputHandler);
+    window.addEventListener("click", () => {
+      isDocumentSelected.current = false;
+    });
     subscribeToEditorEvent(`saveEditor-${blob.id}`, () => {
       dispatchEditorEvent(`onSaved-${blob.id}`, {
         ...blob,
@@ -764,6 +808,9 @@ export default function Editor({
       window.removeEventListener("scrollend", scrollEndHandler);
       window.removeEventListener("keydown", keyboardManager);
       window.removeEventListener("input", mobileInputHandler);
+      window.removeEventListener("click", () => {
+        isDocumentSelected.current = false;
+      });
     };
   }, [
     blob,
@@ -860,7 +907,12 @@ export default function Editor({
 
     const activeNode = getBlockNode(block.id);
 
-    if (!editable || selection == null || activeNode == null) {
+    if (
+      !editable ||
+      selection == null ||
+      activeNode == null ||
+      isDocumentSelected.current
+    ) {
       return;
     }
     screenOffset.current = window.scrollY;
