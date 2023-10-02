@@ -1,6 +1,19 @@
+## 0.8.2 (October 2, 2023)
+
+### New:
+
+- Add Haptic Feedback when action is selected from Annotation Toolbar or Block Tools.
+
+### Fixes:
+
+- Fix an issue in which Arrow Up and Arrow Down keys where not scrolling the page when editor is not in focus.
+- Fix issue #7 in which unexpected HTML tokens was created in the new block when enter key is pressed.
+- Fix issue #6 in which Text Size input was accepting text instead numeric input.
+- Fix issue #5 in which text sizing action was not working.
+
 ## 0.8.1 (September 29, 2023)
 
-## Fixes:
+### Fixes:
 
 - Fix an issue in which initializing table block causing error when text content of current block is not empty.
 - Fix default Text Styles to improve spacings for texts in PolarisConfig.
