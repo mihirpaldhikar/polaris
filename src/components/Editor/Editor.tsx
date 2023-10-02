@@ -53,6 +53,7 @@ import {
   nodeInViewPort,
   removeEmptyInlineAnnotations,
   rgbStringToHex,
+  serializeFile,
   setCaretOffset,
   subscribeToEditorEvent,
   traverseAndDelete,
@@ -100,7 +101,7 @@ interface EditorProps {
   config?: PolarisConfig;
   className?: string;
   annotationActions?: Action[];
-  onAttachmentSelected: (data: File | string) => Promise<string>;
+  onAttachmentSelected?: (data: File | string) => Promise<string>;
 }
 
 /**
@@ -1038,29 +1039,55 @@ export default function Editor({
       return;
     }
 
-    void onAttachmentSelected(data).then((str) => {
-      block.data.url = str;
-      const blockIndex = masterBlocks.indexOf(block);
-      if (blockIndex === -1) {
-        const activeNode = getBlockNode(block.id) as HTMLElement;
-        const listMetadata = getListMetadata(activeNode);
-        if (listMetadata != null) {
-          const parentBlock = traverseAndFind(
-            masterBlocks,
-            listMetadata.parentId,
-          ) as BlockSchema;
-          traverseAndUpdate(parentBlock.data as BlockSchema[], block);
+    if (onAttachmentSelected !== undefined) {
+      void onAttachmentSelected(data).then((str) => {
+        block.data.url = str;
+        const blockIndex = masterBlocks.indexOf(block);
+        if (blockIndex === -1) {
+          const activeNode = getBlockNode(block.id) as HTMLElement;
+          const listMetadata = getListMetadata(activeNode);
+          if (listMetadata != null) {
+            const parentBlock = traverseAndFind(
+              masterBlocks,
+              listMetadata.parentId,
+            ) as BlockSchema;
+            traverseAndUpdate(parentBlock.data as BlockSchema[], block);
+          } else {
+            traverseAndUpdate(masterBlocks, block);
+          }
         } else {
-          traverseAndUpdate(masterBlocks, block);
+          masterBlocks[blockIndex] = block;
         }
-      } else {
-        masterBlocks[blockIndex] = block;
-      }
-      propagateChanges(masterBlocks, {
-        nodeId: block.id,
-        caretOffset: 0,
+        propagateChanges(masterBlocks, {
+          nodeId: block.id,
+          caretOffset: 0,
+        });
       });
-    });
+    } else if (typeof data !== "string") {
+      void serializeFile(data).then((payload) => {
+        block.data.url = payload;
+        const blockIndex = masterBlocks.indexOf(block);
+        if (blockIndex === -1) {
+          const activeNode = getBlockNode(block.id) as HTMLElement;
+          const listMetadata = getListMetadata(activeNode);
+          if (listMetadata != null) {
+            const parentBlock = traverseAndFind(
+              masterBlocks,
+              listMetadata.parentId,
+            ) as BlockSchema;
+            traverseAndUpdate(parentBlock.data as BlockSchema[], block);
+          } else {
+            traverseAndUpdate(masterBlocks, block);
+          }
+        } else {
+          masterBlocks[blockIndex] = block;
+        }
+        propagateChanges(masterBlocks, {
+          nodeId: block.id,
+          caretOffset: 0,
+        });
+      });
+    }
   }
 
   function markdownHandler(block: BlockSchema, focusBlockId?: string): void {
