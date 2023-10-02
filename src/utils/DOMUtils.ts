@@ -847,6 +847,8 @@ export function splitBlocksAtCaretOffset<TBlockSchema>(
     },
   );
 
+  blockNode.innerHTML = normalizeHTML(blockNode.innerHTML);
+
   const newBlock: BlockSchema = {
     id: generateUUID(),
     role: "paragraph",
@@ -899,6 +901,7 @@ export function splitBlocksAtCaretOffset<TBlockSchema>(
         );
     }
   }
+
   block.id = generateUUID();
   block.data = currentBlockContent;
   newBlock.data = newBlockContent;
@@ -906,4 +909,18 @@ export function splitBlocksAtCaretOffset<TBlockSchema>(
   newBlock.style = newBlockContent.length === 0 ? [] : block.style;
 
   return [block, newBlock] as TBlockSchema[];
+}
+
+/**
+ * @function normalizeHTML
+ *
+ * @param string
+ *
+ * @description Normalizes the text content by removing HTML specific HEX Codes.
+ *
+ * @author Mihir Paldhikar
+ */
+
+export function normalizeHTML(string: string): string {
+  return string.replaceAll(/&nbsp;|\u202F|\u00A0/g, " ");
 }
