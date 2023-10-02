@@ -20,16 +20,4 @@
  * SOFTWARE.
  */
 
-export type { default as Style } from "./Style";
-export type { default as BlockSchema } from "./BlockSchema";
-export type { default as Coordinates } from "./Coordinates";
-export type { default as Blob } from "./Blob";
-export type { default as Action } from "./Action";
-export type { default as Executable } from "./Executable";
-export type { default as Attachment } from "./Attachment";
-export type { default as PolarisConfig } from "./PolarisConfig";
-export type { default as Table } from "./Table";
-export type { default as BlockExecutable } from "./BlockExecutable";
-export type { default as BlockLifecycle } from "./BlockLifecycle";
-export type { default as GenericBlockPlugin } from "./GenericBlockPlugin";
-export type { default as Piece } from "./Piece";
+export { default as PieceTable } from "./PieceTable";
