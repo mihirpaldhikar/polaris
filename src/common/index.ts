@@ -20,8 +20,6 @@
  * SOFTWARE.
  */
 
-export {
-  DefaultEndOfLine,
-  PieceTreeTextBufferFactory,
-  PieceTreeTextBufferBuilder,
-} from "./PieceTree";
+export { CharCode } from "./CharCode";
+export { type IEditorRange, EditorRange } from "./EditorRange";
+export { type IPosition, Position } from "./Position";

@@ -21,15 +21,22 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": ["./tsconfig.json", "./website/tsconfig.json"]
+    "project": [
+      "./tsconfig.json",
+      "./website/tsconfig.json"
+    ]
   },
-  "plugins": ["react", "prettier"],
+  "plugins": [
+    "react",
+    "prettier"
+  ],
   "settings": {
     "react": {
       "version": "detect"
     }
   },
   "rules": {
+    "@typescript-eslint/no-non-null-assertion": "off",
     "prettier/prettier": "error",
     "no-empty": "error",
     "no-empty-function": "error",

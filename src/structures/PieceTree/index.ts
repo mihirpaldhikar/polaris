@@ -21,7 +21,7 @@
  */
 
 export {
-  DefaultEndOfLine,
-  PieceTreeTextBufferFactory,
   PieceTreeTextBufferBuilder,
-} from "./PieceTree";
+  PieceTreeTextBufferFactory,
+  DefaultEndOfLine,
+} from "./PieceTreeBuilder";
