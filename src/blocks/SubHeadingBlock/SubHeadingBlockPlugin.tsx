@@ -41,7 +41,7 @@ export default class SubHeadingBlockPlugin
     this.name = "Sub Heading";
     this.description = "Small section Subheading.";
     this.role = "subHeading";
-    this.icon = <SubHeadingIcon />;
+    this.icon = <SubHeadingIcon size={32} />;
   }
 
   onInitialized(content: string): {

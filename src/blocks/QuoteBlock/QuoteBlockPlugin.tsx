@@ -41,7 +41,7 @@ export default class QuoteBlockPlugin
     this.name = "Quote";
     this.description = "Capture a quote.";
     this.role = "quote";
-    this.icon = <QuoteIcon />;
+    this.icon = <QuoteIcon size={32} />;
   }
 
   onInitialized(content: string): {

@@ -41,7 +41,7 @@ export default class TitleBlockPlugin
     this.name = "Title";
     this.description = "Big section heading.";
     this.role = "title";
-    this.icon = <TitleIcon />;
+    this.icon = <TitleIcon size={32} />;
   }
 
   onInitialized(content: string): {

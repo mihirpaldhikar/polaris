@@ -41,7 +41,7 @@ export default class TableBlockPlugin
     this.name = "Table";
     this.description = "Add tabular content.";
     this.role = "table";
-    this.icon = <TableIcon />;
+    this.icon = <TableIcon size={32} />;
   }
 
   onInitialized(content: string): {

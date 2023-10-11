@@ -41,7 +41,7 @@ export default class SubTitleBlockPlugin
     this.name = "Sub Title";
     this.description = "Big Section Subheading.";
     this.role = "subTitle";
-    this.icon = <SubTitleIcon />;
+    this.icon = <SubTitleIcon size={32} />;
   }
 
   onInitialized(content: string): {

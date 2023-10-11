@@ -39,7 +39,7 @@ export default class BulletListBlockPlugin
     this.name = "Bullet List";
     this.description = "Create list with bullets.";
     this.role = "bulletList";
-    this.icon = <BulletListIcon />;
+    this.icon = <BulletListIcon size={32} />;
   }
 
   onInitialized(content: string): {

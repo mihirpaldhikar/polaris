@@ -40,7 +40,7 @@ export default class GithubGistBlockPlugin
     this.name = "GitHub Gist";
     this.description = "Add a GitHub Gist.";
     this.role = "githubGist";
-    this.icon = <GitHubIcon />;
+    this.icon = <GitHubIcon size={32} />;
   }
 
   onInitialized(content: string): {
