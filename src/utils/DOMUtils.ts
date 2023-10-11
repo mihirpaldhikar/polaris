@@ -22,12 +22,14 @@
 
 import { type BlockSchema, type Coordinates, type Style } from "../interfaces";
 import {
+  DEFAULT_LINK_STYLE,
   INLINE_ANNOTATIONS_NODE,
   LINK_ATTRIBUTE,
   NODE_TYPE,
 } from "../constants";
 import { getBlockNode } from "./BlockUtils";
 import { generateUUID } from "./SharedUtils";
+import { kebabCase } from "lodash";
 
 /**
  *
@@ -326,27 +328,17 @@ export function generateInlineAnnotationsString(
     tempNode.setAttribute(NODE_TYPE, INLINE_ANNOTATIONS_NODE);
     tempNode.innerText = nodeFragments[i].textContent as string;
 
-    for (let i = 0; i < style.length; i++) {
+    for (const sty of style) {
       if (
-        tempNode.style.getPropertyValue(style[i].name).length === 0 ||
-        (tempNode.style.getPropertyValue(style[i].name).includes("rgb")
+        tempNode.style.getPropertyValue(style[i].name).includes("rgb")
           ? rgbStringToHex(tempNode.style.getPropertyValue(style[i].name)) !==
             style[i].value
-          : false) ||
-        style[i].name.includes("-link") ||
-        style[i].name.includes("link-") ||
-        style[i].name.includes("-link-") ||
-        tempNode.style.getPropertyValue(style[i].name) !== style[i].value
+          : tempNode.style.getPropertyValue(kebabCase(style[i].name)) !==
+            kebabCase(style[i].value)
       ) {
-        tempNode.style.setProperty(
-          style[i].name
-            .replaceAll("-link", "")
-            .replaceAll("link-", "")
-            .replaceAll("-link-", ""),
-          style[i].value,
-        );
+        tempNode.style.setProperty(kebabCase(sty.name), kebabCase(sty.value));
       } else {
-        tempNode.style.removeProperty(style[i].name);
+        tempNode.style.removeProperty(kebabCase(sty.name));
       }
     }
 
@@ -354,6 +346,18 @@ export function generateInlineAnnotationsString(
       tempNode.setAttribute(LINK_ATTRIBUTE, link);
     } else if (link === undefined || link.length === 0) {
       tempNode.removeAttribute(LINK_ATTRIBUTE);
+    }
+
+    if (tempNode.getAttribute(LINK_ATTRIBUTE) != null) {
+      for (const sty of DEFAULT_LINK_STYLE) {
+        tempNode.style.setProperty(kebabCase(sty.name), kebabCase(sty.value));
+      }
+    } else {
+      for (const sty of DEFAULT_LINK_STYLE) {
+        if (style.filter((mSty) => mSty.name === sty.name).length === 0) {
+          tempNode.style.removeProperty(kebabCase(sty.name));
+        }
+      }
     }
 
     inlineAnnotationsString = inlineAnnotationsString.concat(
@@ -728,17 +732,6 @@ export function inlineAnnotationsManager(
     ) {
       link = undefined;
     }
-  }
-
-  if (link !== undefined) {
-    style.push(
-      ...[
-        {
-          name: "link-text-decoration",
-          value: "underline",
-        },
-      ],
-    );
   }
 
   generateInlineAnnotations(targetElement, selection, style, link);
