@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import { type PolarisConfig } from "../interfaces";
+import { type PolarisConfig, type Style } from "../interfaces";
 
 export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
   block: {
@@ -64,3 +64,10 @@ export const DEFAULT_POLARIS_CONFIG: PolarisConfig = {
     },
   },
 };
+
+export const DEFAULT_LINK_STYLE: Style[] = [
+  {
+    name: "text-decoration",
+    value: "underline",
+  },
+];

@@ -400,51 +400,6 @@ export function generateInlineAnnotations(
 
   let deleteRangeContents: boolean = true;
 
-  if (range.startContainer.isEqualNode(range.endContainer)) {
-    if (
-      isInlineAnnotationsNode(range.startContainer) ||
-      isInlineAnnotationsNode(range.startContainer.parentElement)
-    ) {
-      const tempNode = isInlineAnnotationsNode(
-        range.startContainer.parentElement,
-      )
-        ? (range.startContainer.parentElement as HTMLElement)
-        : (range.startContainer as HTMLElement);
-
-      for (let i = 0; i < style.length; i++) {
-        if (
-          tempNode.style.getPropertyValue(style[i].name).length === 0 ||
-          (tempNode.style.getPropertyValue(style[i].name).includes("rgb")
-            ? rgbStringToHex(tempNode.style.getPropertyValue(style[i].name)) !==
-              style[i].value
-            : false) ||
-          style[i].name.includes("-link") ||
-          style[i].name.includes("link-") ||
-          style[i].name.includes("-link-") ||
-          tempNode.style.getPropertyValue(style[i].name) !== style[i].value
-        ) {
-          tempNode.style.setProperty(
-            style[i].name
-              .replaceAll("-link", "")
-              .replaceAll("link-", "")
-              .replaceAll("-link-", ""),
-            style[i].value,
-          );
-        } else {
-          tempNode.style.removeProperty(style[i].name);
-        }
-      }
-
-      if (link !== undefined && link.length !== 0) {
-        tempNode.setAttribute(LINK_ATTRIBUTE, link);
-      } else if (link === undefined || link.length === 0) {
-        tempNode.removeAttribute(LINK_ATTRIBUTE);
-      }
-
-      return;
-    }
-  }
-
   if (
     range.startContainer.isEqualNode(range.endContainer) &&
     range.startContainer.parentElement != null &&
@@ -632,6 +587,7 @@ export function generateInlineAnnotations(
   range.selectNodeContents(placeholderNode.nextElementSibling as HTMLElement);
   placeholderNode.remove();
   selection.removeAllRanges();
+  range.collapse();
   selection.addRange(range);
 }
 
@@ -716,14 +672,11 @@ export function getNodeAt(parentNode: Node, offset: number): Node {
   return node;
 }
 
-export function isInlineAnnotationsNode(
-  node: Node | null | undefined,
-): boolean {
-  return node === undefined || node == null
-    ? false
-    : node.nodeType === Node.ELEMENT_NODE &&
-        (node as HTMLElement).getAttribute(NODE_TYPE) ===
-          INLINE_ANNOTATIONS_NODE;
+export function isInlineAnnotationsNode(node: Node): boolean {
+  return (
+    node.nodeType === Node.ELEMENT_NODE &&
+    (node as HTMLElement).getAttribute(NODE_TYPE) === INLINE_ANNOTATIONS_NODE
+  );
 }
 
 export function removeEmptyInlineAnnotations(parentElement: HTMLElement): void {
