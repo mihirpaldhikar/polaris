@@ -21,15 +21,9 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": [
-      "./tsconfig.json",
-      "./website/tsconfig.json"
-    ]
+    "project": ["./tsconfig.json", "./website/tsconfig.json"]
   },
-  "plugins": [
-    "react",
-    "prettier"
-  ],
+  "plugins": ["react", "prettier"],
   "settings": {
     "react": {
       "version": "detect"
