@@ -50,6 +50,7 @@ import {
   getNodeAt,
   getNodeIndex,
   inlineAnnotationsManager,
+  isInlineAnnotationsNode,
   nodeInViewPort,
   removeEmptyInlineAnnotations,
   rgbStringToHex,
@@ -903,7 +904,10 @@ export default function Editor({
     });
   }
 
-  function annotationsHandler(block: BlockSchema): void {
+  function annotationsHandler(
+    block: BlockSchema,
+    coordinates?: Coordinates,
+  ): void {
     const selection = window.getSelection();
 
     const activeNode = getBlockNode(block.id);
@@ -917,17 +921,29 @@ export default function Editor({
       return;
     }
     screenOffset.current = window.scrollY;
-    const { x: endX } = getCaretCoordinates(false);
-    const { x: startX, y: startY } = getCaretCoordinates(true);
-    const middleX = startX + (endX - startX) / 2;
 
     const selectionMenuCoordinates: Coordinates = {
-      x: middleX,
-      y: startY,
+      x: -1,
+      y: -1,
     };
+
+    if (coordinates !== undefined) {
+      selectionMenuCoordinates.x = coordinates.x;
+      selectionMenuCoordinates.y = coordinates.y;
+    } else {
+      const { x: endX } = getCaretCoordinates(false);
+      const { x: startX, y: startY } = getCaretCoordinates(true);
+      selectionMenuCoordinates.x = startX + (endX - startX) / 2;
+      selectionMenuCoordinates.y = startY;
+    }
+
     const range = selection.getRangeAt(0);
-    const startNodeParent = range.startContainer.parentElement;
-    const endNodeParent = range.endContainer.parentElement;
+    const startNodeParent = isInlineAnnotationsNode(range.startContainer)
+      ? (range.startContainer as HTMLElement)
+      : range.startContainer.parentElement;
+    const endNodeParent = isInlineAnnotationsNode(range.endContainer)
+      ? (range.endContainer as HTMLElement)
+      : range.endContainer.parentElement;
 
     if (startNodeParent == null || endNodeParent == null) {
       return;
@@ -977,7 +993,7 @@ export default function Editor({
         coordinates={selectionMenuCoordinates}
         actions={defaultAnnotationActions}
         onClose={() => {
-          popUpRoot?.render(<Fragment />);
+          annotationsHandler(block, selectionMenuCoordinates);
           defaultAnnotationActions = cloneDeep(AnnotationActions).concat(
             ...(annotationActions ?? []),
           );
