@@ -43,7 +43,7 @@ import { kebabCase } from "lodash";
  * @author Mihir Paldhikar
  */
 
-export function getCaretOffset(element: HTMLElement | null): number {
+export function getCaretOffset(element: Element | null): number {
   let position = 0;
   if (element === null) return position;
   const selection = window.getSelection();
