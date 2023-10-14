@@ -488,7 +488,6 @@ export default function Editor({
       enableOnContentEditable: true,
       ignoreEventWhen: () => {
         return (
-          isActionMenuOpen.current ||
           document.activeElement == null ||
           document.activeElement.getAttribute("contenteditable") !== "true"
         );
