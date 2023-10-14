@@ -154,6 +154,14 @@ export default function Editor({
   const [dialogRoot, setDialogRoot] = useState<Root>();
   const isActionMenuOpen = useRef<boolean>(false);
   const isDocumentSelected = useRef(false);
+  const [focusedNode, setFocusedNode] = useState<
+    | {
+        nodeId: string;
+        caretOffset: number;
+        nodeIndex?: number;
+      }
+    | undefined
+  >(undefined);
 
   const registeredBlockActions: Action[] = useMemo(() => {
     return Array.from(blockPlugin.registeredBlocks().values()).map((block) => {
@@ -183,14 +191,6 @@ export default function Editor({
   const [masterBlocks, updateMasterBlocks] = useState<BlockSchema[]>(
     blob.blocks,
   );
-  const [focusedNode, setFocusedNode] = useState<
-    | {
-        nodeId: string;
-        caretOffset: number;
-        nodeIndex?: number;
-      }
-    | undefined
-  >(undefined);
 
   useEffect(() => {
     setPopupRoot(createRoot(popupNode.current as HTMLDivElement));
@@ -207,7 +207,9 @@ export default function Editor({
       },
     ) => {
       updateMasterBlocks(blocks);
-      setFocusedNode(focus);
+      if (focus !== undefined) {
+        setFocusedNode({ ...focus });
+      }
       dispatchEditorEvent(`onChanged-${blob.id}`, {
         ...blob,
         blocks: masterBlocks,
@@ -268,11 +270,12 @@ export default function Editor({
             popUpRoot?.render(<Fragment />);
           }}
           onEscape={(query) => {
-            setFocusedNode({
+            const focusData = {
               nodeId: block.id,
               caretOffset: caretOffset + query.length + 1,
               nodeIndex,
-            });
+            };
+            setFocusedNode({ ...focusData });
           }}
           onActionSelected={(execute) => {
             switch (execute.type) {
@@ -879,11 +882,12 @@ export default function Editor({
       updateMasterBlocks(masterBlocks);
     }
     if (focus !== undefined && focus) {
-      setFocusedNode({
+      const focusData = {
         nodeId: block.id,
         nodeIndex: 0,
         caretOffset: 0,
-      });
+      };
+      setFocusedNode({ ...focusData });
     }
     dispatchEditorEvent(`onChanged-${blob.id}`, {
       ...blob,
