@@ -897,7 +897,6 @@ export function splitBlocksAtCaretOffset<TBlockSchema>(
     }
   }
 
-  block.id = generateUUID();
   block.data = currentBlockContent;
   newBlock.data = newBlockContent;
   newBlock.role = newBlockContent.length === 0 ? "paragraph" : block.role;
