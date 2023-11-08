@@ -192,10 +192,15 @@ export default function Editor({
     blob.blocks,
   );
 
+  const rootsCreated = useRef(false);
+
   useEffect(() => {
-    setPopupRoot(createRoot(popupNode.current as HTMLDivElement));
-    setDialogRoot(createRoot(dialogNode.current as HTMLDivElement));
-  }, [blob.id]);
+    if (!rootsCreated.current) {
+      setPopupRoot(createRoot(popupNode.current as HTMLDivElement));
+      setDialogRoot(createRoot(dialogNode.current as HTMLDivElement));
+      rootsCreated.current = true;
+    }
+  }, []);
 
   const propagateChanges = useCallback(
     (
